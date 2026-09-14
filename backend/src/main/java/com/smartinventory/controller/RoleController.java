@@ -1,5 +1,6 @@
 package com.smartinventory.controller;
 
+import com.smartinventory.dto.ApiResponse;
 import com.smartinventory.dto.RoleResponse;
 import com.smartinventory.model.Role;
 import com.smartinventory.repository.RoleRepository;
@@ -21,10 +22,11 @@ public class RoleController {
     }
 
     @GetMapping
-    public List<RoleResponse> getRoles() {
-        return roleRepository.findAll().stream()
+    public ApiResponse<List<RoleResponse>> getRoles() {
+        List<RoleResponse> roles = roleRepository.findAll().stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
+        return ApiResponse.success(roles);
     }
 
     private RoleResponse toResponse(Role role) {
