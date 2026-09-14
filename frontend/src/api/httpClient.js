@@ -63,8 +63,14 @@ httpClient.interceptors.response.use(
   }
 );
 
+const USER_STORAGE_KEY = 'smart_inventory_current_user';
+
 export function setAccessToken(token) {
-  localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, token);
+  if (token) {
+    localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, token);
+  } else {
+    localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+  }
 }
 
 export function clearAccessToken() {
@@ -74,3 +80,25 @@ export function clearAccessToken() {
 export function getAccessToken() {
   return localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
 }
+
+export function setCurrentUser(user) {
+  if (user) {
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+  } else {
+    localStorage.removeItem(USER_STORAGE_KEY);
+  }
+}
+
+export function getCurrentUser() {
+  const user = localStorage.getItem(USER_STORAGE_KEY);
+  try {
+    return user ? JSON.parse(user) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearCurrentUser() {
+  localStorage.removeItem(USER_STORAGE_KEY);
+}
+

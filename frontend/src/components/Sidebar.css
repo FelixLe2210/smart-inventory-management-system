@@ -1,0 +1,93 @@
+/* ============================================================
+   Sidebar — Dark theme
+   ============================================================ */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 240px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  background: #0f172a;
+  color: #cbd5e1;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+/* ---- Logo ---- */
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.5rem 1.25rem 1.25rem;
+  border-bottom: 1px solid #1e293b;
+}
+
+.sidebar-logo-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.sidebar-logo-text {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+/* ---- Navigation ---- */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 1rem 0.75rem;
+  flex: 1;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.875rem;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sidebar-link:hover {
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
+.sidebar-link--active {
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+.sidebar-link--active:hover {
+  background: #2563eb;
+}
+
+.sidebar-link-icon {
+  font-size: 1.05rem;
+  width: 1.25rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.sidebar-link-label {
+  white-space: nowrap;
+}
+
+/* ---- Footer ---- */
+.sidebar-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #1e293b;
+  font-size: 0.72rem;
+  color: #475569;
+  text-align: center;
+}
