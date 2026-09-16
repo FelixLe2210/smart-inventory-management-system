@@ -1,0 +1,25 @@
+/* ============================================================
+   App Layout — CSS Grid
+   Sidebar cố định 240px bên trái, phần còn lại là main area
+   ============================================================ */
+.app-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+  background: #f1f5f9;
+}
+
+/* Vùng bên phải: Header + Content xếp dọc */
+.app-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* Khu vực nội dung chính */
+.app-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}

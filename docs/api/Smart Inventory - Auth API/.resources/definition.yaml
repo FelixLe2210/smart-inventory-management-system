@@ -1,0 +1,4 @@
+$kind: collection
+description: Login endpoint requests for manual/API testing. See docs/api/AUTH_API_TESTING.md for expected responses.
+variables:
+  baseUrl: http://localhost:8080/api

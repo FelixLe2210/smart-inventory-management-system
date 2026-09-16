@@ -1,5 +1,6 @@
 package com.smartinventory.controller;
 
+import com.smartinventory.dto.ApiResponse;
 import com.smartinventory.dto.RoleResponse;
 import com.smartinventory.model.Role;
 import com.smartinventory.repository.RoleRepository;
@@ -22,10 +23,11 @@ public class RoleController {
     }
 
     @GetMapping // Lắng nghe yêu cầu GET từ Client. Khi Frontend gọi đến
-    public List<RoleResponse> getRoles() {
-        return roleRepository.findAll().stream()//Lấy tất cả các bản ghi vai trò trong Database ra.
-                .map(this::toResponse) //Đổi từng thực thể Role (Entity) thành đối tượng RoleResponse (chính là một DTO).
+    public ApiResponse<List<RoleResponse>> getRoles() {
+        List<RoleResponse> roles = roleRepository.findAll().stream() //Lấy tất cả các bản ghi vai trò trong Database ra.
+                .map(this::toResponse) //Đổi từng thực thể Role (Entity) thành đối tượng RoleResponse (chính là một DTO)
                 .collect(Collectors.toList());
+        return ApiResponse.success(roles);
     }
 
     private RoleResponse toResponse(Role role) { //nhận response từ cơ sở dữ liệu, lấy các giá trị đơn giản , cần thiết , đóng gói xong gửi qua DTO -> gửi về FE
