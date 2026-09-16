@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@RestController //báo đây là một controller tiếp nhận API, biến dữ liệu thành định dạng JSON 
 @RequestMapping("/api")
 public class HealthController {
 
