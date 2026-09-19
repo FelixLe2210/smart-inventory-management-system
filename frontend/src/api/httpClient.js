@@ -32,6 +32,7 @@ httpClient.interceptors.response.use(
       // ApiResponse envelope, so error details live in response.data.error.
       const body = error.response.data;
       const apiError = body?.error;
+sangle
       const message = typeof apiError === 'string'
         ? apiError
         : apiError?.message || body?.message || 'Something went wrong. Please try again.';
@@ -41,6 +42,14 @@ httpClient.interceptors.response.use(
           message,
           status: error.response.status,
           details: typeof apiError === 'string' ? null : apiError?.details || null,
+
+      return Promise.reject(
+        new ApiClientError({
+          code: apiError?.code || 'UNKNOWN_ERROR',
+          message: apiError?.message || 'Something went wrong. Please try again.',
+          status: error.response.status,
+          details: apiError?.details || null,
+ master
         })
       );
     }

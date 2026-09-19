@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import AuthInput from './AuthInput';
 import SocialButtons from './SocialButtons';
+ sangle
 import { register } from '../../api/authApi';
+
+ master
 import './RegisterForm.css';
 
 /**
@@ -9,17 +12,23 @@ import './RegisterForm.css';
  */
 export default function RegisterForm({ onRegisterSuccess, onSwitchToLogin }) {
   const [username, setUsername] = useState('');
+ sangle
   const [fullName, setFullName] = useState('');
+master
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notice, setNotice] = useState(null);
+ sangle
   const [errorMessage, setErrorMessage] = useState(null);
+
+master
 
   async function handleSubmit(event) {
     event.preventDefault();
     setIsSubmitting(true);
     setNotice(null);
+sangle
     setErrorMessage(null);
 
     try {
@@ -38,6 +47,16 @@ export default function RegisterForm({ onRegisterSuccess, onSwitchToLogin }) {
       setIsSubmitting(false);
       setErrorMessage(err.message || 'Registration failed. Please try again.');
     }
+
+    // Mock register flow or backend integration
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setNotice('Registration request submitted! Please login with your credentials.');
+      setTimeout(() => {
+        if (onSwitchToLogin) onSwitchToLogin();
+      }, 1500);
+    }, 700);
+ master
   }
 
   return (
@@ -57,6 +76,7 @@ export default function RegisterForm({ onRegisterSuccess, onSwitchToLogin }) {
         />
 
         <AuthInput
+ sangle
           id="register-full-name"
           type="text"
           placeholder="Full name"
@@ -68,6 +88,8 @@ export default function RegisterForm({ onRegisterSuccess, onSwitchToLogin }) {
         />
 
         <AuthInput
+
+ master
           id="register-email"
           type="email"
           placeholder="Email"
@@ -85,7 +107,10 @@ export default function RegisterForm({ onRegisterSuccess, onSwitchToLogin }) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+ sangle
           minLength={8}
+
+ master
           autoComplete="new-password"
           icon="lock"
         />
@@ -96,12 +121,14 @@ export default function RegisterForm({ onRegisterSuccess, onSwitchToLogin }) {
           </div>
         )}
 
+ sangle
         {errorMessage && (
           <div className="register-info-alert" role="alert">
             {errorMessage}
           </div>
         )}
 
+ master
         <button type="submit" className="register-submit-btn" disabled={isSubmitting}>
           {isSubmitting ? 'Registering…' : 'Register'}
         </button>

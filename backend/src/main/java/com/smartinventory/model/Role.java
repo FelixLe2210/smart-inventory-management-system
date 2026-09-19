@@ -1,5 +1,6 @@
 package com.smartinventory.model;
 
+ sangle
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,15 +11,23 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
+
+import jakarta.persistence.*;
+ master
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+ sangle
 @Table(name = "Roles", schema = "dbo")
+
+@Table(name = "roles")
+ master
 public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+ sangle
     @Column(name = "RoleId")
     private Integer roleId;
 
@@ -48,6 +57,29 @@ public class Role {
 
     public void setRoleName(String roleName) {
         this.roleName = roleName;
+
+    private Long id;
+
+    @Column(nullable = false, unique = true, length = 50)
+    private String name;
+
+    @Column(length = 255)
+    private String description;
+
+    @ManyToMany(mappedBy = "roles")
+    private Set<User> users = new HashSet<>();
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+ master
     }
 
     public String getDescription() {
@@ -58,6 +90,7 @@ public class Role {
         this.description = description;
     }
 
+ sangle
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -65,4 +98,13 @@ public class Role {
     public Set<User> getUsers() {
         return users;
     }
+
+    public Set<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
+    }
+master
 }

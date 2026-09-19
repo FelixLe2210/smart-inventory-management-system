@@ -1,5 +1,6 @@
 package com.smartinventory.model;
 
+ sangle
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,15 +14,23 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
+
+import jakarta.persistence.*;
+ master
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+ sangle
 @Table(name = "Users", schema = "dbo")
+
+@Table(name = "users")
+ master
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+ sangle
     @Column(name = "UserId")
     private Integer userId;
 
@@ -64,6 +73,32 @@ public class User {
 
     public Integer getUserId() {
         return userId;
+
+    private Long id;
+
+    @Column(nullable = false, unique = true, length = 50)
+    private String username;
+
+    @Column(nullable = false, unique = true, length = 255)
+    private String email;
+
+    @Column(name = "password_hash", nullable = false, length = 255)
+    private String passwordHash;
+
+    @Column(name = "is_active", nullable = false)
+    private Boolean active = true;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "user_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
+
+    public Long getId() {
+        return id;
+ master
     }
 
     public String getUsername() {
@@ -74,6 +109,7 @@ public class User {
         this.username = username;
     }
 
+ sangle
     public String getPasswordHash() {
         return passwordHash;
     }
@@ -90,6 +126,8 @@ public class User {
         this.fullName = fullName;
     }
 
+
+ master
     public String getEmail() {
         return email;
     }
@@ -98,6 +136,7 @@ public class User {
         this.email = email;
     }
 
+ sangle
     public boolean isActive() {
         return active;
     }
@@ -108,6 +147,22 @@ public class User {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+ master
     }
 
     public Set<Role> getRoles() {
