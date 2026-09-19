@@ -2,6 +2,10 @@ package com.smartinventory.dto;
 
 import java.util.List;
 
+sangle
+public record LoginResponse(
+        int id,
+
 /**
  * Body of a successful {@code POST /api/auth/login} response (wrapped in {@link ApiResponse}).
  *
@@ -15,9 +19,14 @@ import java.util.List;
  */
 public record LoginResponse(
         Long id,
+ master
         String username,
         String email,
         List<String> roles,
         String accessToken
 ) {
+ sangle
 }
+
+}
+ master

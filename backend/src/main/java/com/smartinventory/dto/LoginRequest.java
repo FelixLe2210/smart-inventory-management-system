@@ -2,6 +2,13 @@ package com.smartinventory.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
+ sangle
+public record LoginRequest(
+        @NotBlank String usernameOrEmail,
+        @NotBlank String password
+) {
+}
+
 /**
  * Body of {@code POST /api/auth/login}.
  *
@@ -17,3 +24,4 @@ public record LoginRequest(
         String password
 ) {
 }
+master

@@ -9,4 +9,7 @@ public class SmartInventoryApplication {
     public static void main(String[] args) {
         SpringApplication.run(SmartInventoryApplication.class, args);
     }
+sangle
 }
+}
+ master
