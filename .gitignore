@@ -5,6 +5,7 @@ target/
 *.war
 *.ear
 .mvn/
+backend/native/
 
 # React / Node.js
 node_modules/
