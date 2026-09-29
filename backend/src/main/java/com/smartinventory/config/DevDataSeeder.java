@@ -14,14 +14,14 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 /**
- * Creates one demo ADMIN user on startup (dev profile only) so the login API has
- * something to authenticate against without anyone having to hand-write a
- * bcrypt hash into a SQL migration.
+ * Creates demo users on startup (dev profile only) so the login API has
+ * accounts to authenticate against for testing.
  *
- * <p>Demo credentials (dev environment only - never used outside local/dev):
+ * <p>Demo credentials:
  * <pre>
- *   username: admin
- *   password: Admin@123
+ *   1. Quản trị viên: username: admin   | password: Admin@123   (Role: ADMIN)
+ *   2. Quản lý kho:   username: tester  | password: Tester@123  (Role: MANAGER)
+ *   3. Nhân viên:     username: staff   | password: Staff@123   (Role: STAFF)
  * </pre>
  */
 @Component
@@ -29,11 +29,6 @@ import java.util.Set;
 public class DevDataSeeder implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DevDataSeeder.class);
-
-    private static final String DEMO_USERNAME = "admin";
-    private static final String DEMO_EMAIL = "admin@smartinventory.local";
-    private static final String DEMO_PASSWORD = "Admin@123";
-    private static final String DEMO_ROLE = "ADMIN";
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -49,22 +44,32 @@ public class DevDataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (userRepository.existsByUsername(DEMO_USERNAME)) {
+        seedUserIfNotExists("admin", "admin@smartinventory.vn", "Admin@123", "ADMIN");
+        seedUserIfNotExists("tester", "tester@smartinventory.vn", "Tester@123", "MANAGER");
+        seedUserIfNotExists("staff", "staff@smartinventory.vn", "Staff@123", "STAFF");
+    }
+
+    private void seedUserIfNotExists(String username, String email, String rawPassword, String roleName) {
+        if (userRepository.existsByUsername(username)) {
             return;
         }
 
-        Role adminRole = roleRepository.findByName(DEMO_ROLE)
-                .orElseThrow(() -> new IllegalStateException(
-                        "Role '" + DEMO_ROLE + "' not found. Did the V1 migration run?"));
+        Role role = roleRepository.findByName(roleName)
+                .orElse(null);
 
-        User admin = new User();
-        admin.setUsername(DEMO_USERNAME);
-        admin.setEmail(DEMO_EMAIL);
-        admin.setPasswordHash(passwordEncoder.encode(DEMO_PASSWORD));
-        admin.setActive(true);
-        admin.setRoles(Set.of(adminRole));
+        if (role == null) {
+            log.warn("Role '{}' not found in database. Skipping seed for user '{}'.", roleName, username);
+            return;
+        }
 
-        userRepository.save(admin);
-        log.info("Seeded demo user '{}' (dev profile only) for login testing.", DEMO_USERNAME);
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPasswordHash(passwordEncoder.encode(rawPassword));
+        user.setActive(true);
+        user.setRoles(Set.of(role));
+
+        userRepository.save(user);
+        log.info("Seeded demo user '{}' (role: {}) for login testing.", username, roleName);
     }
 }

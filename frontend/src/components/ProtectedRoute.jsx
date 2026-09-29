@@ -1,12 +1,21 @@
-import { Navigate, Outlet } from 'react-router-dom';
-import { getAccessToken } from '../api/httpClient';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { getAccessToken, getCurrentUser } from '../api/httpClient';
 
 /**
- * Bảo vệ các route yêu cầu đăng nhập.
- * Nếu chưa có token → redirect về /login.
- * Nếu đã có token → render route con bình thường.
+ * ProtectedRoute – Bảo vệ các route yêu cầu đăng nhập.
+ * Nếu chưa đăng nhập (không có token hoặc user), chuyển hướng về /login.
  */
 export default function ProtectedRoute() {
+  const location = useLocation();
   const token = getAccessToken();
-  return token ? <Outlet /> : <Navigate to="/login" replace />;
+  const user = getCurrentUser();
+
+  // Kiểm tra nếu có token hoặc user trong session/localStorage
+  const isAuthenticated = Boolean(token || user);
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  return <Outlet />;
 }
