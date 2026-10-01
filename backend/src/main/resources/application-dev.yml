@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: ${DB_URL:jdbc:sqlserver://localhost:1435;databaseName=smart_inventory;encrypt=true;trustServerCertificate=true}
-    username: ${DB_USERNAME:smart_user}
-    password: ${DB_PASSWORD:SmartPassword123!}
+    url: ${DB_URL:jdbc:sqlserver://localhost:1433;databaseName=smart_inventory;encrypt=true;trustServerCertificate=true}
+    username: ${DB_USERNAME:daiphuc1}
+    password: ${DB_PASSWORD:daiphuc1}
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
   jpa:
     hibernate:
