@@ -71,14 +71,6 @@ export default function WarehousePage() {
             <span>{hook.isLoading ? "Đang tải..." : "Làm mới dữ liệu"}</span>
           </button>
           <button
-            id="btn-export-excel"
-            className="flex items-center gap-1.5 px-3 py-2 bg-surface-container text-on-surface font-body-sm-medium text-body-sm-medium rounded-lg hover:bg-surface-container-high transition-colors"
-            onClick={() => hook.showToast("Đang tạo file Danh_sach_chi_nhanh_kho.xlsx", "file_download")}
-          >
-            <span className="material-symbols-outlined text-[18px]">download</span>
-            <span>Xuất file Excel</span>
-          </button>
-          <button
             id="btn-add-warehouse"
             className="flex items-center gap-1.5 px-4 py-2 bg-primary-container text-on-primary-container font-body-sm-medium text-body-sm-medium rounded-lg hover:bg-primary hover:text-on-primary transition-colors shadow-sm"
             onClick={hook.openAddModal}

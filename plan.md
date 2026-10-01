@@ -99,3 +99,193 @@ Cả 4 màn hình Master Data hiện nay tuân thủ chặt chẽ và nhất qu�
   - `CategoryControllerTest`: 5/5 PASS
   - `SupplierControllerTest`: 5/5 PASS
   - `GlobalExceptionHandlerTest`: 4/4 PASS
+
+---
+
+---
+
+# 🚨 KẾ HOẠCH KHÔI PHỤC MASTER — GHI ĐÈ CODE CHUẨN LÊN NHÁNH MASTER
+
+> **Tình huống:** Thành viên Sang Le đã push thẳng code bị lỗi lên nhánh `master` mà không qua nhánh riêng, gây hỏng codebase chung.  
+> **Mục tiêu:** Khôi phục nhánh `master` trên remote về đúng trạng thái code chuẩn của nhánh `phutrong` (commit `6c835e0`).  
+> **⚠️ CẢNH BÁO:** Thao tác `git push --force` sẽ **ghi đè lịch sử** trên `origin/master`. Thông báo cho nhóm trưởng và các thành viên trước khi thực hiện.
+
+---
+
+## 📋 BƯỚC 0 — Chuẩn Bị & Thông Báo Nhóm
+
+**Trước khi làm bất kỳ thao tác Git nào, hãy:**
+
+1. Nhắn tin cho nhóm trưởng và toàn nhóm trên kênh liên lạc chung (Zalo/Discord/...):
+   > 🚨 **THÔNG BÁO KHẨN:** Nhánh `master` đang bị lỗi do code của Sang Le. Mình sẽ tiến hành khôi phục lại master về code chuẩn của sprint 3 trong vài phút tới.  
+   > **Yêu cầu:** Tất cả mọi người **DỪNG push code** và **KHÔNG pull master** cho đến khi được thông báo hoàn tất. 🙏
+
+2. Chờ xác nhận từ nhóm trưởng trước khi sang bước 1.
+
+---
+
+## 📋 BƯỚC 1 — Commit Toàn Bộ Thay Đổi Chưa Lưu Trên Nhánh `phutrong`
+
+> Hiện tại có 5 file đang bị `modified` chưa được commit. Phải commit hết trước khi tiếp tục.
+
+Mở terminal tại thư mục gốc dự án và chạy lần lượt:
+
+```bash
+# Kiểm tra lại các file thay đổi (đảm bảo bạn đang ở nhánh phutrong)
+git status
+
+# Stage toàn bộ thay đổi
+git add .
+
+# Commit với message rõ ràng
+git commit -m "fix(frontend): finalize and save all local changes before master restore"
+
+# Đẩy lên remote nhánh phutrong để lưu trữ an toàn
+git push origin phutrong
+```
+
+✅ **Kiểm tra thành công:** Lệnh `git status` báo `nothing to commit, working tree clean`.
+
+---
+
+## 📋 BƯỚC 2 — Xác Nhận Bạn Đang Ở Nhánh `phutrong` Với Code Chuẩn
+
+```bash
+# Kiểm tra nhánh hiện tại (phải là phutrong)
+git branch
+
+# Xem commit mới nhất (phải thấy commit "feat(master-data): synchronize..." hoặc commit vừa tạo)
+git log --oneline -5
+
+# Kiểm tra không còn file thay đổi nào
+git status
+```
+
+✅ **Kiểm tra thành công:** Đầu ra `git branch` có dấu `*` ở dòng `phutrong`.
+
+---
+
+## 📋 BƯỚC 3 — Chuyển Sang Nhánh `master` Local Và Cập Nhật
+
+```bash
+# Chuyển sang nhánh master local
+git checkout master
+
+# Fetch code mới nhất từ remote (chưa merge)
+git fetch origin
+
+# Kiểm tra trạng thái master bị lỗi (xem commit của Sang Le)
+git log --oneline -5
+```
+
+---
+
+## 📋 BƯỚC 4 — Ghi Đè Master Bằng Code Từ Nhánh `phutrong`
+
+> Đây là bước **cốt lõi** — reset nhánh `master` local về đúng trạng thái của `phutrong`.
+
+```bash
+# Reset CỨNG nhánh master local về đúng HEAD của nhánh phutrong
+git reset --hard phutrong
+```
+
+> **Giải thích lệnh:**  
+> `git reset --hard phutrong` — Di chuyển con trỏ HEAD của nhánh `master` về commit mới nhất của `phutrong`, **xóa hoàn toàn** mọi thay đổi của Sang Le trên master local.
+
+✅ **Kiểm tra thành công:** Lệnh `git log --oneline -3` cho thấy commit đầu tiên là commit của bạn `6c835e0`, **không phải** commit của Sang Le.
+
+---
+
+## 📋 BƯỚC 5 — Force Push Lên Remote `origin/master`
+
+> ⚠️ **QUAN TRỌNG:** Lệnh này sẽ **ghi đè vĩnh viễn** lịch sử của `origin/master`. Chỉ thực hiện khi đã xác nhận bước 4 đúng.
+
+```bash
+# Force push — ghi đè origin/master bằng master local hiện tại
+git push origin master --force
+```
+
+✅ **Kiểm tra thành công:** Terminal báo `Branch 'master' set up to track remote branch 'master' from 'origin'` hoặc tương tự.
+
+---
+
+## 📋 BƯỚC 6 — Xác Minh Kết Quả Trên GitHub
+
+1. Mở trình duyệt, truy cập:  
+   👉 `https://github.com/FelixLe2210/smart-inventory-management-system`
+
+2. Chuyển sang tab **"Commits"** của nhánh `master`.
+
+3. Kiểm tra:
+   - ✅ Commit mới nhất phải là: `feat(master-data): synchronize Master Data UI...` (hash `6c835e0` hoặc commit mới hơn).
+   - ❌ Commit của Sang Le **KHÔNG được xuất hiện** ở đầu danh sách.
+
+---
+
+## 📋 BƯỚC 7 — Thông Báo Nhóm Pull Code Mới
+
+Sau khi xác minh GitHub đã cập nhật đúng, nhắn tin cho nhóm:
+
+> ✅ **HOÀN TẤT:** Nhánh `master` đã được khôi phục về code chuẩn Sprint 3.  
+> Tất cả mọi người hãy chạy lệnh sau để cập nhật:
+>
+> ```bash
+> git checkout master
+> git pull origin master --rebase
+> ```
+>
+> Nếu ai đang làm việc trên nhánh riêng, chạy thêm:
+>
+> ```bash
+> git rebase master
+> ```
+>
+> Gặp conflict hãy báo ngay để hỗ trợ! 🙏
+
+---
+
+## 📋 BƯỚC 8 — Quay Lại Nhánh Làm Việc Của Bạn
+
+```bash
+# Quay về nhánh phutrong để tiếp tục phát triển
+git checkout phutrong
+```
+
+---
+
+## ⚠️ LƯU Ý Sau Khi Hoàn Tất
+
+| # | Vấn đề | Hành động |
+|---|--------|-----------|
+| 1 | **Sang Le cần làm gì?** | Sang Le chạy `git checkout sangle` → `git rebase master`, giải quyết conflict rồi mới tạo Pull Request. KHÔNG push thẳng lên master. |
+| 2 | **Thành viên khác bị conflict?** | Mỗi người `git pull origin master --rebase` trên nhánh riêng, giải quyết conflict thủ công. |
+| 3 | **Bảo vệ master về sau?** | Nhóm trưởng bật **Branch Protection** trên GitHub: Settings → Branches → Add rule cho `master` → bật `Require pull request reviews before merging`. |
+| 4 | **Lịch sử Git bị mất?** | Commit của Sang Le không còn trên `master`, nhưng vẫn còn trên nhánh `sangle` — không mất vĩnh viễn. |
+
+---
+
+## 🔄 Tóm Tắt Toàn Bộ Lệnh (Cheat Sheet)
+
+```bash
+# ---- BƯỚC 1: Lưu code hiện tại trên phutrong ----
+git add .
+git commit -m "fix(frontend): finalize and save all local changes before master restore"
+git push origin phutrong
+
+# ---- BƯỚC 2: Chuyển sang master local ----
+git checkout master
+git fetch origin
+
+# ---- BƯỚC 3: Ghi đè master bằng code phutrong ----
+git reset --hard phutrong
+
+# ---- BƯỚC 4: Force push lên remote ----
+git push origin master --force
+
+# ---- BƯỚC 5: Quay lại nhánh làm việc ----
+git checkout phutrong
+```
+
+> **Thời gian ước tính:** 5–10 phút  
+> **Người thực hiện:** Phú Trọng (chủ nhánh `phutrong`)  
+> **Người phê duyệt:** Nhóm trưởng (xác nhận trước bước 5)
