@@ -1,0 +1,345 @@
+{
+	"info": {
+		"_postman_id": "smart-inventory-master-data-collection",
+		"name": "Smart Inventory - Master Data API",
+		"description": "Comprehensive integration test collection for Master Data (Sprint3-14, 15, 16): Warehouse, Category, Supplier, Product.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080/api",
+			"type": "string"
+		},
+		{
+			"key": "warehouseId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "categoryId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "supplierId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "productId",
+			"value": "1",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Warehouse",
+			"item": [
+				{
+					"name": "1. Get All Warehouses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/warehouses",
+							"host": ["{{baseUrl}}"],
+							"path": ["warehouses"]
+						}
+					}
+				},
+				{
+					"name": "2. Create Warehouse",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"KHO-TEST01\",\n  \"name\": \"Kho Thử Nghiệm Hà Nội\",\n  \"address\": \"KCN Bắc Thăng Long, Đông Anh, Hà Nội\",\n  \"phone\": \"0988776655\",\n  \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/warehouses",
+							"host": ["{{baseUrl}}"],
+							"path": ["warehouses"]
+						}
+					}
+				},
+				{
+					"name": "3. Get Warehouse By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/warehouses/{{warehouseId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["warehouses", "{{warehouseId}}"]
+						}
+					}
+				},
+				{
+					"name": "4. Update Warehouse",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"KHO-TEST01\",\n  \"name\": \"Kho Thử Nghiệm Hà Nội (Cập nhật)\",\n  \"address\": \"KCN Bắc Thăng Long (Khu B), Hà Nội\",\n  \"phone\": \"0988776655\",\n  \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/warehouses/{{warehouseId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["warehouses", "{{warehouseId}}"]
+						}
+					}
+				},
+				{
+					"name": "5. Update Warehouse Status",
+					"request": {
+						"method": "PATCH",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"INACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/warehouses/{{warehouseId}}/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["warehouses", "{{warehouseId}}", "status"]
+						}
+					}
+				},
+				{
+					"name": "6. Delete Warehouse",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/warehouses/{{warehouseId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["warehouses", "{{warehouseId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Category",
+			"item": [
+				{
+					"name": "1. Get All Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/categories",
+							"host": ["{{baseUrl}}"],
+							"path": ["categories"]
+						}
+					}
+				},
+				{
+					"name": "2. Create Category",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"CAT-COMP\",\n  \"name\": \"Máy tính & Thiết bị văn phòng\",\n  \"description\": \"Laptop, máy in, linh kiện vi tính\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/categories",
+							"host": ["{{baseUrl}}"],
+							"path": ["categories"]
+						}
+					}
+				},
+				{
+					"name": "3. Get Category By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/categories/{{categoryId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["categories", "{{categoryId}}"]
+						}
+					}
+				},
+				{
+					"name": "4. Update Category",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"CAT-COMP\",\n  \"name\": \"Máy tính, Mạng & TB Văn phòng\",\n  \"description\": \"Cập nhật mô tả\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/categories/{{categoryId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["categories", "{{categoryId}}"]
+						}
+					}
+				},
+				{
+					"name": "5. Delete Category",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/categories/{{categoryId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["categories", "{{categoryId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Supplier",
+			"item": [
+				{
+					"name": "1. Get All Suppliers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/suppliers",
+							"host": ["{{baseUrl}}"],
+							"path": ["suppliers"]
+						}
+					}
+				},
+				{
+					"name": "2. Create Supplier",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"SUP-DELL01\",\n  \"name\": \"Dell Vietnam Co., Ltd\",\n  \"contactName\": \"John Doe\",\n  \"email\": \"contact@dell.com.vn\",\n  \"phone\": \"02838221133\",\n  \"address\": \"Quận 1, TP. Hồ Chí Minh\",\n  \"leadTimeDays\": 5,\n  \"reliabilityScore\": 0.95,\n  \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/suppliers",
+							"host": ["{{baseUrl}}"],
+							"path": ["suppliers"]
+						}
+					}
+				},
+				{
+					"name": "3. Get Supplier By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/suppliers/{{supplierId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["suppliers", "{{supplierId}}"]
+						}
+					}
+				},
+				{
+					"name": "4. Update Supplier",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"SUP-DELL01\",\n  \"name\": \"Dell Technologies VN\",\n  \"contactName\": \"John Doe\",\n  \"email\": \"contact@dell.com.vn\",\n  \"phone\": \"02838221133\",\n  \"leadTimeDays\": 4,\n  \"reliabilityScore\": 0.99,\n  \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/suppliers/{{supplierId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["suppliers", "{{supplierId}}"]
+						}
+					}
+				},
+				{
+					"name": "5. Delete Supplier",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/suppliers/{{supplierId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["suppliers", "{{supplierId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Product",
+			"item": [
+				{
+					"name": "1. Get All Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products",
+							"host": ["{{baseUrl}}"],
+							"path": ["products"]
+						}
+					}
+				},
+				{
+					"name": "2. Create Product",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sku\": \"PRD-DELL-XPS15\",\n  \"barcode\": \"8939001122334\",\n  \"name\": \"Dell XPS 15 9530 i7 32GB 1TB\",\n  \"description\": \"Laptop cao cấp màn hình OLED 3.5K\",\n  \"categoryId\": 1,\n  \"supplierId\": 1,\n  \"unit\": \"Chiếc\",\n  \"purchasePrice\": 42000000,\n  \"sellingPrice\": 48990000,\n  \"minStockLevel\": 5,\n  \"maxStockLevel\": 50,\n  \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products",
+							"host": ["{{baseUrl}}"],
+							"path": ["products"]
+						}
+					}
+				},
+				{
+					"name": "3. Get Product By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/{{productId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["products", "{{productId}}"]
+						}
+					}
+				},
+				{
+					"name": "4. Update Product",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sku\": \"PRD-DELL-XPS15\",\n  \"barcode\": \"8939001122334\",\n  \"name\": \"Dell XPS 15 9530 i7 32GB 1TB (Phiên bản 2026)\",\n  \"description\": \"Laptop cao cấp\",\n  \"categoryId\": 1,\n  \"supplierId\": 1,\n  \"unit\": \"Chiếc\",\n  \"purchasePrice\": 41000000,\n  \"sellingPrice\": 47500000,\n  \"minStockLevel\": 5,\n  \"maxStockLevel\": 50,\n  \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/{{productId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["products", "{{productId}}"]
+						}
+					}
+				},
+				{
+					"name": "5. Delete Product",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/{{productId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["products", "{{productId}}"]
+						}
+					}
+				}
+			]
+		}
+	]
+}
