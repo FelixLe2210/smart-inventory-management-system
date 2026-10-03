@@ -1,17 +1,15 @@
 import { httpClient } from './httpClient';
 
- sangle
 export async function register({ username, password, fullName, email }) {
-  return httpClient.post('/auth/register', {
+  const envelope = await httpClient.post('/auth/register', {
     username,
     password,
     fullName,
     email,
   });
+  return envelope.data;
 }
 
-
- master
 /**
  * @param {string} usernameOrEmail
  * @param {string} password
@@ -19,10 +17,6 @@ export async function register({ username, password, fullName, email }) {
  * @throws {import('./ApiClientError').ApiClientError}
  */
 export async function login(usernameOrEmail, password) {
- sangle
-  return httpClient.post('/auth/login', { usernameOrEmail, password });
-
   const envelope = await httpClient.post('/auth/login', { usernameOrEmail, password });
   return envelope.data;
- master
 }
