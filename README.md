@@ -1,6 +1,6 @@
-# Smart Inventory Management System
+# Smart Inventory Management System for Demand Forecasting and Reorder Recommendation
 
-A warehouse management system that supports inventory visibility, demand planning, and intelligent replenishment.
+A comprehensive warehouse and smart inventory management system powered by AI that supports real-time inventory visibility, demand forecasting, and intelligent reorder recommendations.
 
 ## AI Features
 
