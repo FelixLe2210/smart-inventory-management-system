@@ -47,3 +47,14 @@
 .auth-input-icon.clickable:hover {
   color: #0ea5e9;
 }
+
+@media (max-height: 560px) {
+  .auth-input-group {
+    margin: 6px 0;
+  }
+
+  .auth-input-field {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+}

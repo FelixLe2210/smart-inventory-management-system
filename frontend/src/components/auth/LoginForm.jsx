@@ -85,10 +85,7 @@ export default function LoginForm({ onLoginSuccess }) {
 
   return (
     <div className="login-form-container">
-      <h1 className="login-form-title">Đăng nhập Smart Inventory</h1>
-      <p className="font-body-sm text-[13px] text-secondary text-center mb-4">
-        Demand Forecasting & Reorder Recommendation System
-      </p>
+      <h1 className="login-form-title">Login</h1>
 
       <form className="login-form-body" onSubmit={handleSubmit}>
         <AuthInput

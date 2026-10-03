@@ -1,0 +1,1 @@
+//Lọc đúng dữ liệu cần thiết: Chỉ nhận vào hoặc trả ra đúng những trường giao diện yêu cầu, tránh gửi thừa thông tin gây nặng đường truyền.

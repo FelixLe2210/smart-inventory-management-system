@@ -3,10 +3,12 @@ package com.smartinventory.controller;
 import com.smartinventory.dto.WarehouseRequest;
 import com.smartinventory.exception.ConflictException;
 import com.smartinventory.exception.NotFoundException;
+import com.smartinventory.security.JwtAuthenticationFilter;
 import com.smartinventory.service.WarehouseService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -18,6 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(WarehouseController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class GlobalExceptionHandlerTest {
 
     @Autowired
@@ -25,6 +28,9 @@ class GlobalExceptionHandlerTest {
 
     @MockBean
     private WarehouseService warehouseService;
+
+    @MockBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Test
     @DisplayName("Malformed JSON body returns 400 MALFORMED_REQUEST")

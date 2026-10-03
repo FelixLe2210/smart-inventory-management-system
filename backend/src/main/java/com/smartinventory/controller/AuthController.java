@@ -3,20 +3,21 @@ package com.smartinventory.controller;
 import com.smartinventory.dto.ApiResponse;
 import com.smartinventory.dto.LoginRequest;
 import com.smartinventory.dto.LoginResponse;
+import com.smartinventory.dto.RegisterRequest;
+import com.smartinventory.dto.RegisterResponse;
 import com.smartinventory.service.AuthService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Authentication endpoints.
- *
- * <p>See {@code docs/api/API_CONVENTIONS.md} for the response envelope and
- * {@code docs/api/AUTH_API_TESTING.md} for ready-to-run Postman/curl examples.
- */
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -27,15 +28,22 @@ public class AuthController {
         this.authService = authService;
     }
 
-    /**
-     * POST /api/auth/login
-     * 200 -> ApiResponse&lt;LoginResponse&gt; on success.
-     * 400 -> ApiResponse&lt;Void&gt; if usernameOrEmail/password are missing or blank.
-     * 401 -> ApiResponse&lt;Void&gt; if credentials are wrong or the account is disabled.
-     */
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(authService.register(request)));
+    }
+
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
-        LoginResponse response = authService.login(request);
-        return ResponseEntity.ok(ApiResponse.success(response));
+    public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ApiResponse.success(authService.login(request));
+    }
+
+    @GetMapping("/me")
+    public ApiResponse<Map<String, Object>> currentUser(Authentication authentication) {
+        return ApiResponse.success(Map.of(
+                "username", authentication.getName(),
+                "authorities", authentication.getAuthorities()
+        ));
     }
 }
