@@ -4,11 +4,11 @@ target/
 *.jar
 *.war
 *.ear
+backend/native/
 # NOTE: .mvn/ is intentionally NOT ignored - it holds the Maven Wrapper
 # (mvnw/mvnw.cmd + .mvn/wrapper/maven-wrapper.properties), which must be
 # committed so anyone cloning the repo can run ./mvnw without installing
 # Maven manually.
-
 # React / Node.js
 node_modules/
 npm-debug.log*
