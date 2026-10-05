@@ -22,7 +22,7 @@ export const warehouseApi = {
 
   /**
    * Tạo mới kho.
-   * @param {Object} data { code, name, address, phone, status }
+   * @param {Object} data { code, name, address, phone, description, region, type, area, capacity, height, docks, floorLoad, managerName, managerEmail, security, barcodeEnabled, status }
    * @returns {Promise<Object>}
    */
   async create(data) {
@@ -33,7 +33,7 @@ export const warehouseApi = {
   /**
    * Cập nhật thông tin kho.
    * @param {number|string} id
-   * @param {Object} data { code, name, address, phone, status }
+   * @param {Object} data { code, name, address, phone, description, region, type, area, capacity, height, docks, floorLoad, managerName, managerEmail, security, barcodeEnabled, status }
    * @returns {Promise<Object>}
    */
   async update(id, data) {

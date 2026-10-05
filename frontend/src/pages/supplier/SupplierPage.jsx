@@ -5,15 +5,8 @@ import { ApiClientError } from '../../api/ApiClientError';
 import ToastNotification from '../../components/common/ToastNotification';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 
-const INITIAL_SUPPLIERS = [
-  { id: 1, code: 'SUP-SAMS01', name: 'Samsung Electronics VN', contactName: 'Kim Jin', email: 'contact@samsung.vn', phone: '028.1234.567', leadTimeDays: 5, reliabilityScore: 0.98, status: 'ACTIVE' },
-  { id: 2, code: 'SUP-DELL01', name: 'Dell Technologies VN', contactName: 'John Doe', email: 'sales@dell.com.vn', phone: '028.3822.1133', leadTimeDays: 7, reliabilityScore: 0.95, status: 'ACTIVE' },
-  { id: 3, code: 'SUP-LG01', name: 'LG Innotek Hải Phòng', contactName: 'Park Sung', email: 'contact@lginnotek.vn', phone: '0225.889.922', leadTimeDays: 10, reliabilityScore: 0.92, status: 'ACTIVE' },
-  { id: 4, code: 'SUP-RANGDONG', name: 'Công ty CP Bóng đèn Rạng Đông', contactName: 'Nguyễn Văn Minh', email: 'banhang@rangdong.com.vn', phone: '024.3858.4310', leadTimeDays: 3, reliabilityScore: 0.96, status: 'INACTIVE' },
-];
-
 export default function SupplierPage() {
-  const [suppliers, setSuppliers] = useState(INITIAL_SUPPLIERS);
+  const [suppliers, setSuppliers] = useState([]);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedCodes, setSelectedCodes] = useState(new Set());
@@ -44,15 +37,16 @@ export default function SupplierPage() {
     setIsLoading(true);
     try {
       const data = await supplierApi.getAll();
-      if (Array.isArray(data) && data.length > 0) {
-        setSuppliers(data);
+      if (!Array.isArray(data)) {
+        throw new Error('Backend trả về danh sách nhà cung cấp không hợp lệ.');
       }
-    } catch {
-      // Fallback
+      setSuppliers(data);
+    } catch (err) {
+      showToast(err.message || 'Không thể tải nhà cung cấp từ máy chủ.', 'error');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
     fetchSuppliers();
@@ -157,14 +151,15 @@ export default function SupplierPage() {
     try {
       if (modal.mode === 'add') {
         const created = await supplierApi.create(payload);
-        setSuppliers((prev) => [created || { ...payload, id: Date.now() }, ...prev]);
+        setSuppliers((prev) => [created, ...prev]);
         showToast(`Đã thêm nhà cung cấp ${payload.code}!`, 'check_circle');
       } else {
-        if (modal.data?.id) {
-          await supplierApi.update(modal.data.id, payload);
+        if (!modal.data?.id) {
+          throw new Error('Không xác định được nhà cung cấp cần cập nhật.');
         }
+        const updated = await supplierApi.update(modal.data.id, payload);
         setSuppliers((prev) =>
-          prev.map((s) => (s.code === modal.data.code ? { ...s, ...payload } : s))
+          prev.map((s) => (s.id === updated.id ? updated : s))
         );
         showToast(`Đã cập nhật nhà cung cấp ${payload.code}!`, 'check_circle');
       }
@@ -173,13 +168,8 @@ export default function SupplierPage() {
       if (err instanceof ApiClientError && err.status === 409) {
         setErrors({ code: 'Mã nhà cung cấp đã tồn tại' });
       } else {
-        if (modal.mode === 'add') {
-          setSuppliers((prev) => [{ ...payload, id: Date.now() }, ...prev]);
-          showToast(`Đã lưu cục bộ nhà cung cấp ${payload.code}`, 'check_circle');
-          closeModal();
-        } else {
-          setErrors({ general: err.message || 'Lỗi khi lưu nhà cung cấp' });
-        }
+        setErrors({ general: err.message || 'Lỗi khi lưu nhà cung cấp' });
+        showToast(err.message || 'Lỗi khi lưu nhà cung cấp', 'error');
       }
     } finally {
       setIsSaving(false);
@@ -193,7 +183,8 @@ export default function SupplierPage() {
   const confirmDelete = async () => {
     const { id, code } = deleteConfirm;
     try {
-      if (id) await supplierApi.delete(id);
+      if (!id) throw new Error('Không xác định được nhà cung cấp cần xóa.');
+      await supplierApi.delete(id);
       setSuppliers((prev) => prev.filter((s) => s.code !== code));
       setSelectedCodes((prev) => {
         const next = new Set(prev);

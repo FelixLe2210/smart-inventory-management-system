@@ -6,12 +6,12 @@ import com.smartinventory.exception.UnauthorizedException;
 import com.smartinventory.model.Role;
 import com.smartinventory.model.User;
 import com.smartinventory.repository.UserRepository;
+import com.smartinventory.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -21,10 +21,12 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -44,15 +46,14 @@ public class AuthService {
                 .sorted()
                 .toList();
 
-        // Temporary opaque token - see LoginResponse javadoc for why this isn't a JWT yet.
-        String temporaryAccessToken = UUID.randomUUID().toString();
+        String accessToken = jwtService.generateToken(user.getUsername(), roleNames);
 
         return new LoginResponse(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 roleNames,
-                temporaryAccessToken
+                accessToken
         );
     }
 

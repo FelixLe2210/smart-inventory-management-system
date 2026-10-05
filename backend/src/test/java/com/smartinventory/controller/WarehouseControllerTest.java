@@ -12,10 +12,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(WarehouseController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class WarehouseControllerTest {
 
     @Autowired
@@ -47,6 +50,14 @@ class WarehouseControllerTest {
         sampleWarehouse.setName("Kho Logistics Tân Tạo");
         sampleWarehouse.setAddress("Lô 12, KCN Tân Tạo, TP.HCM");
         sampleWarehouse.setPhone("0908123456");
+        sampleWarehouse.setDescription("Hub miền Nam");
+        sampleWarehouse.setRegion("south");
+        sampleWarehouse.setType("fulfillment");
+        sampleWarehouse.setArea(new BigDecimal("8500.50"));
+        sampleWarehouse.setCapacity(7000);
+        sampleWarehouse.setUsed(3500);
+        sampleWarehouse.setManagerName("Nguyễn An");
+        sampleWarehouse.setManagerEmail("an@example.com");
         sampleWarehouse.setStatus("ACTIVE");
 
         sampleResponse = WarehouseResponse.from(sampleWarehouse);
@@ -61,7 +72,15 @@ class WarehouseControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data[0].code").value("KHO-SGN01"))
-                .andExpect(jsonPath("$.data[0].name").value("Kho Logistics Tân Tạo"));
+                .andExpect(jsonPath("$.data[0].name").value("Kho Logistics Tân Tạo"))
+                .andExpect(jsonPath("$.data[0].description").value("Hub miền Nam"))
+                .andExpect(jsonPath("$.data[0].region").value("south"))
+                .andExpect(jsonPath("$.data[0].type").value("fulfillment"))
+                .andExpect(jsonPath("$.data[0].area").value(8500.50))
+                .andExpect(jsonPath("$.data[0].capacity").value(7000))
+                .andExpect(jsonPath("$.data[0].used").value(3500))
+                .andExpect(jsonPath("$.data[0].managerName").value("Nguyễn An"))
+                .andExpect(jsonPath("$.data[0].managerEmail").value("an@example.com"));
 
         verify(warehouseService, times(1)).getAllWarehouses();
     }
@@ -109,6 +128,18 @@ class WarehouseControllerTest {
     }
 
     @Test
+    void updateStatus_rejectsUnknownStatus() throws Exception {
+        mockMvc.perform(patch("/api/warehouses/1/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"UNKNOWN\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+
+        verifyNoInteractions(warehouseService);
+    }
+
+    @Test
     @DisplayName("POST /api/warehouses - Returns 400 when validation fails (empty code or blank name)")
     void createWarehouse_validationError() throws Exception {
         WarehouseRequest request = new WarehouseRequest();
@@ -122,6 +153,26 @@ class WarehouseControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void createWarehouse_rejectsInvalidExtendedDetails() throws Exception {
+        WarehouseRequest request = new WarehouseRequest();
+        request.setCode("KHO-HAN01");
+        request.setName("Kho Hà Nội");
+        request.setAddress("KCN Quang Minh, Hà Nội");
+        request.setRegion("east");
+        request.setType("unknown");
+        request.setArea(new BigDecimal("-1"));
+        request.setManagerEmail("not-an-email");
+
+        mockMvc.perform(post("/api/warehouses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+
+        verifyNoInteractions(warehouseService);
     }
 
     @Test
@@ -170,6 +221,19 @@ class WarehouseControllerTest {
                         .content(objectMapper.writeValueAsString(Map.of("status", "INACTIVE"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    void updateStatus_acceptsMaintenance() throws Exception {
+        sampleWarehouse.setStatus("MAINTENANCE");
+        when(warehouseService.updateStatus(eq(1L), eq("MAINTENANCE")))
+                .thenReturn(WarehouseResponse.from(sampleWarehouse));
+
+        mockMvc.perform(patch("/api/warehouses/1/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("status", "MAINTENANCE"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("MAINTENANCE"));
     }
 
     @Test

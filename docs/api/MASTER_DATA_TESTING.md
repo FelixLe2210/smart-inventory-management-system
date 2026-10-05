@@ -83,6 +83,18 @@ cd d:\smart-inventory-management-system\backend
        "name": "Kho Quang Minh - Hà Nội",
        "address": "KCN Quang Minh, H. Mê Linh, Hà Nội",
        "phone": "0912889922",
+       "description": "Hub phân phối miền Bắc",
+       "region": "north",
+       "type": "fulfillment",
+       "area": 8500.5,
+       "capacity": 7000,
+       "height": 12.5,
+       "docks": 14,
+       "floorLoad": 5.0,
+       "managerName": "Nguyễn An",
+       "managerEmail": "an@example.com",
+       "security": "Đội an ninh A",
+       "barcodeEnabled": true,
        "status": "ACTIVE"
      }
      ```
