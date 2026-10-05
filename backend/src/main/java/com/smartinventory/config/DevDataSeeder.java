@@ -14,14 +14,14 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 /**
- * Creates one demo ADMIN user on startup (dev profile only) so the login API has
- * something to authenticate against without anyone having to hand-write a
- * bcrypt hash into a SQL migration.
+ * Creates demo users on startup (dev profile only) so the login API has
+ * accounts to authenticate against for testing.
  *
- * <p>Demo credentials (dev environment only - never used outside local/dev):
+ * <p>Demo credentials:
  * <pre>
- *   username: admin
- *   password: Admin@123
+ *   1. Quản trị viên: username: admin   | password: Admin@123   (Role: Admin)
+ *   2. Quản lý kho:   username: tester  | password: Tester@123  (Role: Warehouse Manager)
+ *   3. Nhân viên:     username: staff   | password: Staff@123   (Role: Warehouse Staff)
  * </pre>
  */
 @Component
@@ -29,11 +29,6 @@ import java.util.Set;
 public class DevDataSeeder implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DevDataSeeder.class);
-
-    private static final String DEMO_USERNAME = "admin";
-    private static final String DEMO_EMAIL = "admin@smartinventory.local";
-    private static final String DEMO_PASSWORD = "Admin@123";
-    private static final String DEMO_ROLE = "ADMIN";
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -49,22 +44,43 @@ public class DevDataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (userRepository.existsByUsername(DEMO_USERNAME)) {
+        seedUserIfNotExists("admin", "Quản trị viên", "admin@smartinventory.vn", "Admin@123", "Admin");
+        seedUserIfNotExists("tester", "Quản lý kho", "tester@smartinventory.vn", "Tester@123", "Warehouse Manager");
+        seedUserIfNotExists("staff", "Nhân viên kho", "staff@smartinventory.vn", "Staff@123", "Warehouse Staff");
+        seedUserIfNotExists("procurement", "Nhân viên mua hàng", "procurement@smartinventory.vn", "Procurement@123", "Procurement Staff");
+    }
+
+    private void seedUserIfNotExists(String username, String fullName, String email, String rawPassword, String roleName) {
+        Role role = roleRepository.findByRoleName(roleName)
+                .orElse(null);
+
+        if (role == null) {
+            log.warn("Role '{}' not found in database. Skipping seed for user '{}'.", roleName, username);
             return;
         }
 
-        Role adminRole = roleRepository.findByName(DEMO_ROLE)
-                .orElseThrow(() -> new IllegalStateException(
-                        "Role '" + DEMO_ROLE + "' not found. Did the V1 migration run?"));
+        User existingUser = userRepository.findByUsernameOrEmail(username, username)
+                .orElse(null);
+        if (existingUser != null) {
+            boolean hasRole = existingUser.getRoles().stream()
+                    .anyMatch(existingRole -> existingRole.getRoleId().equals(role.getRoleId()));
+            if (!hasRole) {
+                existingUser.getRoles().add(role);
+                userRepository.save(existingUser);
+                log.info("Assigned role '{}' to existing dev user '{}'.", roleName, username);
+            }
+            return;
+        }
 
-        User admin = new User();
-        admin.setUsername(DEMO_USERNAME);
-        admin.setEmail(DEMO_EMAIL);
-        admin.setPasswordHash(passwordEncoder.encode(DEMO_PASSWORD));
-        admin.setActive(true);
-        admin.setRoles(Set.of(adminRole));
+        User user = new User();
+        user.setUsername(username);
+        user.setFullName(fullName);
+        user.setEmail(email);
+        user.setPasswordHash(passwordEncoder.encode(rawPassword));
+        user.setActive(true);
+        user.setRoles(Set.of(role));
 
-        userRepository.save(admin);
-        log.info("Seeded demo user '{}' (dev profile only) for login testing.", DEMO_USERNAME);
+        userRepository.save(user);
+        log.info("Seeded demo user '{}' (role: {}) for login testing.", username, roleName);
     }
 }
