@@ -118,19 +118,18 @@ manually for anything already covered by an annotation.
 
 | Method | Path              | Auth required | Description |
 |--------|-------------------|---------------|--------------|
-| POST   | `/api/auth/login` | No            | Authenticates a user, returns profile + a temporary access token. |
+| POST   | `/api/auth/login` | No            | Authenticates a user, returns profile + a signed JWT access token. |
 
 See `AUTH_API_TESTING.md` in this folder for request/response examples and a
-ready-to-import Postman collection.
+ready-to-import Postman collection. `/api/health` is also public; all other API
+routes require a valid access token.
 
 ### On the `accessToken` field
 
-`LoginResponse.accessToken` is currently a random UUID, **not a JWT**, and no
-endpoint validates it yet (there are no protected endpoints yet). It exists so
-the frontend can already implement "store the token, send it as
-`Authorization: Bearer <token>`" against a stable contract. When real
-token-based auth (JWT) is introduced, only the token's format and a new
-validation filter change — this response shape does not.
+`LoginResponse.accessToken` is a signed JWT. Send it on protected requests in
+the `Authorization: Bearer <accessToken>` header. Its lifetime is configured
+with `JWT_EXPIRATION_MS` (one hour by default); the signing key is configured
+with `JWT_SECRET`. Configure a unique, secure secret outside development.
 
 ## 8. CORS
 

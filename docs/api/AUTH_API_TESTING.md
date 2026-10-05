@@ -7,7 +7,7 @@ against, plus the Postman collection in this folder
 
 ## Prerequisites
 
-1. MySQL running and reachable with the credentials in
+1. SQL Server running and reachable with the credentials in
    `backend/src/main/resources/application-dev.yml` (or override via the
    `DB_URL` / `DB_USERNAME` / `DB_PASSWORD` env vars).
 2. Start the backend with the `dev` profile (it's the default —
@@ -16,25 +16,24 @@ against, plus the Postman collection in this folder
    cd backend
    ./mvnw spring-boot:run
    ```
-3. On first startup, Flyway runs `V1__create_users_and_roles.sql` (creates the
-   `ADMIN` / `MANAGER` / `STAFF` roles), then `DevDataSeeder` creates one demo
-   user:
+3. On first startup, Flyway applies the database migrations, then
+   `DevDataSeeder` creates demo users:
 
    | Field    | Value                     |
    |----------|---------------------------|
    | username | `admin`                   |
-   | email    | `admin@smartinventory.local` |
+   | email    | `admin@smartinventory.vn` |
    | password | `Admin@123`               |
    | role     | `ADMIN`                   |
 
-   This seeding only runs when `spring.profiles.active=dev` and only if the
-   `admin` user doesn't already exist — safe to restart the app repeatedly.
+   This seeding only runs when `spring.profiles.active=dev` and only if each
+   seeded user doesn't already exist — safe to restart the app repeatedly.
 
 ## Importing into Postman
 
 Import `Smart_Inventory_Auth.postman_collection.json` from this folder. It has
 a collection variable `baseUrl` set to `http://localhost:8080/api` — change it
-if your backend runs elsewhere. It includes all four cases below as separate
+if your backend runs elsewhere. It includes the cases below as separate
 requests.
 
 ## Case 1 — successful login
@@ -53,9 +52,9 @@ Expected: `200 OK`
   "data": {
     "id": 1,
     "username": "admin",
-    "email": "admin@smartinventory.local",
+    "email": "admin@smartinventory.vn",
     "roles": ["ADMIN"],
-    "accessToken": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    "accessToken": "<signed JWT>"
   },
   "error": null,
   "timestamp": "2026-09-14T10:15:30Z"
@@ -63,7 +62,7 @@ Expected: `200 OK`
 ```
 
 Logging in with the email instead of the username works the same way:
-`"usernameOrEmail": "admin@smartinventory.local"`.
+`"usernameOrEmail": "admin@smartinventory.vn"`.
 
 ## Case 2 — wrong password
 
@@ -132,9 +131,22 @@ Expected: `400 Bad Request` with `error.code = "MALFORMED_REQUEST"`.
 ## Case 6 — disabled account
 
 Not reproducible with the seeded demo user (it's active by default). To test:
-set `is_active = 0` for a user row directly in MySQL, then attempt login with
+set `is_active = 0` for a user row directly in SQL Server, then attempt login with
 correct credentials. Expected: `401 Unauthorized` with
 `error.code = "ACCOUNT_DISABLED"`.
+
+## Case 7 — access a protected API
+
+Use the token from the successful login response as a Bearer token:
+
+```bash
+curl -i http://localhost:8080/api/categories \
+  -H "Authorization: Bearer <accessToken>"
+```
+
+Requests to protected API routes without a valid token receive `401 Unauthorized`.
+Tokens expire after `JWT_EXPIRATION_MS` (one hour by default). Set `JWT_SECRET`
+to a secure random value outside development.
 
 ## Frontend manual check
 

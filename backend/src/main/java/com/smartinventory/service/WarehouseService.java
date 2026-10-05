@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,6 +47,7 @@ public class WarehouseService {
         warehouse.setName(request.getName().trim());
         warehouse.setAddress(request.getAddress().trim());
         warehouse.setPhone(request.getPhone() != null ? request.getPhone().trim() : null);
+        applyExtendedDetails(warehouse, request);
         if (request.getStatus() != null && !request.getStatus().isBlank()) {
             warehouse.setStatus(request.getStatus().toUpperCase());
         }
@@ -66,12 +68,32 @@ public class WarehouseService {
         warehouse.setName(request.getName().trim());
         warehouse.setAddress(request.getAddress().trim());
         warehouse.setPhone(request.getPhone() != null ? request.getPhone().trim() : null);
+        applyExtendedDetails(warehouse, request);
         if (request.getStatus() != null && !request.getStatus().isBlank()) {
             warehouse.setStatus(request.getStatus().toUpperCase());
         }
 
         Warehouse updated = warehouseRepository.save(warehouse);
         return WarehouseResponse.from(updated);
+    }
+
+    private void applyExtendedDetails(Warehouse warehouse, WarehouseRequest request) {
+        warehouse.setDescription(trimToNull(request.getDescription()));
+        warehouse.setRegion(request.getRegion().toLowerCase(Locale.ROOT));
+        warehouse.setType(request.getType().toLowerCase(Locale.ROOT));
+        warehouse.setArea(request.getArea());
+        warehouse.setCapacity(request.getCapacity() != null ? request.getCapacity() : 0);
+        warehouse.setHeight(request.getHeight());
+        warehouse.setDocks(request.getDocks());
+        warehouse.setFloorLoad(request.getFloorLoad());
+        warehouse.setManagerName(trimToNull(request.getManagerName()));
+        warehouse.setManagerEmail(trimToNull(request.getManagerEmail()));
+        warehouse.setSecurity(trimToNull(request.getSecurity()));
+        warehouse.setBarcodeEnabled(Boolean.TRUE.equals(request.getBarcodeEnabled()));
+    }
+
+    private String trimToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 
     public void deleteWarehouse(Long id) {

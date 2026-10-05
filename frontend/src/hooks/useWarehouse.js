@@ -6,7 +6,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { warehouseApi } from "../api/warehouseApi";
 import { ApiClientError } from "../api/ApiClientError";
 
-// ── Dữ liệu khởi tạo mặc định (fallback khi offline / chưa có backend) ──────
+// ── Demo data for UI previews; the page loads persisted rows from the API. ──
 export const INITIAL_WAREHOUSES = [
   {
     code: "KHO-SGN01",
@@ -139,25 +139,40 @@ function normalizeWarehouse(item, index = 0) {
     "bg-tertiary text-on-tertiary",
     "bg-primary-container text-on-primary-container",
   ];
+  const typeDetails = {
+    standard: { label: "Kho tiêu chuẩn", icon: "warehouse" },
+    cold: { label: "Kho mát/lạnh", icon: "ac_unit" },
+    crossdock: { label: "Cross-dock", icon: "swap_horiz" },
+    fulfillment: { label: "Fulfillment Hub", icon: "local_shipping" },
+  };
+  const type = item.type || "standard";
+  const areaValue = item.area == null ? "" : Number(item.area);
   return {
     id: item.id,
     code: item.code,
     name: item.name,
-    description: item.description || `Chi nhánh lưu trữ & điều phối ${item.code}`,
-    region: item.region || (index % 3 === 0 ? "north" : index % 3 === 1 ? "south" : "central"),
-    type: item.type || "standard",
-    typeLabel: item.typeLabel || "Kho tiêu chuẩn",
-    typeIcon: item.typeIcon || "warehouse",
+    description: item.description || "",
+    region: item.region || "north",
+    type,
+    typeLabel: typeDetails[type]?.label || typeDetails.standard.label,
+    typeIcon: typeDetails[type]?.icon || typeDetails.standard.icon,
     address: item.address,
-    area: item.area || "10,000 m²",
-    capacity: item.capacity || 8000,
-    used: item.used || 0,
-    manager: item.manager || {
-      name: item.phone ? `Quản lý kho` : "Chưa phân công",
-      initials: (item.code || "KH").slice(-2).toUpperCase(),
+    area: areaValue === "" ? "Chưa cập nhật" : `${areaValue.toLocaleString("vi-VN")} m²`,
+    areaValue,
+    capacity: item.capacity ?? 0,
+    used: item.used ?? 0,
+    height: item.height ?? "",
+    docks: item.docks ?? "",
+    floorLoad: item.floorLoad ?? "",
+    manager: {
+      name: item.managerName || "Chưa phân công",
+      initials: (item.managerName || "KH").trim().split(/\s+/).map((part) => part[0]).slice(-2).join("").toUpperCase(),
       phone: item.phone || "---",
+      email: item.managerEmail || "",
       color: colors[index % colors.length],
     },
+    security: item.security || "",
+    barcodeEnabled: item.barcodeEnabled ?? true,
     status: statusLower,
   };
 }
@@ -184,7 +199,7 @@ const DEFAULT_FORM = {
 
 export function useWarehouse() {
   // ── State dữ liệu ────────────────────────────────────────────────────
-  const [warehouses, setWarehouses] = useState(INITIAL_WAREHOUSES);
+  const [warehouses, setWarehouses] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState({});
@@ -216,15 +231,16 @@ export function useWarehouse() {
     setIsLoading(true);
     try {
       const data = await warehouseApi.getAll();
-      if (Array.isArray(data) && data.length > 0) {
-        setWarehouses(data.map((item, idx) => normalizeWarehouse(item, idx)));
+      if (!Array.isArray(data)) {
+        throw new Error("Backend trả về danh sách kho không hợp lệ.");
       }
+      setWarehouses(data.map((item, idx) => normalizeWarehouse(item, idx)));
     } catch (err) {
-      console.warn("Backend API not reachable or empty, keeping local/fallback data:", err.message);
+      showToast(err.message || "Không thể tải danh sách kho từ máy chủ.", "error");
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
     fetchWarehouses();
@@ -282,9 +298,17 @@ export function useWarehouse() {
       type: w.type || "standard",
       region: w.region || "north",
       address: w.address || "",
+      area: w.areaValue === "" ? "" : String(w.areaValue),
+      capacity: String(w.capacity ?? ""),
+      height: w.height === "" ? "" : String(w.height),
+      docks: w.docks === "" ? "" : String(w.docks),
+      floorLoad: w.floorLoad === "" ? "" : String(w.floorLoad),
       manager: w.manager?.name || "",
       phone: w.manager?.phone || "",
+      email: w.manager?.email || "",
+      security: w.security || "",
       notes: w.description || "",
+      barcodeEnabled: w.barcodeEnabled,
       isActive: w.status === "active",
     });
     setErrors({});
@@ -332,39 +356,42 @@ export function useWarehouse() {
       name: form.name.trim(),
       address: form.address.trim(),
       phone: form.phone ? form.phone.trim() : null,
-      status: form.isActive ? "ACTIVE" : "INACTIVE",
+      description: form.notes.trim() || null,
+      region: form.region,
+      type: form.type,
+      area: form.area === "" ? null : Number(form.area),
+      capacity: form.capacity === "" ? 0 : Number(form.capacity),
+      height: form.height === "" ? null : Number(form.height),
+      docks: form.docks === "" ? null : Number(form.docks),
+      floorLoad: form.floorLoad === "" ? null : Number(form.floorLoad),
+      managerName: form.manager.trim() || null,
+      managerEmail: form.email.trim() || null,
+      security: form.security.trim() || null,
+      barcodeEnabled: form.barcodeEnabled,
+      status: form.isActive
+        ? "ACTIVE"
+        : warehouseModal.data?.status === "maintenance"
+          ? "MAINTENANCE"
+          : "INACTIVE",
     };
 
     try {
       if (warehouseModal.mode === "add") {
         const created = await warehouseApi.create(payload);
-        setWarehouses((prev) => [normalizeWarehouse(created || payload, prev.length), ...prev]);
+        setWarehouses((prev) => [normalizeWarehouse(created, prev.length), ...prev]);
         showToast(`Đã tạo chi nhánh kho ${payload.code} thành công!`, "check_circle");
       } else {
         const existing = warehouseModal.data;
-        let updated = null;
-        if (existing?.id) {
-          updated = await warehouseApi.update(existing.id, payload);
+        if (!existing?.id) {
+          throw new Error("Không xác định được chi nhánh kho cần cập nhật.");
         }
-        setWarehouses((prev) =>
-          prev.map((w) =>
-            w.code === form.code
-              ? {
-                  ...w,
-                  name: payload.name,
-                  address: payload.address,
-                  status: payload.status.toLowerCase(),
-                  type: form.type,
-                  region: form.region,
-                  manager: {
-                    ...w.manager,
-                    name: form.manager || w.manager.name,
-                    phone: payload.phone || w.manager.phone,
-                  },
-                }
-              : w
-          )
-        );
+        const updated = await warehouseApi.update(existing.id, payload);
+        setWarehouses((prev) => {
+          const index = prev.findIndex((w) => w.id === updated.id);
+          return prev.map((w, currentIndex) =>
+            currentIndex === index ? normalizeWarehouse(updated, currentIndex) : w
+          );
+        });
         showToast(`Đã cập nhật chi nhánh kho ${payload.code} thành công!`, "check_circle");
       }
       closeWarehouseModal();
@@ -385,15 +412,8 @@ export function useWarehouse() {
         }
         showToast(err.message, "error");
       } else {
-        // Offline fallback
-        if (warehouseModal.mode === "add") {
-          setWarehouses((prev) => [normalizeWarehouse(payload, prev.length), ...prev]);
-          showToast(`Đã lưu cục bộ chi nhánh kho ${payload.code}`, "check_circle");
-          closeWarehouseModal();
-        } else {
-          setErrors({ general: err.message || "Không thể lưu dữ liệu" });
-          showToast(err.message || "Lỗi lưu dữ liệu", "error");
-        }
+        setErrors({ general: err.message || "Không thể lưu dữ liệu" });
+        showToast(err.message || "Lỗi lưu dữ liệu", "error");
       }
     } finally {
       setIsSaving(false);
@@ -411,11 +431,13 @@ export function useWarehouse() {
     const newStatusStr = newState ? "ACTIVE" : "INACTIVE";
 
     try {
-      if (target?.id) {
-        await warehouseApi.updateStatus(target.id, newStatusStr);
+      if (!target?.id) {
+        throw new Error("Không xác định được chi nhánh kho cần cập nhật trạng thái.");
       }
+      await warehouseApi.updateStatus(target.id, newStatusStr);
     } catch (err) {
-      console.warn("Failed to update status on server:", err);
+      showToast(err.message || "Không thể cập nhật trạng thái kho.", "error");
+      return;
     }
 
     setWarehouses((prev) =>
@@ -441,9 +463,10 @@ export function useWarehouse() {
     async (code) => {
       const target = warehouses.find((w) => w.code === code);
       try {
-        if (target?.id) {
-          await warehouseApi.delete(target.id);
+        if (!target?.id) {
+          throw new Error("Không xác định được kho cần xóa.");
         }
+        await warehouseApi.delete(target.id);
         setWarehouses((prev) => prev.filter((w) => w.code !== code));
         showToast(`Đã xóa kho ${code} thành công`, "delete");
       } catch (err) {

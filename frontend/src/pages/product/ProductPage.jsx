@@ -7,67 +7,8 @@ import { ApiClientError } from '../../api/ApiClientError';
 import ToastNotification from '../../components/common/ToastNotification';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 
-const INITIAL_PRODUCTS = [
-  {
-    id: 1,
-    sku: 'PRD-IP15-128',
-    barcode: '8938501234567',
-    name: 'Apple iPhone 15 128GB Black',
-    categoryName: 'Thiết bị điện tử & Viễn thông',
-    supplierName: 'Samsung Electronics VN',
-    unit: 'Chiếc',
-    purchasePrice: 18500000,
-    sellingPrice: 21990000,
-    minStockLevel: 5,
-    maxStockLevel: 100,
-    status: 'ACTIVE',
-  },
-  {
-    id: 2,
-    sku: 'PRD-DELL-XPS15',
-    barcode: '8939001122334',
-    name: 'Dell XPS 15 9530 i7 32GB 1TB OLED',
-    categoryName: 'Máy tính & Linh kiện PC',
-    supplierName: 'Dell Technologies VN',
-    unit: 'Chiếc',
-    purchasePrice: 42000000,
-    sellingPrice: 48990000,
-    minStockLevel: 3,
-    maxStockLevel: 50,
-    status: 'ACTIVE',
-  },
-  {
-    id: 3,
-    sku: 'PRD-SAM-S24',
-    barcode: '8938507654321',
-    name: 'Samsung Galaxy S24 Ultra 256GB',
-    categoryName: 'Thiết bị điện tử & Viễn thông',
-    supplierName: 'Samsung Electronics VN',
-    unit: 'Chiếc',
-    purchasePrice: 24000000,
-    sellingPrice: 28990000,
-    minStockLevel: 5,
-    maxStockLevel: 80,
-    status: 'ACTIVE',
-  },
-  {
-    id: 4,
-    sku: 'PRD-RD-LED18W',
-    barcode: '8934567890123',
-    name: 'Bóng Đèn LED Bulb Rạng Đông 18W',
-    categoryName: 'Cơ khí & Vật tư phụ tùng',
-    supplierName: 'Công ty CP Bóng đèn Rạng Đông',
-    unit: 'Bóng',
-    purchasePrice: 45000,
-    sellingPrice: 65000,
-    minStockLevel: 50,
-    maxStockLevel: 1000,
-    status: 'INACTIVE',
-  },
-];
-
 export default function ProductPage() {
-  const [products, setProducts] = useState(INITIAL_PRODUCTS);
+  const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
 
@@ -111,19 +52,29 @@ export default function ProductPage() {
         supplierApi.getAll(),
       ]);
 
-      if (prods.status === 'fulfilled' && Array.isArray(prods.value) && prods.value.length > 0) {
+      const failures = [];
+      if (prods.status === 'fulfilled' && Array.isArray(prods.value)) {
         setProducts(prods.value);
+      } else {
+        failures.push(`sản phẩm: ${prods.reason?.message || 'phản hồi không hợp lệ'}`);
       }
       if (cats.status === 'fulfilled' && Array.isArray(cats.value)) {
         setCategories(cats.value);
+      } else {
+        failures.push(`danh mục: ${cats.reason?.message || 'phản hồi không hợp lệ'}`);
       }
       if (sups.status === 'fulfilled' && Array.isArray(sups.value)) {
         setSuppliers(sups.value);
+      } else {
+        failures.push(`nhà cung cấp: ${sups.reason?.message || 'phản hồi không hợp lệ'}`);
+      }
+      if (failures.length > 0) {
+        showToast(`Không thể tải ${failures.join('; ')}`, 'error');
       }
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
     loadData();
@@ -166,8 +117,8 @@ export default function ProductPage() {
       barcode: `893${Math.floor(1000000000 + Math.random() * 9000000000)}`,
       name: '',
       description: '',
-      categoryId: categories[0]?.id || 1,
-      supplierId: suppliers[0]?.id || 1,
+      categoryId: categories[0]?.id || '',
+      supplierId: suppliers[0]?.id || '',
       unit: 'Chiếc',
       purchasePrice: '',
       sellingPrice: '',
@@ -185,8 +136,8 @@ export default function ProductPage() {
       barcode: p.barcode || '',
       name: p.name,
       description: p.description || '',
-      categoryId: p.categoryId || 1,
-      supplierId: p.supplierId || 1,
+      categoryId: p.categoryId || '',
+      supplierId: p.supplierId || '',
       unit: p.unit || 'Chiếc',
       purchasePrice: p.purchasePrice || '',
       sellingPrice: p.sellingPrice || '',
@@ -208,6 +159,7 @@ export default function ProductPage() {
     if (!form.sku.trim()) errs.sku = 'SKU không được để trống';
     if (!form.name.trim()) errs.name = 'Tên sản phẩm không được để trống';
     if (!form.barcode.trim()) errs.barcode = 'Mã barcode không được để trống';
+    if (!form.categoryId) errs.categoryId = 'Danh mục không được để trống';
     if (!form.purchasePrice) errs.purchasePrice = 'Giá nhập không được để trống';
     if (!form.sellingPrice) errs.sellingPrice = 'Giá bán không được để trống';
 
@@ -224,7 +176,7 @@ export default function ProductPage() {
       barcode: form.barcode.trim(),
       name: form.name.trim(),
       description: form.description ? form.description.trim() : null,
-      categoryId: Number(form.categoryId) || 1,
+      categoryId: Number(form.categoryId),
       supplierId: form.supplierId ? Number(form.supplierId) : null,
       unit: form.unit.trim(),
       purchasePrice: Number(form.purchasePrice),
@@ -237,24 +189,15 @@ export default function ProductPage() {
     try {
       if (modal.mode === 'add') {
         const created = await productApi.create(payload);
-        const selectedCat = categories.find((c) => c.id === payload.categoryId);
-        const selectedSup = suppliers.find((s) => s.id === payload.supplierId);
-        setProducts((prev) => [
-          created || {
-            ...payload,
-            id: Date.now(),
-            categoryName: selectedCat?.name || 'Điện tử',
-            supplierName: selectedSup?.name || 'Samsung',
-          },
-          ...prev,
-        ]);
+        setProducts((prev) => [created, ...prev]);
         showToast(`Đã thêm sản phẩm ${payload.sku}!`, 'check_circle');
       } else {
-        if (modal.data?.id) {
-          await productApi.update(modal.data.id, payload);
+        if (!modal.data?.id) {
+          throw new Error('Không xác định được sản phẩm cần cập nhật.');
         }
+        const updated = await productApi.update(modal.data.id, payload);
         setProducts((prev) =>
-          prev.map((p) => (p.sku === modal.data.sku ? { ...p, ...payload } : p))
+          prev.map((p) => (p.id === updated.id ? updated : p))
         );
         showToast(`Đã cập nhật sản phẩm ${payload.sku}!`, 'check_circle');
       }
@@ -263,13 +206,8 @@ export default function ProductPage() {
       if (err instanceof ApiClientError && err.status === 409) {
         setErrors({ sku: err.message || 'Mã SKU hoặc barcode đã tồn tại' });
       } else {
-        if (modal.mode === 'add') {
-          setProducts((prev) => [{ ...payload, id: Date.now() }, ...prev]);
-          showToast(`Đã lưu cục bộ sản phẩm ${payload.sku}`, 'check_circle');
-          closeModal();
-        } else {
-          setErrors({ general: err.message || 'Lỗi khi lưu sản phẩm' });
-        }
+        setErrors({ general: err.message || 'Lỗi khi lưu sản phẩm' });
+        showToast(err.message || 'Lỗi khi lưu sản phẩm', 'error');
       }
     } finally {
       setIsSaving(false);
@@ -283,7 +221,8 @@ export default function ProductPage() {
   const confirmDelete = async () => {
     const { id, sku } = deleteConfirm;
     try {
-      if (id) await productApi.delete(id);
+      if (!id) throw new Error('Không xác định được sản phẩm cần xóa.');
+      await productApi.delete(id);
       setProducts((prev) => prev.filter((p) => p.sku !== sku));
       setSelectedSkus((prev) => {
         const next = new Set(prev);

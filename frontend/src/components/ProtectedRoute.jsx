@@ -10,8 +10,7 @@ export default function ProtectedRoute() {
   const token = getAccessToken();
   const user = getCurrentUser();
 
-  // Kiểm tra nếu có token hoặc user trong session/localStorage
-  const isAuthenticated = Boolean(token || user);
+  const isAuthenticated = Boolean(token && user);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />;

@@ -3,15 +3,10 @@ package com.smartinventory.dto;
 import java.util.List;
 
 /**
- * Body of a successful {@code POST /api/auth/login} response (wrapped in {@link ApiResponse}).
+ * Body of a successful {@code POST /api/auth/login} response.
  *
- * <p>{@code accessToken} is a temporary opaque session token (random UUID), NOT a JWT.
- * It lets the frontend start wiring up "store the token, send it as
- * {@code Authorization: Bearer <token>}" now. It is not yet verified on subsequent
- * requests — no endpoint checks it, because no protected endpoints exist yet.
- * When real JWT-based auth is introduced, only this field's value and the (not yet
- * written) token-validation filter change — the response shape and frontend
- * integration stay the same.
+ * <p>{@code accessToken} is a signed JWT to send as a Bearer token on protected
+ * API requests.
  */
 public record LoginResponse(
         Long id,

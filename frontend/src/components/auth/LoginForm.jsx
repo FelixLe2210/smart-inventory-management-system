@@ -5,32 +5,8 @@ import { login } from '../../api/authApi';
 import { setAccessToken, setCurrentUser } from '../../api/httpClient';
 import './LoginForm.css';
 
-export const DEMO_ACCOUNTS = {
-  admin: {
-    username: 'admin',
-    password: 'Admin@123',
-    name: 'Quản trị viên Hệ thống',
-    email: 'admin@smartinventory.vn',
-    roles: ['ROLE_ADMIN'],
-  },
-  tester: {
-    username: 'tester',
-    password: 'Tester@123',
-    name: 'Lý Nguyễn (Quản lý kho)',
-    email: 'tester@smartinventory.vn',
-    roles: ['ROLE_MANAGER'],
-  },
-  staff: {
-    username: 'staff',
-    password: 'Staff@123',
-    name: 'Trần Văn Nhân (Nhân viên)',
-    email: 'staff@smartinventory.vn',
-    roles: ['ROLE_STAFF'],
-  },
-};
-
 /**
- * LoginForm Component - xử lý đăng nhập người dùng với hỗ trợ kết nối backend & fallback tài khoản test.
+ * LoginForm Component - xử lý đăng nhập người dùng qua backend.
  */
 export default function LoginForm({ onLoginSuccess }) {
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
@@ -43,40 +19,17 @@ export default function LoginForm({ onLoginSuccess }) {
     setErrorMessage(null);
     setIsSubmitting(true);
 
-    const u = usernameOrEmail.trim();
-    const p = password;
-
     try {
-      // 1. Thử gọi API xác thực với Backend
-      const result = await login(u, p);
-      setAccessToken(result.accessToken || 'jwt-backend-token');
+      const result = await login(usernameOrEmail.trim(), password);
+      if (!result?.accessToken) {
+        throw new Error('Backend không trả về access token hợp lệ.');
+      }
+      setAccessToken(result.accessToken);
       setCurrentUser(result);
       if (onLoginSuccess) {
         onLoginSuccess(result);
       }
     } catch (err) {
-      // 2. Nếu Backend offline hoặc không có kết nối, kiểm tra tài khoản test mẫu
-      const matchedDemo = Object.values(DEMO_ACCOUNTS).find(
-        (acc) => (acc.username === u || acc.email === u) && acc.password === p
-      );
-
-      if (matchedDemo) {
-        const demoSession = {
-          id: matchedDemo.username === 'admin' ? 1 : matchedDemo.username === 'tester' ? 2 : 3,
-          username: matchedDemo.username,
-          name: matchedDemo.name,
-          email: matchedDemo.email,
-          roles: matchedDemo.roles,
-          accessToken: `demo-token-${matchedDemo.username}`,
-        };
-        setAccessToken(demoSession.accessToken);
-        setCurrentUser(demoSession);
-        if (onLoginSuccess) {
-          onLoginSuccess(demoSession);
-        }
-        return;
-      }
-
       setErrorMessage(err.message || 'Đăng nhập không thành công. Vui lòng kiểm tra lại tài khoản & mật khẩu.');
     } finally {
       setIsSubmitting(false);

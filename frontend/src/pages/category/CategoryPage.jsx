@@ -5,15 +5,8 @@ import { ApiClientError } from '../../api/ApiClientError';
 import ToastNotification from '../../components/common/ToastNotification';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 
-const INITIAL_CATEGORIES = [
-  { id: 1, code: 'CAT-ELEC', name: 'Thiết bị điện tử & Viễn thông', description: 'Điện thoại, máy tính bảng, phụ kiện cáp sạc', createdAt: '2026-09-01' },
-  { id: 2, code: 'CAT-COMP', name: 'Máy tính & Linh kiện PC', description: 'Laptop, RAM, CPU, SSD, màn hình', createdAt: '2026-09-02' },
-  { id: 3, code: 'CAT-MECH', name: 'Cơ khí & Vật tư phụ tùng', description: 'Bạc đạn, bánh răng, dây curoa', createdAt: '2026-09-03' },
-  { id: 4, code: 'CAT-FOOD', name: 'Thực phẩm đông lạnh & Đóng gói', description: 'Hàng tiêu dùng nhanh và thực phẩm bảo quản lạnh', createdAt: '2026-09-05' },
-];
-
 export default function CategoryPage() {
-  const [categories, setCategories] = useState(INITIAL_CATEGORIES);
+  const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState('');
   const [selectedCodes, setSelectedCodes] = useState(new Set());
   const [isLoading, setIsLoading] = useState(false);
@@ -33,15 +26,16 @@ export default function CategoryPage() {
     setIsLoading(true);
     try {
       const data = await categoryApi.getAll();
-      if (Array.isArray(data) && data.length > 0) {
-        setCategories(data);
+      if (!Array.isArray(data)) {
+        throw new Error('Backend trả về danh sách danh mục không hợp lệ.');
       }
-    } catch {
-      // Dùng dữ liệu khởi tạo khi backend offline
+      setCategories(data);
+    } catch (err) {
+      showToast(err.message || 'Không thể tải danh mục từ máy chủ.', 'error');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
     fetchCategories();
@@ -115,14 +109,15 @@ export default function CategoryPage() {
     try {
       if (modal.mode === 'add') {
         const created = await categoryApi.create(payload);
-        setCategories((prev) => [created || { ...payload, id: Date.now() }, ...prev]);
+        setCategories((prev) => [created, ...prev]);
         showToast(`Đã tạo danh mục ${payload.code} thành công!`, 'check_circle');
       } else {
-        if (modal.data?.id) {
-          await categoryApi.update(modal.data.id, payload);
+        if (!modal.data?.id) {
+          throw new Error('Không xác định được danh mục cần cập nhật.');
         }
+        const updated = await categoryApi.update(modal.data.id, payload);
         setCategories((prev) =>
-          prev.map((c) => (c.code === modal.data.code ? { ...c, ...payload } : c))
+          prev.map((c) => (c.id === updated.id ? updated : c))
         );
         showToast(`Đã cập nhật danh mục ${payload.code}!`, 'check_circle');
       }
@@ -131,13 +126,8 @@ export default function CategoryPage() {
       if (err instanceof ApiClientError && err.status === 409) {
         setErrors({ code: 'Mã danh mục đã tồn tại trong hệ thống' });
       } else {
-        if (modal.mode === 'add') {
-          setCategories((prev) => [{ ...payload, id: Date.now() }, ...prev]);
-          showToast(`Đã lưu danh mục ${payload.code} cục bộ`, 'check_circle');
-          closeModal();
-        } else {
-          setErrors({ general: err.message || 'Lỗi khi lưu danh mục' });
-        }
+        setErrors({ general: err.message || 'Lỗi khi lưu danh mục' });
+        showToast(err.message || 'Lỗi khi lưu danh mục', 'error');
       }
     } finally {
       setIsSaving(false);
@@ -151,7 +141,8 @@ export default function CategoryPage() {
   const confirmDelete = async () => {
     const { id, code } = deleteConfirm;
     try {
-      if (id) await categoryApi.delete(id);
+      if (!id) throw new Error('Không xác định được danh mục cần xóa.');
+      await categoryApi.delete(id);
       setCategories((prev) => prev.filter((c) => c.code !== code));
       setSelectedCodes((prev) => {
         const next = new Set(prev);
