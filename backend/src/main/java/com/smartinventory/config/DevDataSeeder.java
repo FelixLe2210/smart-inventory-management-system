@@ -19,9 +19,9 @@ import java.util.Set;
  *
  * <p>Demo credentials:
  * <pre>
- *   1. Quản trị viên: username: admin   | password: Admin@123   (Role: Admin)
- *   2. Quản lý kho:   username: tester  | password: Tester@123  (Role: Warehouse Manager)
- *   3. Nhân viên:     username: staff   | password: Staff@123   (Role: Warehouse Staff)
+ *   1. Quản trị viên: username: admin   | password: Admin@123   (Role: ADMIN)
+ *   2. Quản lý kho:   username: tester  | password: Tester@123  (Role: MANAGER)
+ *   3. Nhân viên:     username: staff   | password: Staff@123   (Role: STAFF)
  * </pre>
  */
 @Component
@@ -44,14 +44,17 @@ public class DevDataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        seedUserIfNotExists("admin", "Quản trị viên", "admin@smartinventory.vn", "Admin@123", "Admin");
-        seedUserIfNotExists("tester", "Quản lý kho", "tester@smartinventory.vn", "Tester@123", "Warehouse Manager");
-        seedUserIfNotExists("staff", "Nhân viên kho", "staff@smartinventory.vn", "Staff@123", "Warehouse Staff");
-        seedUserIfNotExists("procurement", "Nhân viên mua hàng", "procurement@smartinventory.vn", "Procurement@123", "Procurement Staff");
+        seedUserIfNotExists("admin", "admin@smartinventory.vn", "Admin@123", "ADMIN");
+        seedUserIfNotExists("tester", "tester@smartinventory.vn", "Tester@123", "MANAGER");
+        seedUserIfNotExists("staff", "staff@smartinventory.vn", "Staff@123", "STAFF");
     }
 
-    private void seedUserIfNotExists(String username, String fullName, String email, String rawPassword, String roleName) {
-        Role role = roleRepository.findByRoleName(roleName)
+    private void seedUserIfNotExists(String username, String email, String rawPassword, String roleName) {
+        if (userRepository.existsByUsername(username)) {
+            return;
+        }
+
+        Role role = roleRepository.findByName(roleName)
                 .orElse(null);
 
         if (role == null) {
@@ -59,22 +62,8 @@ public class DevDataSeeder implements CommandLineRunner {
             return;
         }
 
-        User existingUser = userRepository.findByUsernameOrEmail(username, username)
-                .orElse(null);
-        if (existingUser != null) {
-            boolean hasRole = existingUser.getRoles().stream()
-                    .anyMatch(existingRole -> existingRole.getRoleId().equals(role.getRoleId()));
-            if (!hasRole) {
-                existingUser.getRoles().add(role);
-                userRepository.save(existingUser);
-                log.info("Assigned role '{}' to existing dev user '{}'.", roleName, username);
-            }
-            return;
-        }
-
         User user = new User();
         user.setUsername(username);
-        user.setFullName(fullName);
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(rawPassword));
         user.setActive(true);

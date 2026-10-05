@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import AuthInput from './AuthInput';
 import SocialButtons from './SocialButtons';
-import { register } from '../../api/authApi';
 import './RegisterForm.css';
 
 /**
@@ -9,35 +8,24 @@ import './RegisterForm.css';
  */
 export default function RegisterForm({ onRegisterSuccess, onSwitchToLogin }) {
   const [username, setUsername] = useState('');
-  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notice, setNotice] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
 
   async function handleSubmit(event) {
     event.preventDefault();
     setIsSubmitting(true);
     setNotice(null);
-    setErrorMessage(null);
 
-    try {
-      await register({
-        username: username.trim(),
-        password,
-        fullName: fullName.trim(),
-        email: email.trim(),
-      });
-      setNotice('Account created successfully. You can now login.');
+    // Mock register flow or backend integration
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setNotice('Registration request submitted! Please login with your credentials.');
       setTimeout(() => {
         if (onSwitchToLogin) onSwitchToLogin();
       }, 1500);
-    } catch (err) {
-      setErrorMessage(err.message || 'Registration failed. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, 700);
   }
 
   return (
@@ -53,17 +41,6 @@ export default function RegisterForm({ onRegisterSuccess, onSwitchToLogin }) {
           onChange={(e) => setUsername(e.target.value)}
           required
           autoComplete="username"
-          icon="user"
-        />
-
-        <AuthInput
-          id="register-full-name"
-          type="text"
-          placeholder="Full name"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-          required
-          autoComplete="name"
           icon="user"
         />
 
@@ -85,7 +62,6 @@ export default function RegisterForm({ onRegisterSuccess, onSwitchToLogin }) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          minLength={8}
           autoComplete="new-password"
           icon="lock"
         />
@@ -96,11 +72,6 @@ export default function RegisterForm({ onRegisterSuccess, onSwitchToLogin }) {
           </div>
         )}
 
-        {errorMessage && (
-          <div className="register-info-alert" role="alert">
-            {errorMessage}
-          </div>
-        )}
         <button type="submit" className="register-submit-btn" disabled={isSubmitting}>
           {isSubmitting ? 'Registering…' : 'Register'}
         </button>

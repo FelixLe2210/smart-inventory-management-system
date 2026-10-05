@@ -2,10 +2,17 @@ package com.smartinventory.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-/** Login by username or email. */
+/**
+ * Body of {@code POST /api/auth/login}.
+ *
+ * <p>{@code usernameOrEmail} accepts either the username or the email so the frontend
+ * doesn't need to ask the user which one they're typing.
+ */
 public record LoginRequest(
+
         @NotBlank(message = "Username or email is required")
         String usernameOrEmail,
+
         @NotBlank(message = "Password is required")
         String password
 ) {

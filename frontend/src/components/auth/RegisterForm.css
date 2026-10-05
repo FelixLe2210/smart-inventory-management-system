@@ -65,19 +65,3 @@
   font-size: 13px;
   text-align: left;
 }
-
-@media (max-height: 560px) {
-  .register-form-container {
-    padding: 16px 36px;
-  }
-
-  .register-form-title {
-    font-size: 28px;
-    margin-bottom: 12px;
-  }
-
-  .register-submit-btn {
-    padding: 11px 20px;
-    margin-top: 6px;
-  }
-}

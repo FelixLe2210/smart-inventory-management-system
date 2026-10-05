@@ -1,69 +1,39 @@
 package com.smartinventory.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
-
-import java.time.LocalDateTime;
+import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "Users", schema = "dbo")
+@Table(name = "users")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "UserId")
-    private Integer userId;
+    private Long id;
 
-    @Column(name = "Username", nullable = false, length = 100, unique = true)
+    @Column(nullable = false, unique = true, length = 50)
     private String username;
 
-    @Column(name = "PasswordHash", nullable = false, length = 255)
-    private String passwordHash;
-
-    @Column(name = "FullName", nullable = false, length = 200)
-    private String fullName;
-
-    @Column(name = "Email", nullable = false, length = 200, unique = true)
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
 
-    @Column(name = "IsActive", nullable = false)
-    private boolean active = true;
+    @Column(name = "password_hash", nullable = false, length = 255)
+    private String passwordHash;
 
-    @Column(name = "CreatedAt", nullable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "is_active", nullable = false)
+    private Boolean active = true;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "UserRoles",
-            schema = "dbo",
-            joinColumns = @JoinColumn(name = "UserId"),
-            inverseJoinColumns = @JoinColumn(name = "RoleId")
+        name = "user_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
 
-    public User() {
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-    }
-
-    public Integer getUserId() {
-        return userId;
+    public Long getId() {
+        return id;
     }
 
     public String getUsername() {
@@ -74,22 +44,6 @@ public class User {
         this.username = username;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
     public String getEmail() {
         return email;
     }
@@ -98,16 +52,20 @@ public class User {
         this.email = email;
     }
 
-    public boolean isActive() {
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public Boolean getActive() {
         return active;
     }
 
-    public void setActive(boolean active) {
+    public void setActive(Boolean active) {
         this.active = active;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
     }
 
     public Set<Role> getRoles() {

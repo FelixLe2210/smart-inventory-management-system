@@ -26,7 +26,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-surface relative">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-surface relative p-4 py-8">
       {/* ── Container đăng nhập chính (Figma design: AuthContainer) ── */}
       <AuthContainer onLoginSuccess={handleLoginSuccess} />
     </div>

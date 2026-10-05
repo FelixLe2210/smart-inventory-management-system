@@ -47,18 +47,3 @@
 .social-icon-btn:active {
   transform: translateY(0);
 }
-
-@media (max-height: 560px) {
-  .social-auth-wrapper {
-    margin-top: 12px;
-  }
-
-  .social-auth-text {
-    margin-bottom: 8px;
-  }
-
-  .social-icon-btn {
-    width: 36px;
-    height: 36px;
-  }
-}

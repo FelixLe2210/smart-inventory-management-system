@@ -1,15 +1,5 @@
 import { httpClient } from './httpClient';
 
-export async function register({ username, password, fullName, email }) {
-  const envelope = await httpClient.post('/auth/register', {
-    username,
-    password,
-    fullName,
-    email,
-  });
-  return envelope.data;
-}
-
 /**
  * @param {string} usernameOrEmail
  * @param {string} password

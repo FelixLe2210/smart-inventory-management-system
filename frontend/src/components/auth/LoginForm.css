@@ -83,26 +83,3 @@
   line-height: 1.4;
 }
 
-@media (max-height: 560px) {
-  .login-form-container {
-    padding: 16px 36px;
-  }
-
-  .login-form-title {
-    font-size: 28px;
-    margin-bottom: 12px;
-  }
-
-  .login-form-container > p {
-    margin: 0 0 8px;
-  }
-
-  .forgot-password-link {
-    margin: 2px 0 10px 2px;
-  }
-
-  .login-submit-btn {
-    padding: 11px 20px;
-  }
-}
-

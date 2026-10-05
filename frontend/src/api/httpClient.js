@@ -35,8 +35,7 @@ httpClient.interceptors.response.use(
       return Promise.reject(
         new ApiClientError({
           code: apiError?.code || 'UNKNOWN_ERROR',
-          message: apiError?.message || (typeof apiError === 'string' ? apiError : null)
-            || body?.message || 'Something went wrong. Please try again.',
+          message: apiError?.message || 'Something went wrong. Please try again.',
           status: error.response.status,
           details: apiError?.details || null,
         })
