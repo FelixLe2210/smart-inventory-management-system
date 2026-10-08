@@ -289,3 +289,49 @@ git checkout phutrong
 > **Thời gian ước tính:** 5–10 phút  
 > **Người thực hiện:** Phú Trọng (chủ nhánh `phutrong`)  
 > **Người phê duyệt:** Nhóm trưởng (xác nhận trước bước 5)
+
+---
+
+### Kế hoạch & Lịch sử Đồng bộ Nhánh Sprint 4
+
+- **Thời gian đồng bộ:** 10:37 ngày 08/10/2026 (GMT+7)
+- **Nhánh thực hiện:**
+  - Nhánh chính của dự án: `master` (nhánh chính gốc trên remote repository)
+  - Nhánh làm việc nhận cập nhật: `phutrong`
+- **Trạng thái trước khi gộp:**
+  - Nhánh `phutrong` sạch sẽ (`working tree clean`), không có file uncommitted nên không cần commit backup thêm.
+- **Kết quả merge:**
+  - **Thành công hoàn toàn (Fast-forward)** từ commit `4e1373f` lên `8ec1545` (tổng cộng 14 commits mới nhất).
+  - **Xung đột (Conflict):** **0 conflict**. Không có xung đột mã nguồn.
+  - Cập nhật 36 files (bao gồm cấu hình Spring Security JWT, DTO & Controller Warehouse, migration Flyway V3/V4, các unit/integration test backend và tối ưu giao diện frontend).
+
+#### Danh sách các lệnh Git đã thực hiện:
+```bash
+# 1. Kiểm tra trạng thái làm việc trên nhánh phutrong
+git status
+git branch -a
+
+# 2. Lấy thông tin commit mới nhất từ toàn bộ các nhánh remote
+git fetch origin
+
+# 3. Chuyển sang nhánh chính (master) và kéo mã nguồn mới nhất về
+git checkout master
+git pull origin master
+
+# 4. Quay lại nhánh làm việc cá nhân (phutrong) và hợp nhất code từ nhánh chính
+git checkout phutrong
+git merge master
+```
+
+---
+
+## 🚀 SPRINT 4 — TIẾN ĐỘ THỰC HIỆN MILESTONE M1
+
+| ID | TV | Product Backlog / Card | Effort (h) | Type | Trạng thái | Nội dung đã triển khai |
+|:---:|:---:|:---|:---:|:---:|:---:|:---|
+| **Sprint4-01** | M1 | **Inventory Entity & Business Logic** | 6 | BE | ✅ Hoàn thành | Xây dựng Entity `Inventory` ánh xạ bảng `inventories`, tích hợp quan hệ `Product` & `Warehouse`, logic tính tồn kho khả dụng `availableStock = currentStock - reservedStock`, xác định cảnh báo tồn `LOW_STOCK`, `OUT_OF_STOCK`, `OVER_STOCK`. |
+| **Sprint4-02** | M1 | **Inventory API** | 5 | BE / API | ✅ Hoàn thành | Xây dựng REST API chuẩn hóa: `GET /api/inventories` (hỗ trợ lọc `productId`, `warehouseId`, `lowStock`), `GET /api/inventories/{id}`, `GET /api/inventories/product/{productId}/warehouse/{warehouseId}`, `GET /api/inventories/low-stock`, `POST /api/inventories`, `PUT /api/inventories/{id}`, `POST /api/inventories/{id}/adjust`. |
+| **Sprint4-03** | M1 | **Stock Validation Rules** | 3 | BE | ✅ Hoàn thành | Triển khai bộ quy tắc kiểm soát tồn kho chặt chẽ: Chống âm kho (`currentStock >= 0`, `reservedStock >= 0`), đảm bảo `reservedStock <= currentStock`, ngăn xuất kho vượt tồn khả dụng (`INSUFFICIENT_STOCK`), kiểm tra trạng thái kho (`WAREHOUSE_NOT_ACTIVE`), chống trùng lặp `(product, warehouse)`. |
+| **Sprint4-04** | M1 | **Inventory API Testing** | 3 | Testing | ✅ Hoàn thành | Viết bộ kiểm thử toàn diện: `InventoryServiceTest` (15/15 unit tests) & `InventoryControllerTest` (7/7 MockMvc tests). Toàn bộ hệ thống Backend đạt **63/63 tests PASS 100%**. Frontend build hoàn tất không lỗi. |
+
+
