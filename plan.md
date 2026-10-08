@@ -334,4 +334,33 @@ git merge master
 | **Sprint4-03** | M1 | **Stock Validation Rules** | 3 | BE | ✅ Hoàn thành | Triển khai bộ quy tắc kiểm soát tồn kho chặt chẽ: Chống âm kho (`currentStock >= 0`, `reservedStock >= 0`), đảm bảo `reservedStock <= currentStock`, ngăn xuất kho vượt tồn khả dụng (`INSUFFICIENT_STOCK`), kiểm tra trạng thái kho (`WAREHOUSE_NOT_ACTIVE`), chống trùng lặp `(product, warehouse)`. |
 | **Sprint4-04** | M1 | **Inventory API Testing** | 3 | Testing | ✅ Hoàn thành | Viết bộ kiểm thử toàn diện: `InventoryServiceTest` (15/15 unit tests) & `InventoryControllerTest` (7/7 MockMvc tests). Toàn bộ hệ thống Backend đạt **63/63 tests PASS 100%**. Frontend build hoàn tất không lỗi. |
 
+---
+
+### 📦 Lịch Sử Commit & Đồng Bộ Remote Nhánh `phutrong`
+
+- **Thời gian đẩy code:** 11:31 ngày 08/10/2026 (GMT+7)
+- **Mã commit (Commit SHA):** `a0e1573`
+- **Commit Message:** `feat(M1): implement Sprint 4 inventory entity, api, validation and tests`
+- **Nhánh đẩy:** `phutrong` ➔ `origin/phutrong`
+- **Chi tiết 11 files đã triển khai & đưa lên remote:**
+  1. [`Inventory.java`](file:///d:/smart-inventory-management-system/backend/src/main/java/com/smartinventory/model/Inventory.java) — Entity ánh xạ bảng `inventories`, tích hợp tính toán tồn khả dụng & trạng thái cảnh báo.
+  2. [`InventoryRepository.java`](file:///d:/smart-inventory-management-system/backend/src/main/java/com/smartinventory/repository/InventoryRepository.java) — Repository với truy vấn JOIN FETCH tối ưu.
+  3. [`InventoryResponse.java`](file:///d:/smart-inventory-management-system/backend/src/main/java/com/smartinventory/dto/InventoryResponse.java) — Record DTO phản hồi dữ liệu tồn kho đầy đủ.
+  4. [`InventoryCreateRequest.java`](file:///d:/smart-inventory-management-system/backend/src/main/java/com/smartinventory/dto/InventoryCreateRequest.java) — DTO tiếp nhận khởi tạo tồn kho ban đầu.
+  5. [`InventoryUpdateRequest.java`](file:///d:/smart-inventory-management-system/backend/src/main/java/com/smartinventory/dto/InventoryUpdateRequest.java) — DTO cập nhật vị trí/kiểm kê.
+  6. [`InventoryAdjustRequest.java`](file:///d:/smart-inventory-management-system/backend/src/main/java/com/smartinventory/dto/InventoryAdjustRequest.java) — DTO điều chỉnh kho (IN/OUT/SET/RESERVE/RELEASE).
+  7. [`InventoryService.java`](file:///d:/smart-inventory-management-system/backend/src/main/java/com/smartinventory/service/InventoryService.java) — Service xử lý business logic & toàn bộ Stock Validation Rules (chống âm kho, kiểm tra kho active).
+  8. [`InventoryController.java`](file:///d:/smart-inventory-management-system/backend/src/main/java/com/smartinventory/controller/InventoryController.java) — REST Controller đầy đủ endpoints chuẩn REST API.
+  9. [`InventoryServiceTest.java`](file:///d:/smart-inventory-management-system/backend/src/test/java/com/smartinventory/service/InventoryServiceTest.java) — 15 Unit tests nghiệp vụ và validation rules (100% PASS).
+  10. [`InventoryControllerTest.java`](file:///d:/smart-inventory-management-system/backend/src/test/java/com/smartinventory/controller/InventoryControllerTest.java) — 7 MockMvc tests cho API tồn kho (100% PASS).
+  11. [`plan.md`](file:///d:/smart-inventory-management-system/plan.md) — Tài liệu theo dõi kế hoạch, tiến độ M1 và lịch sử đồng bộ.
+
+#### Các lệnh Git đã chạy:
+```bash
+git add .
+git commit -m "feat(M1): implement Sprint 4 inventory entity, api, validation and tests"
+git push origin phutrong
+```
+
+
 
