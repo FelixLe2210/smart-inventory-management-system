@@ -6,6 +6,7 @@ import WarehousePage from './pages/warehouse/WarehousePage';
 import ProductPage from './pages/product/ProductPage';
 import CategoryPage from './pages/category/CategoryPage';
 import SupplierPage from './pages/supplier/SupplierPage';
+import InventoryPage from './pages/inventory/InventoryPage';
 
 /**
  * App – Router chính của Hệ thống Smart Inventory Management System for Demand Forecasting and Reorder Recommendation.
@@ -40,7 +41,7 @@ export default function App() {
 
             {/* Các phân hệ mở rộng theo kế hoạch Sprint sau */}
             <Route path="/dashboard" element={<PlaceholderPage title="Bàn làm việc (Dashboard)" icon="dashboard" />} />
-            <Route path="/inventory" element={<PlaceholderPage title="Kiểm kê & Tồn kho" icon="shelves" />} />
+            <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/inbound" element={<PlaceholderPage title="Phiếu Nhập kho (Inbound)" icon="move_to_inbox" />} />
             <Route path="/outbound" element={<PlaceholderPage title="Phiếu Xuất kho (Outbound)" icon="outbox" />} />
             <Route path="/reports" element={<PlaceholderPage title="Báo cáo & Phân tích" icon="monitoring" />} />

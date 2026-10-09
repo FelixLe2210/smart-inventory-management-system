@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 /**
  * StatusBadge – hiển thị trạng thái của kho với màu sắc tương ứng.
  */
@@ -205,6 +207,14 @@ export default function WarehouseTable({
   onPreview,
   onCopyCode,
 }) {
+  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(1);
+  const pageCount = Math.max(1, Math.ceil(warehouses.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pageWarehouses = warehouses.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const firstRow = warehouses.length ? (currentPage - 1) * pageSize + 1 : 0;
+  const lastRow = Math.min(currentPage * pageSize, warehouses.length);
+
   return (
     <div className="rounded-xl bg-surface-container-lowest shadow-sm overflow-hidden flex flex-col">
       <div className="overflow-x-auto w-full">
@@ -242,7 +252,7 @@ export default function WarehouseTable({
                 </td>
               </tr>
             ) : (
-              warehouses.map((w) => (
+              pageWarehouses.map((w) => (
                 <WarehouseTableRow
                   key={w.code}
                   warehouse={w}
@@ -263,12 +273,19 @@ export default function WarehouseTable({
       <div className="p-space-md bg-surface-container-lowest flex flex-col sm:flex-row sm:items-center sm:justify-between gap-space-md font-body-sm text-body-sm text-secondary">
         <div className="flex items-center gap-space-md">
           <span>
-            Hiển thị <strong>1 – {warehouses.length}</strong> trong tổng số{" "}
+          Hiển thị <strong>{firstRow} – {lastRow}</strong> trong tổng số{" "}
             <strong>{warehouses.length}</strong> chi nhánh kho
           </span>
           <div className="flex items-center gap-2">
             <span className="text-label-sm font-label-sm">Số dòng:</span>
-            <select className="h-8 px-2 bg-surface-container-low text-on-surface rounded text-label-sm font-label-sm outline-none cursor-pointer">
+          <select
+            className="h-8 px-2 bg-surface-container-low text-on-surface rounded text-label-sm font-label-sm outline-none cursor-pointer"
+            onChange={(event) => {
+              setPageSize(Number(event.target.value));
+              setPage(1);
+            }}
+            value={pageSize}
+          >
               <option value="10">10 dòng / trang</option>
               <option value="20">20 dòng / trang</option>
               <option value="50">50 dòng / trang</option>
@@ -279,18 +296,18 @@ export default function WarehouseTable({
         {/* Pagination */}
         <div className="flex items-center gap-1">
           <button
-            className="p-1.5 rounded bg-surface-container text-outline cursor-not-allowed flex items-center justify-center"
-            disabled
+            className={`p-1.5 rounded flex items-center justify-center ${currentPage <= 1 ? "bg-surface-container text-outline cursor-not-allowed" : "bg-surface-container text-on-surface hover:bg-surface-container-high"}`}
+            disabled={currentPage <= 1}
+            onClick={() => setPage(Math.max(1, currentPage - 1))}
             aria-label="Trang trước"
           >
             <span className="material-symbols-outlined text-[18px]">chevron_left</span>
           </button>
-          <button className="w-8 h-8 rounded bg-primary-container text-on-primary-container font-body-sm-medium flex items-center justify-center">
-            1
-          </button>
+          <span className="px-2 text-label-default text-on-surface">Trang {currentPage} / {pageCount}</span>
           <button
-            className="p-1.5 rounded bg-surface-container text-outline cursor-not-allowed flex items-center justify-center"
-            disabled
+            className={`p-1.5 rounded flex items-center justify-center ${currentPage >= pageCount ? "bg-surface-container text-outline cursor-not-allowed" : "bg-surface-container text-on-surface hover:bg-surface-container-high"}`}
+            disabled={currentPage >= pageCount}
+            onClick={() => setPage(Math.min(pageCount, currentPage + 1))}
             aria-label="Trang sau"
           >
             <span className="material-symbols-outlined text-[18px]">chevron_right</span>

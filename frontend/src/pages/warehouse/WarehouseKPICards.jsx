@@ -8,6 +8,7 @@ export default function WarehouseKPICards({ warehouses }) {
   const fillRate = totalCapacity ? ((totalUsed / totalCapacity) * 100).toFixed(1) : 0;
   const activeCount = warehouses.filter((w) => w.status === "active").length;
   const maintenanceCount = warehouses.filter((w) => w.status === "maintenance").length;
+  const inactiveCount = warehouses.filter((w) => w.status === "inactive").length;
   const totalArea = warehouses
     .reduce((s, w) => s + parseFloat(w.area?.replace(/[^0-9.]/g, "") || 0), 0)
     .toLocaleString("vi-VN");
@@ -87,25 +88,23 @@ export default function WarehouseKPICards({ warehouses }) {
         </div>
       </div>
 
-      {/* Card 4 – Hiệu suất */}
+      {/* Card 4 – Trạng thái kho */}
       <div className="p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
         <div className="absolute -right-3 -top-3 w-16 h-16 rounded-full bg-surface-container-high group-hover:scale-125 transition-transform flex items-center justify-center">
-          <span className="material-symbols-outlined text-primary text-[28px]">speed</span>
+          <span className="material-symbols-outlined text-primary text-[28px]">fact_check</span>
         </div>
         <div className="flex flex-col gap-1">
           <span className="font-label-default text-label-default text-secondary uppercase tracking-wider">
-            Hiệu suất vận hành kho
+            Trạng thái chi nhánh
           </span>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="font-display text-display text-on-surface font-bold">96.2%</span>
-            <span className="text-label-sm font-label-sm text-primary flex items-center gap-0.5">
-              <span className="material-symbols-outlined text-[14px]">trending_up</span> +1.8%
-            </span>
+            <span className="font-display text-display text-on-surface font-bold">{activeCount}</span>
+            <span className="font-label-default text-label-default text-secondary">đang hoạt động</span>
           </div>
         </div>
         <div className="mt-4 pt-3 flex items-center justify-between text-label-sm font-label-sm bg-surface-container-low px-2.5 py-1.5 rounded-lg">
-          <span className="text-secondary">Đơn hoàn tất đúng SLA</span>
-          <span className="font-body-sm-medium text-body-sm-medium text-on-surface">98.1% tuần này</span>
+          <span className="text-secondary">Bảo trì / ngưng hoạt động</span>
+          <span className="font-body-sm-medium text-body-sm-medium text-on-surface">{maintenanceCount} / {inactiveCount}</span>
         </div>
       </div>
     </div>
