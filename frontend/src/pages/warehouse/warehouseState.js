@@ -1,10 +1,10 @@
 /**
- * useWarehouse – quản lý toàn bộ state, API calls & logic cho trang Warehouse UI.
+ * useWarehouse – state, API calls & logic cho trang Warehouse UI.
  * Sprint3-13 (UI) + Sprint3-14 (API Integration) + Sprint3-15 (Validation & Error Handling).
  */
 import { useState, useCallback, useRef, useEffect } from "react";
-import { warehouseApi } from "../api/warehouseApi";
-import { ApiClientError } from "../api/ApiClientError";
+import { warehouseApi } from "../../api/warehouseApi";
+import { ApiClientError } from "../../api/ApiClientError";
 
 // ── Demo data for UI previews; the page loads persisted rows from the API. ──
 export const INITIAL_WAREHOUSES = [
@@ -235,8 +235,10 @@ export function useWarehouse() {
         throw new Error("Backend trả về danh sách kho không hợp lệ.");
       }
       setWarehouses(data.map((item, idx) => normalizeWarehouse(item, idx)));
+      return true;
     } catch (err) {
       showToast(err.message || "Không thể tải danh sách kho từ máy chủ.", "error");
+      return false;
     } finally {
       setIsLoading(false);
     }

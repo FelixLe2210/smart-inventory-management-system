@@ -11,9 +11,9 @@
  *   StatusConfirmModal.jsx   ← dialog xác nhận toggle trạng thái
  *   ToastNotification.jsx    ← thanh toast góc dưới phải
  *
- * Logic & state → src/hooks/useWarehouse.js
+ * Logic & state → warehouseState.js
  */
-import { useWarehouse } from "../../hooks/useWarehouse";
+import { useWarehouse } from "./warehouseState";
 import WarehouseKPICards from "./WarehouseKPICards";
 import WarehouseFilterBar from "./WarehouseFilterBar";
 import WarehouseTable from "./WarehouseTable";
@@ -50,9 +50,9 @@ export default function WarehousePage() {
             <span className="px-2 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container text-primary font-body-sm-medium">
               {hook.warehouses.length} chi nhánh
             </span>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container-low text-tertiary">
-              <span className="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse" />
-              Đồng bộ thời gian thực
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container-low text-secondary">
+              <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
+              Dữ liệu từ hệ thống
             </span>
           </div>
         </div>
@@ -63,8 +63,8 @@ export default function WarehousePage() {
             id="btn-refresh-data"
             className="flex items-center gap-1.5 px-3 py-2 bg-surface-container text-on-surface font-body-sm-medium text-body-sm-medium rounded-lg hover:bg-surface-container-high transition-colors"
             onClick={async () => {
-              await hook.fetchWarehouses();
-              hook.showToast("Đã cập nhật dữ liệu kho mới nhất", "sync");
+              const refreshed = await hook.fetchWarehouses();
+              if (refreshed) hook.showToast("Đã cập nhật dữ liệu kho mới nhất", "sync");
             }}
           >
             <span className={`material-symbols-outlined text-[18px] ${hook.isLoading ? "animate-spin" : ""}`}>sync</span>
