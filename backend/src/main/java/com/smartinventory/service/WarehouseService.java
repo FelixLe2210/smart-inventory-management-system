@@ -5,6 +5,7 @@ import com.smartinventory.dto.WarehouseResponse;
 import com.smartinventory.exception.ConflictException;
 import com.smartinventory.exception.NotFoundException;
 import com.smartinventory.model.Warehouse;
+import com.smartinventory.repository.InventoryRepository;
 import com.smartinventory.repository.WarehouseRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,9 +19,12 @@ import java.util.stream.Collectors;
 public class WarehouseService {
 
     private final WarehouseRepository warehouseRepository;
+    private final InventoryRepository inventoryRepository;
 
-    public WarehouseService(WarehouseRepository warehouseRepository) {
+    public WarehouseService(WarehouseRepository warehouseRepository,
+                            InventoryRepository inventoryRepository) {
         this.warehouseRepository = warehouseRepository;
+        this.inventoryRepository = inventoryRepository;
     }
 
     @Transactional(readOnly = true)
@@ -99,6 +103,11 @@ public class WarehouseService {
     public void deleteWarehouse(Long id) {
         if (!warehouseRepository.existsById(id)) {
             throw new NotFoundException("WAREHOUSE_NOT_FOUND", "Không tìm thấy kho với ID: " + id);
+        }
+        // Tích hợp Master Data - Inventory: kho đã phát sinh tồn kho thì không được xóa.
+        if (inventoryRepository.existsByWarehouseId(id)) {
+            throw new ConflictException("WAREHOUSE_HAS_INVENTORY",
+                    "Không thể xóa kho đã có dữ liệu tồn kho. Hãy chuyển trạng thái kho sang INACTIVE thay vì xóa");
         }
         warehouseRepository.deleteById(id);
     }

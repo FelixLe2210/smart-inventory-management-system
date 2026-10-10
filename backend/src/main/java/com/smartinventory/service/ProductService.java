@@ -9,6 +9,7 @@ import com.smartinventory.model.Category;
 import com.smartinventory.model.Product;
 import com.smartinventory.model.Supplier;
 import com.smartinventory.repository.CategoryRepository;
+import com.smartinventory.repository.InventoryRepository;
 import com.smartinventory.repository.ProductRepository;
 import com.smartinventory.repository.SupplierRepository;
 import org.springframework.stereotype.Service;
@@ -24,13 +25,16 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final SupplierRepository supplierRepository;
+    private final InventoryRepository inventoryRepository;
 
     public ProductService(ProductRepository productRepository,
                           CategoryRepository categoryRepository,
-                          SupplierRepository supplierRepository) {
+                          SupplierRepository supplierRepository,
+                          InventoryRepository inventoryRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.supplierRepository = supplierRepository;
+        this.inventoryRepository = inventoryRepository;
     }
 
     @Transactional(readOnly = true)
@@ -142,6 +146,11 @@ public class ProductService {
     public void deleteProduct(Long id) {
         if (!productRepository.existsById(id)) {
             throw new NotFoundException("PRODUCT_NOT_FOUND", "Không tìm thấy sản phẩm với ID: " + id);
+        }
+        // Tích hợp Master Data - Inventory: còn hàng tồn thì không được xóa (bản ghi tồn = 0 sẽ cascade theo FK).
+        if (inventoryRepository.existsByProductIdAndCurrentStockGreaterThan(id, 0)) {
+            throw new ConflictException("PRODUCT_HAS_STOCK",
+                    "Không thể xóa sản phẩm còn hàng tồn kho. Hãy chuyển sản phẩm sang INACTIVE thay vì xóa");
         }
         productRepository.deleteById(id);
     }

@@ -2,7 +2,9 @@ package com.smartinventory.service;
 
 import com.smartinventory.dto.WarehouseRequest;
 import com.smartinventory.dto.WarehouseResponse;
+import com.smartinventory.exception.ConflictException;
 import com.smartinventory.model.Warehouse;
+import com.smartinventory.repository.InventoryRepository;
 import com.smartinventory.repository.WarehouseRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -22,8 +25,32 @@ class WarehouseServiceTest {
     @Mock
     private WarehouseRepository warehouseRepository;
 
+    @Mock
+    private InventoryRepository inventoryRepository;
+
     @InjectMocks
     private WarehouseService warehouseService;
+
+    @Test
+    void deleteWarehouseIsBlockedWhenInventoryExists() {
+        when(warehouseRepository.existsById(1L)).thenReturn(true);
+        when(inventoryRepository.existsByWarehouseId(1L)).thenReturn(true);
+
+        ConflictException ex = assertThrows(ConflictException.class, () -> warehouseService.deleteWarehouse(1L));
+
+        assertEquals("WAREHOUSE_HAS_INVENTORY", ex.getCode());
+        verify(warehouseRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void deleteWarehouseSucceedsWhenNoInventory() {
+        when(warehouseRepository.existsById(1L)).thenReturn(true);
+        when(inventoryRepository.existsByWarehouseId(1L)).thenReturn(false);
+
+        warehouseService.deleteWarehouse(1L);
+
+        verify(warehouseRepository).deleteById(1L);
+    }
 
     @Test
     void createWarehousePersistsAndReturnsExtendedWarehouseDetails() {

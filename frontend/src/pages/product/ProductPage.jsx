@@ -569,6 +569,13 @@ export default function ProductPage() {
                         </td>
                         <td className="py-3 px-4 text-right">
                           <div className="inline-flex items-center gap-1 justify-end">
+                            <Link
+                              to={`/inventory?productId=${prod.id}`}
+                              title="Xem tồn kho của sản phẩm"
+                              className="p-1.5 rounded-lg text-secondary hover:text-primary hover:bg-surface-container-high transition-colors"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">shelves</span>
+                            </Link>
                             <button
                               onClick={() => openEditModal(prod)}
                               title="Chỉnh sửa sản phẩm"
