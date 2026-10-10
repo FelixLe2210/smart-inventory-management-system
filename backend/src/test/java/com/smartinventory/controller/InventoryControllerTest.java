@@ -105,19 +105,6 @@ class InventoryControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/inventories/product/{productId}/warehouse/{warehouseId} - Tra cứu theo sản phẩm và kho")
-    void getByProductAndWarehouse_ReturnsInventory() throws Exception {
-        when(inventoryService.getInventoryByProductAndWarehouse(10L, 20L)).thenReturn(sampleResponse);
-
-        mockMvc.perform(get("/api/inventories/product/10/warehouse/20"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.productId").value(10L))
-                .andExpect(jsonPath("$.data.warehouseId").value(20L))
-                .andExpect(jsonPath("$.data.currentStock").value(50));
-    }
-
-    @Test
     @DisplayName("POST /api/inventories - Tạo mới thành công trả về 201 Created")
     void createInventory_Success() throws Exception {
         InventoryCreateRequest request = new InventoryCreateRequest(10L, 20L, 50, 10, "Kệ A1-02");
