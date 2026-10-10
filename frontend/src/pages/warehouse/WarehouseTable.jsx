@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 /**
  * StatusBadge – hiển thị trạng thái của kho với màu sắc tương ứng.
  */
@@ -172,6 +174,15 @@ function WarehouseTableRow({ warehouse, isSelected, onSelect, onToggleStatus, on
           >
             <span className="material-symbols-outlined text-[18px]">edit_square</span>
           </button>
+          {warehouse.id != null && (
+            <Link
+              to={`/inventory?warehouseId=${warehouse.id}`}
+              className="p-1 rounded text-secondary hover:text-primary hover:bg-surface-container-high transition-colors"
+              title="Xem tồn kho của kho này"
+            >
+              <span className="material-symbols-outlined text-[18px]">shelves</span>
+            </Link>
+          )}
           <button
             className="p-1 rounded text-secondary hover:text-primary hover:bg-surface-container-high transition-colors"
             onClick={() => onPreview(code)}

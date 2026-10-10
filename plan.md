@@ -1,3 +1,16 @@
+# 📦 SPRINT 4 — PHẦN M4 (Inventory)
+
+| Mã thẻ | Hạng mục | Trạng thái | Triển khai |
+|:---:|---|:---:|---|
+| Sprint4-13 | Stock Status UI | ✅ | `StockStatusBadge`, `InventoryKPICards`, `InventoryTable` (In Stock / Low / Out of Stock, thêm Over Stock) |
+| Sprint4-14 | Inventory Filtering | ✅ | `InventoryFilterBar`: lọc kho / sản phẩm / trạng thái / từ khóa, đồng bộ URL |
+| Sprint4-15 | Inventory Integration | ✅ | Trang `/inventory` nối `/api/inventories` (+ `/adjust`); chặn xóa Product/Warehouse đã có tồn; liên kết từ trang Sản phẩm, Kho |
+| Sprint4-16 | Inventory E2E Testing | ✅ | `InventoryEndToEndFlowTest`, test frontend, `docs/api/inventory-e2e.mjs`, `docs/api/INVENTORY_TESTING.md` |
+
+Chi tiết: `docs/api/INVENTORY_TESTING.md`.
+
+---
+
 # 📋 KẾ HOẠCH & BÁO CÁO TOÀN DIỆN — SPRINT 3 (MILESTONE M1 – M4)
 
 > **Tên dự án chính thức:** **Smart Inventory Management System for Demand Forecasting and Reorder Recommendation**  

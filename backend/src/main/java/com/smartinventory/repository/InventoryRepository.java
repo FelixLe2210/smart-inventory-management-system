@@ -20,6 +20,12 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
     boolean existsByProductIdAndWarehouseId(Long productId, Long warehouseId);
 
+    /** Sprint4-15: kho đã có bản ghi tồn kho thì không được xóa (FK warehouse không cascade). */
+    boolean existsByWarehouseId(Long warehouseId);
+
+    /** Sprint4-15: sản phẩm còn hàng tồn ở bất kỳ kho nào thì không được xóa. */
+    boolean existsByProductIdAndCurrentStockGreaterThan(Long productId, Integer stock);
+
     @Query("SELECT i FROM Inventory i JOIN FETCH i.product p JOIN FETCH i.warehouse w WHERE p.id = :productId")
     List<Inventory> findByProductId(@Param("productId") Long productId);
 
