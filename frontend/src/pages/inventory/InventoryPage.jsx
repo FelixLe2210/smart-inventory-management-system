@@ -5,6 +5,7 @@ import InventoryKPICards from './InventoryKPICards';
 import InventoryFilterBar from './InventoryFilterBar';
 import InventoryTable from './InventoryTable';
 import InventoryModal from './InventoryModal';
+import InventoryDetailModal from './InventoryDetailModal';
 
 /**
  * InventoryPage – Tồn kho theo Sản phẩm x Kho (/inventory).
@@ -79,6 +80,7 @@ export default function InventoryPage() {
           total={inv.summary.totalItems}
           isLoading={inv.isLoading}
           loadError={inv.loadError}
+          onView={inv.openDetail}
           onAdjust={inv.openAdjustModal}
           onEditLocation={inv.openLocationModal}
           onRetry={inv.fetchInventory}
@@ -91,6 +93,15 @@ export default function InventoryPage() {
         products={inv.products} warehouses={inv.warehouses}
         onClose={inv.closeModal} onSave={inv.saveModal}
       />
+
+      {inv.detailItem && (
+        <InventoryDetailModal
+          inventory={inv.detailItem}
+          onClose={inv.closeDetail}
+          onAdjust={inv.adjustFromDetail}
+          isSaving={inv.isSaving}
+        />
+      )}
 
       <ToastNotification visible={inv.toast.visible} text={inv.toast.text} icon={inv.toast.icon} />
     </div>
