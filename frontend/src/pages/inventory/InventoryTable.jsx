@@ -33,7 +33,7 @@ function StockBar({ item }) {
 }
 
 /** Bảng tồn kho (Sprint4-13). */
-export default function InventoryTable({ items, total, isLoading, loadError, onAdjust, onEditLocation, onRetry }) {
+export default function InventoryTable({ items, total, isLoading, loadError, onView, onAdjust, onEditLocation, onRetry }) {
   return (
     <div className="rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant overflow-hidden flex flex-col">
       <div className="overflow-x-auto w-full">
@@ -47,7 +47,7 @@ export default function InventoryTable({ items, total, isLoading, loadError, onA
               <th className="py-3 px-4 min-w-[110px]">Vị trí</th>
               <th className="py-3 px-4 min-w-[140px]">Trạng thái tồn</th>
               <th className="py-3 px-4 min-w-[130px]">Cập nhật</th>
-              <th className="py-3 px-4 text-right min-w-[90px]">Thao tác</th>
+              <th className="py-3 px-4 text-right min-w-[120px]">Thao tác</th>
             </tr>
           </thead>
           <tbody className="font-body-sm text-body-sm text-on-surface divide-y divide-outline-variant/30">
@@ -103,6 +103,14 @@ export default function InventoryTable({ items, total, isLoading, loadError, onA
                   <td className="py-3 px-4 text-[12px] text-secondary">{fmtDate(it.updatedAt)}</td>
                   <td className="py-3 px-4 text-right">
                     <div className="inline-flex items-center gap-1 justify-end">
+                      <button
+                        type="button"
+                        onClick={() => onView(it)}
+                        title="Xem chi tiết tồn kho"
+                        className="p-1.5 rounded-lg text-secondary hover:text-primary hover:bg-surface-container-high transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">visibility</span>
+                      </button>
                       <button
                         type="button"
                         onClick={() => onAdjust(it)}

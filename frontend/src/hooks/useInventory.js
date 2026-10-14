@@ -51,6 +51,9 @@ export function useInventory() {
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
 
+  // ── Chi tiết tồn kho (InventoryDetailModal – Sprint4-11) ─────────────
+  const [detailId, setDetailId] = useState(null);
+
   // ── Toast ────────────────────────────────────────────────────────────
   const [toast, setToast] = useState({ visible: false, text: '', icon: 'check_circle' });
   const toastTimer = useRef(null);
@@ -113,6 +116,8 @@ export function useInventory() {
   // ── Dữ liệu hiển thị ─────────────────────────────────────────────────
   const summary = useMemo(() => summarize(rows), [rows]);
   const items = useMemo(() => filterInventory(rows, filterStatus, search), [rows, filterStatus, search]);
+  // Lấy lại dòng từ danh sách mới nhất để số liệu trong modal chi tiết tự cập nhật sau khi điều chỉnh
+  const detailItem = useMemo(() => rows.find((r) => r.id === detailId) || null, [rows, detailId]);
 
   const hasActiveFilter =
     filterWarehouse !== 'all' || filterProduct !== 'all' || filterStatus !== 'all' || !!search;
@@ -255,6 +260,21 @@ export function useInventory() {
     }
   }, [form, modal, closeModal, fetchInventory, showToast, applyApiError]);
 
+  const openDetail = useCallback((item) => setDetailId(item.id), []);
+  const closeDetail = useCallback(() => setDetailId(null), []);
+
+  /** Điều chỉnh từ modal chi tiết. Không bắt lỗi ở đây: để lỗi nổi lên cho modal tự hiển thị (err.message). */
+  const adjustFromDetail = useCallback(async (id, payload) => {
+    setIsSaving(true);
+    try {
+      await inventoryApi.adjust(id, payload);
+      await fetchInventory();
+      showToast('Đã điều chỉnh tồn kho', 'check_circle');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [fetchInventory, showToast]);
+
   const saveModal = useCallback(() => {
     if (modal.mode === 'add') return saveAdd();
     if (modal.mode === 'adjust') return saveAdjust();
@@ -273,6 +293,8 @@ export function useInventory() {
     // modal
     modal, form, setForm, errors, isSaving,
     openAddModal, openAdjustModal, openLocationModal, closeModal, saveModal,
+    // detail
+    detailItem, openDetail, closeDetail, adjustFromDetail,
     // toast
     toast, showToast,
   };
