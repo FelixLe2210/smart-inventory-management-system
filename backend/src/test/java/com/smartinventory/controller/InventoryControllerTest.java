@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartinventory.dto.InventoryAdjustRequest;
 import com.smartinventory.dto.InventoryCreateRequest;
 import com.smartinventory.dto.InventoryResponse;
+import com.smartinventory.dto.InventoryTransferRequest;
 import com.smartinventory.dto.InventoryUpdateRequest;
 import com.smartinventory.exception.BadRequestException;
 import com.smartinventory.exception.NotFoundException;
@@ -175,5 +176,55 @@ class InventoryControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error.code").value("INSUFFICIENT_STOCK"));
+    }
+
+    @Test
+    @DisplayName("POST /api/inventories/{id}/adjust - Từ chối transaction type không hỗ trợ")
+    void adjustStock_InvalidType_ReturnsValidationError() throws Exception {
+        String invalidJson = """
+                {
+                    "adjustmentType": "TRANSFER",
+                    "quantity": 5
+                }
+                """;
+
+        mockMvc.perform(post("/api/inventories/1/adjust")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    @DisplayName("POST /api/inventories/{id}/transfer - Chuyển kho thành công")
+    void transferStock_Success() throws Exception {
+        InventoryTransferRequest request = new InventoryTransferRequest(21L, 5, "Điều chuyển", "DC-01");
+        when(inventoryService.transferStock(eq(1L), any(InventoryTransferRequest.class))).thenReturn(sampleResponse);
+
+        mockMvc.perform(post("/api/inventories/1/transfer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.currentStock").value(50));
+    }
+
+    @Test
+    @DisplayName("POST /api/inventories/{id}/transfer - Từ chối quantity không dương")
+    void transferStock_InvalidQuantity_Returns400() throws Exception {
+        String invalidJson = """
+                {
+                    "destinationWarehouseId": 21,
+                    "quantity": 0
+                }
+                """;
+
+        mockMvc.perform(post("/api/inventories/1/transfer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
     }
 }
