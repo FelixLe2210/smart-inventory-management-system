@@ -375,5 +375,16 @@ git commit -m "feat(M1): implement Sprint 4 inventory entity, api, validation an
 git push origin phutrong
 ```
 
+---
+
+## 🚀 SPRINT 5 — TIẾN ĐỘ THỰC HIỆN MILESTONE M3 (Frontend Stock Movement)
+
+| STT | Mã Thẻ | Milestone | Tên Card / Hạng mục | Effort | Phân loại | Trạng thái | Chi tiết triển khai |
+|:---:|:------:|:---------:|----------------------|:------:|:---------:|:----------:|:--------------------|
+| 1 | **Sprint5-09** | M3 | **Receiving UI** | 5h | FE | ✅ Hoàn thành | Giao diện Nhập kho (`/inbound`): Form nhập hàng, chọn kho & sản phẩm, tự khởi tạo tồn kho nếu sản phẩm chưa có ở kho, xem trước tồn kho sau nhập, bảng đối soát phiên làm việc `RecentMovements.jsx`. |
+| 2 | **Sprint5-10** | M3 | **Issuing UI** | 5h | FE | ✅ Hoàn thành | Giao diện Xuất kho (`/outbound`): Form xuất kho, validation chống xuất vượt tồn khả dụng (`availableStock`), cảnh báo trạng thái kho không ACTIVE, mô phỏng tồn giảm tức thì. |
+| 3 | **Sprint5-11** | M3 | **Transaction History UI** | 4h | FE | ✅ Hoàn thành | Màn hình Lịch sử Giao dịch (`/transactions`) & Tab Lịch sử trong `InventoryDetailModal`: Bộ lọc đa tiêu chí (Loại GD, Kho, Sản phẩm, Từ khóa), phân loại Badge màu cho `RECEIVING`, `ISSUING`, `TRANSFER_IN`, `TRANSFER_OUT`, `ADJUSTMENT`. Tương thích liền mạch với backend Sprint 5 M1. |
+| 4 | **Sprint5-12** | M3 | **Receiving/Issuing API Integration** | 4h | FE / Int | ✅ Hoàn thành | Bổ sung `receive()`, `issue()`, `getTransactions()` trong `inventoryApi.js`; hook điều phối `useStockMovement.js` & `useTransactionHistory.js`; xử lý lỗi chi tiết tiếng Việt và thông báo Toast; bổ sung route & thanh điều hướng `AppSidebar`. 9/9 Node tests PASS 100%, Vite Build thành công. |
+
 
 

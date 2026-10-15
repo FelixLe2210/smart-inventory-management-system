@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { inventoryApi } from '../../api/inventoryApi';
+import TransactionTypeBadge from '../../components/inventory/TransactionTypeBadge';
 
 const ADJUSTMENT_TYPES = [
   { value: 'IN', label: 'Nhập kho', icon: 'south_west' },
@@ -17,12 +19,36 @@ function formatDate(value) {
 }
 
 export default function InventoryDetailModal({ inventory, onClose, onAdjust, isSaving }) {
+  const [activeTab, setActiveTab] = useState('detail'); // 'detail' | 'transactions'
+  const [transactions, setTransactions] = useState([]);
+  const [isLoadingTxns, setIsLoadingTxns] = useState(false);
+  const [hasTxnApi, setHasTxnApi] = useState(true);
+
   const [adjustmentType, setAdjustmentType] = useState('IN');
   const [quantity, setQuantity] = useState('');
   const [reason, setReason] = useState('');
   const [referenceDoc, setReferenceDoc] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    if (activeTab === 'transactions' && inventory?.id) {
+      setIsLoadingTxns(true);
+      inventoryApi
+        .getTransactions(inventory.id)
+        .then((data) => {
+          setTransactions(Array.isArray(data) ? data : []);
+          setHasTxnApi(true);
+        })
+        .catch((err) => {
+          if (err?.status === 404 || err?.status === 501) {
+            setHasTxnApi(false);
+          }
+          setTransactions([]);
+        })
+        .finally(() => setIsLoadingTxns(false));
+    }
+  }, [activeTab, inventory?.id]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -76,27 +102,120 @@ export default function InventoryDetailModal({ inventory, onClose, onAdjust, isS
         className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl bg-surface-container-lowest shadow-2xl"
         role="dialog"
       >
-        <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-outline-variant bg-surface-container-lowest px-6 py-5">
-          <div>
-            <p className="font-code-mono text-code-mono font-semibold text-primary">{inventory.productSku}</p>
-            <h2 id="inventory-detail-title" className="mt-1 font-headline-md text-headline-md text-on-surface">
-              {inventory.productName}
-            </h2>
-            <p className="mt-1 text-body-sm text-secondary">
-              {inventory.warehouseCode} · {inventory.warehouseName}
-            </p>
+        <header className="sticky top-0 z-10 flex flex-col border-b border-outline-variant bg-surface-container-lowest px-6 pt-5">
+          <div className="flex items-start justify-between gap-4 pb-4">
+            <div>
+              <p className="font-code-mono text-code-mono font-semibold text-primary">{inventory.productSku}</p>
+              <h2 id="inventory-detail-title" className="mt-1 font-headline-md text-headline-md text-on-surface">
+                {inventory.productName}
+              </h2>
+              <p className="mt-1 text-body-sm text-secondary">
+                {inventory.warehouseCode} · {inventory.warehouseName}
+              </p>
+            </div>
+            <button
+              aria-label="Đóng chi tiết"
+              className="rounded-lg p-2 text-secondary hover:bg-surface-container-high"
+              onClick={onClose}
+              type="button"
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
           </div>
-          <button
-            aria-label="Đóng chi tiết"
-            className="rounded-lg p-2 text-secondary hover:bg-surface-container-high"
-            onClick={onClose}
-            type="button"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
+
+          {/* Navigation Tabs */}
+          <div className="flex items-center gap-6">
+            <button
+              type="button"
+              onClick={() => setActiveTab('detail')}
+              className={`pb-3 font-body-sm-medium text-body-sm-medium flex items-center gap-1.5 border-b-2 transition-colors ${
+                activeTab === 'detail'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-secondary hover:text-on-surface'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">info</span>
+              <span>Thông tin & Điều chỉnh</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('transactions')}
+              className={`pb-3 font-body-sm-medium text-body-sm-medium flex items-center gap-1.5 border-b-2 transition-colors ${
+                activeTab === 'transactions'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-secondary hover:text-on-surface'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+              <span>Lịch sử giao dịch biến động</span>
+            </button>
+          </div>
         </header>
 
-        <div className="grid gap-6 p-6 lg:grid-cols-[1fr_1fr]">
+        {activeTab === 'transactions' ? (
+          <div className="p-6">
+            {!hasTxnApi && (
+              <div className="p-4 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 mb-4 flex items-center gap-2">
+                <span className="material-symbols-outlined text-amber-600">info</span>
+                <span className="text-body-sm">
+                  Backend API {'GET /api/inventories/' + inventory.id + '/transactions'} đang được đồng bộ ở nhánh Sprint 5 M1.
+                </span>
+              </div>
+            )}
+
+            {isLoadingTxns ? (
+              <div className="py-12 text-center text-secondary">
+                <span className="material-symbols-outlined text-[28px] animate-spin text-primary">progress_activity</span>
+                <p className="mt-2 text-body-sm">Đang nạp nhật ký giao dịch...</p>
+              </div>
+            ) : transactions.length === 0 ? (
+              <div className="py-12 text-center text-secondary">
+                <span className="material-symbols-outlined text-[36px] opacity-60">receipt_long</span>
+                <p className="mt-2 font-body-sm-medium text-on-surface">Chưa có giao dịch ghi nhận cho dòng tồn này</p>
+                <p className="mt-1 text-label-sm">Các thao tác Nhập/Xuất kho sẽ lưu vết lịch sử tự động tại đây.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto divide-y divide-outline-variant/30 border border-outline-variant rounded-xl">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-surface-container-low text-secondary font-label-default text-label-default uppercase">
+                      <th className="py-2.5 px-3">Mã GD</th>
+                      <th className="py-2.5 px-3">Loại</th>
+                      <th className="py-2.5 px-3">Số lượng</th>
+                      <th className="py-2.5 px-3">Trước ➔ Sau</th>
+                      <th className="py-2.5 px-3">Chứng từ</th>
+                      <th className="py-2.5 px-3">Thời gian</th>
+                    </tr>
+                  </thead>
+                  <tbody className="font-body-sm text-body-sm divide-y divide-outline-variant/20">
+                    {transactions.map((tx) => (
+                      <tr key={tx.id || tx.transactionCode}>
+                        <td className="py-2.5 px-3 font-code-mono text-primary font-bold text-[12px]">{tx.transactionCode}</td>
+                        <td className="py-2.5 px-3">
+                          <TransactionTypeBadge type={tx.transactionType} size="sm" />
+                        </td>
+                        <td className="py-2.5 px-3 font-code-mono font-bold">
+                          {tx.quantity}
+                        </td>
+                        <td className="py-2.5 px-3 font-code-mono text-secondary text-[12px]">
+                          {tx.balanceBefore} ➔ {tx.balanceAfter}
+                        </td>
+                        <td className="py-2.5 px-3 font-code-mono text-secondary text-[12px]">
+                          {tx.referenceDoc || '---'}
+                        </td>
+                        <td className="py-2.5 px-3 font-code-mono text-secondary text-[12px]">
+                          {formatDate(tx.createdAt)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="grid gap-6 p-6 lg:grid-cols-[1fr_1fr]">
           <div className="space-y-5">
             <div className="grid grid-cols-3 gap-3">
               {[
@@ -193,6 +312,7 @@ export default function InventoryDetailModal({ inventory, onClose, onAdjust, isS
             </button>
           </form>
         </div>
+        )}
       </section>
     </div>
   );

@@ -52,4 +52,32 @@ export const inventoryApi = {
     const res = await httpClient.post(`/inventories/${id}/adjust`, data);
     return res.data;
   },
+
+  /**
+   * Nhập kho (Receiving) - bọc quanh adjustType = IN
+   * @param {number|string} id Inventory ID
+   * @param {{quantity:number, reason?:string, referenceDoc?:string}} data
+   */
+  async receive(id, data) {
+    return this.adjust(id, { ...data, adjustmentType: 'IN' });
+  },
+
+  /**
+   * Xuất kho (Issuing) - bọc quanh adjustType = OUT
+   * @param {number|string} id Inventory ID
+   * @param {{quantity:number, reason?:string, referenceDoc?:string}} data
+   */
+  async issue(id, data) {
+    return this.adjust(id, { ...data, adjustmentType: 'OUT' });
+  },
+
+  /**
+   * Lịch sử giao dịch biến động kho của bản ghi tồn kho
+   * @param {number|string} id Inventory ID
+   * @returns {Promise<Array>}
+   */
+  async getTransactions(id) {
+    const res = await httpClient.get(`/inventories/${id}/transactions`);
+    return res.data;
+  },
 };

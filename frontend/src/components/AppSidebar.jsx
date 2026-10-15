@@ -190,6 +190,20 @@ export default function AppSidebar() {
           </NavLink>
 
           <NavLink
+            to="/transactions"
+            className={({ isActive }) =>
+              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
+                isActive
+                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
+                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
+              }`
+            }
+          >
+            <span className="material-symbols-outlined text-[20px]">receipt_long</span>
+            <span>Lịch sử giao dịch kho</span>
+          </NavLink>
+
+          <NavLink
             to="/reports"
             className={({ isActive }) =>
               `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
