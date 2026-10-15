@@ -6,12 +6,15 @@ import com.smartinventory.exception.ConflictException;
 import com.smartinventory.model.Category;
 import com.smartinventory.model.Inventory;
 import com.smartinventory.model.Product;
+import com.smartinventory.model.User;
 import com.smartinventory.model.Warehouse;
 import com.smartinventory.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -45,6 +48,8 @@ class InventoryEndToEndFlowTest {
         ProductRepository productRepo = mock(ProductRepository.class);
         WarehouseRepository warehouseRepo = mock(WarehouseRepository.class);
         InventoryRepository inventoryRepo = mock(InventoryRepository.class);
+        InventoryTransactionRepository transactionRepo = mock(InventoryTransactionRepository.class);
+        UserRepository userRepo = mock(UserRepository.class);
         CategoryRepository categoryRepo = mock(CategoryRepository.class);
         SupplierRepository supplierRepo = mock(SupplierRepository.class);
 
@@ -52,6 +57,13 @@ class InventoryEndToEndFlowTest {
         ReflectionTestUtils.setField(category, "id", 1L);
         category.setName("Điện tử");
         when(categoryRepo.findById(1L)).thenReturn(Optional.of(category));
+
+        User actor = new User();
+        ReflectionTestUtils.setField(actor, "id", 1L);
+        actor.setUsername("e2e-user");
+        when(userRepo.findByUsername("e2e-user")).thenReturn(Optional.of(actor));
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("e2e-user", null, List.of()));
 
         // Product
         when(productRepo.save(any(Product.class))).thenAnswer(i -> store(products, i.getArgument(0)));
@@ -71,6 +83,7 @@ class InventoryEndToEndFlowTest {
         // Warehouse
         when(warehouseRepo.save(any(Warehouse.class))).thenAnswer(i -> store(warehouses, i.getArgument(0)));
         when(warehouseRepo.findById(anyLong())).thenAnswer(i -> Optional.ofNullable(warehouses.get(i.<Long>getArgument(0))));
+        when(warehouseRepo.findByIdForUpdate(anyLong())).thenAnswer(i -> Optional.ofNullable(warehouses.get(i.<Long>getArgument(0))));
         when(warehouseRepo.existsById(anyLong())).thenAnswer(i -> warehouses.containsKey(i.<Long>getArgument(0)));
         when(warehouseRepo.existsByCode(any())).thenReturn(false);
         doAnswer(i -> warehouses.remove(i.<Long>getArgument(0))).when(warehouseRepo).deleteById(anyLong());
@@ -78,12 +91,17 @@ class InventoryEndToEndFlowTest {
         // Inventory (mô phỏng các truy vấn theo khóa ngoại)
         when(inventoryRepo.save(any(Inventory.class))).thenAnswer(i -> store(inventories, i.getArgument(0)));
         when(inventoryRepo.findByIdWithDetails(anyLong())).thenAnswer(i -> Optional.ofNullable(inventories.get(i.<Long>getArgument(0))));
+        when(inventoryRepo.findByIdWithDetailsForUpdate(anyLong())).thenAnswer(i -> Optional.ofNullable(inventories.get(i.<Long>getArgument(0))));
         when(inventoryRepo.findAllWithDetails()).thenAnswer(i -> new ArrayList<>(inventories.values()));
         when(inventoryRepo.findByProductId(anyLong())).thenAnswer(i ->
                 inventories.values().stream().filter(v -> v.getProduct().getId().equals(i.<Long>getArgument(0))).toList());
         when(inventoryRepo.findByWarehouseId(anyLong())).thenAnswer(i ->
                 inventories.values().stream().filter(v -> v.getWarehouse().getId().equals(i.<Long>getArgument(0))).toList());
         when(inventoryRepo.findByProductIdAndWarehouseId(anyLong(), anyLong())).thenAnswer(i ->
+                inventories.values().stream().filter(v ->
+                        v.getProduct().getId().equals(i.<Long>getArgument(0))
+                                && v.getWarehouse().getId().equals(i.<Long>getArgument(1))).findFirst());
+        when(inventoryRepo.findByProductIdAndWarehouseIdForUpdate(anyLong(), anyLong())).thenAnswer(i ->
                 inventories.values().stream().filter(v ->
                         v.getProduct().getId().equals(i.<Long>getArgument(0))
                                 && v.getWarehouse().getId().equals(i.<Long>getArgument(1))).findFirst());
@@ -100,7 +118,7 @@ class InventoryEndToEndFlowTest {
 
         productService = new ProductService(productRepo, categoryRepo, supplierRepo, inventoryRepo);
         warehouseService = new WarehouseService(warehouseRepo, inventoryRepo);
-        inventoryService = new InventoryService(inventoryRepo, productRepo, warehouseRepo);
+        inventoryService = new InventoryService(inventoryRepo, transactionRepo, productRepo, warehouseRepo, userRepo);
     }
 
     private <T> T store(Map<Long, T> map, T entity) {

@@ -24,8 +24,18 @@ Do backend (`Inventory.getStockStatus()`) tính từ `currentStock` và `minStoc
 | POST | `/api/inventories` | `{productId, warehouseId, initialStock?, reservedStock?, locationInWarehouse?}` |
 | PUT | `/api/inventories/{id}` | Chỉ đổi `locationInWarehouse`, `lastStockCountAt` |
 | POST | `/api/inventories/{id}/adjust` | `{adjustmentType: IN\|OUT\|SET\|RESERVE\|RELEASE, quantity, reason?, referenceDoc?}` |
+| POST | `/api/inventories/{id}/transfer` | `{destinationWarehouseId, quantity, reason?, referenceDoc?}` |
+| GET | `/api/inventories/{id}/transactions` | Lịch sử giao dịch của sản phẩm tại kho này |
 
 Lọc theo **trạng thái** và **từ khóa**, cùng các thẻ KPI, được thực hiện ở frontend (`src/utils/inventoryFilters.js`) trên danh sách đã tải theo kho / sản phẩm.
+
+### Nghiệp vụ giao dịch tồn kho
+
+- `IN` tăng tồn và ghi `RECEIVING`; `OUT` trừ tồn khả dụng (tồn hiện tại trừ lượng giữ chỗ) và ghi `ISSUING`. `SET` ghi `ADJUSTMENT`; loại điều chỉnh không hợp lệ bị từ chối.
+- Chuyển kho yêu cầu số lượng dương, kho nguồn và kho đích khác nhau, sản phẩm và hai kho đang `ACTIVE`, và đủ tồn khả dụng tại kho nguồn.
+- Nếu sản phẩm chưa có bản ghi tồn tại kho đích, backend tạo bản ghi với `currentStock=0`, `reservedStock=0` rồi cộng lượng chuyển đến. Kho nguồn/đích được khóa theo thứ tự ID để tránh mất cập nhật đồng thời.
+- Nhập, xuất, điều chỉnh vật lý, tồn ban đầu (nếu > 0) và chuyển kho ghi lịch sử cùng database transaction với số tồn. Chuyển kho ghi cặp `TRANSFER_OUT`/`TRANSFER_IN`; lỗi ở một bước rollback toàn bộ.
+- Giao dịch yêu cầu JWT hợp lệ; `created_by` lấy từ người dùng đã xác thực. Quyền theo kho/vai trò chi tiết chưa được mô hình hóa trong backend hiện tại.
 
 ## 3. Tích hợp Master Data ↔ Inventory (Sprint4-15)
 
@@ -49,6 +59,8 @@ cd frontend && npm test
 |---|---|
 | `InventoryStockStatusTest` | Quy tắc In / Low / Out / Over, biên Min và Max, tồn khả dụng |
 | `InventoryEndToEndFlowTest` | Luồng Product → Warehouse → Inventory với 3 service thật + repository giả lập trong bộ nhớ |
+| `InventoryServiceTest` | Validate loại giao dịch, tồn khả dụng, chuyển kho và lịch sử |
+| `InventoryTransactionRepositoryTest` | Ánh xạ lịch sử và truy vấn giao dịch theo kho |
 | `ProductServiceDeleteTest` | Chặn xóa sản phẩm còn tồn |
 | `WarehouseServiceTest` | Chặn xóa kho có tồn kho |
 | `frontend/src/utils/inventoryFilters.test.mjs` | `summarize`, `filterInventory`, `validateAdjustment` |

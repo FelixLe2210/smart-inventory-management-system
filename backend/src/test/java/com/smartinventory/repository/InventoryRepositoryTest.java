@@ -84,4 +84,16 @@ class InventoryRepositoryTest {
                 new Inventory(product, warehouse, 12, 0, "A-02")))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
+
+    @Test
+    @DisplayName("Giao dịch có thể khóa tồn kho theo ID và theo cặp sản phẩm/kho")
+    void inventoryRowsCanBeLockedForStockTransactions() {
+        Inventory inventory = new Inventory(product, warehouse, 8, 3, "A-01");
+        entityManager.persistAndFlush(inventory);
+        entityManager.clear();
+
+        assertThat(inventoryRepository.findByIdWithDetailsForUpdate(inventory.getId())).isPresent();
+        assertThat(inventoryRepository.findByProductIdAndWarehouseIdForUpdate(
+                product.getId(), warehouse.getId())).isPresent();
+    }
 }

@@ -4,6 +4,8 @@ import com.smartinventory.dto.ApiResponse;
 import com.smartinventory.dto.InventoryAdjustRequest;
 import com.smartinventory.dto.InventoryCreateRequest;
 import com.smartinventory.dto.InventoryResponse;
+import com.smartinventory.dto.InventoryTransactionResponse;
+import com.smartinventory.dto.InventoryTransferRequest;
 import com.smartinventory.dto.InventoryUpdateRequest;
 import com.smartinventory.service.InventoryService;
 import jakarta.validation.Valid;
@@ -67,5 +69,17 @@ public class InventoryController {
             @PathVariable Long id,
             @Valid @RequestBody InventoryAdjustRequest request) {
         return ApiResponse.success(inventoryService.adjustStock(id, request));
+    }
+
+    @PostMapping("/{id}/transfer")
+    public ApiResponse<InventoryResponse> transferStock(
+            @PathVariable Long id,
+            @Valid @RequestBody InventoryTransferRequest request) {
+        return ApiResponse.success(inventoryService.transferStock(id, request));
+    }
+
+    @GetMapping("/{id}/transactions")
+    public ApiResponse<List<InventoryTransactionResponse>> getTransactions(@PathVariable Long id) {
+        return ApiResponse.success(inventoryService.getTransactions(id));
     }
 }
