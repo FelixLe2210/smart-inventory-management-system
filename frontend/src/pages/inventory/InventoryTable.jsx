@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import StockStatusBadge, { STOCK_STATUS } from '../../components/inventory/StockStatusBadge';
 
 function fmtDate(value) {
@@ -47,7 +48,7 @@ export default function InventoryTable({ items, total, isLoading, loadError, onV
               <th className="py-3 px-4 min-w-[110px]">Vị trí</th>
               <th className="py-3 px-4 min-w-[140px]">Trạng thái tồn</th>
               <th className="py-3 px-4 min-w-[130px]">Cập nhật</th>
-              <th className="py-3 px-4 text-right min-w-[120px]">Thao tác</th>
+              <th className="py-3 px-4 text-right min-w-[150px]">Thao tác</th>
             </tr>
           </thead>
           <tbody className="font-body-sm text-body-sm text-on-surface divide-y divide-outline-variant/30">
@@ -111,6 +112,15 @@ export default function InventoryTable({ items, total, isLoading, loadError, onV
                       >
                         <span className="material-symbols-outlined text-[18px]">visibility</span>
                       </button>
+                      {Number(it.availableStock || 0) > 0 && (
+                        <Link
+                          to={`/transfer?productId=${it.productId}&sourceWarehouseId=${it.warehouseId}`}
+                          title="Chuyển kho sang chi nhánh khác"
+                          className="p-1.5 rounded-lg text-secondary hover:text-primary hover:bg-surface-container-high transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">swap_horiz</span>
+                        </Link>
+                      )}
                       <button
                         type="button"
                         onClick={() => onAdjust(it)}

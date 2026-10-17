@@ -8,6 +8,7 @@ import CategoryPage from './pages/category/CategoryPage';
 import SupplierPage from './pages/supplier/SupplierPage';
 import InventoryPage from './pages/inventory/InventoryPage';
 import StockMovementPage from './pages/stock-movement/StockMovementPage';
+import StockTransferPage from './pages/stock-transfer/StockTransferPage';
 import TransactionHistoryPage from './pages/transactions/TransactionHistoryPage';
 
 /**
@@ -46,6 +47,7 @@ export default function App() {
             <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/inbound" element={<StockMovementPage mode="RECEIVING" />} />
             <Route path="/outbound" element={<StockMovementPage mode="ISSUING" />} />
+            <Route path="/transfer" element={<StockTransferPage />} />
             <Route path="/transactions" element={<TransactionHistoryPage />} />
             <Route path="/reports" element={<PlaceholderPage title="Báo cáo & Phân tích" icon="monitoring" />} />
             <Route path="/settings" element={<PlaceholderPage title="Cài đặt hệ thống" icon="settings" />} />

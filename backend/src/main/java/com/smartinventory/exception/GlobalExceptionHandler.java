@@ -2,6 +2,8 @@ package com.smartinventory.exception;
 
 import com.smartinventory.dto.ApiError;
 import com.smartinventory.dto.ApiResponse;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -70,6 +72,32 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ApiResponse<Void>> handleConflict(ConflictException ex) {
         ApiError error = new ApiError(ex.getCode(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(error));
+    }
+
+    /**
+     * Two transactions touching the same inventory row at the same moment (lock timeout,
+     * deadlock victim, failure to acquire a row lock). The request is safe to retry, so it is
+     * a 409 with a stable code the frontend recognises, instead of an opaque 500.
+     */
+    @ExceptionHandler(PessimisticLockingFailureException.class)
+    public ResponseEntity<ApiResponse<Void>> handleLockFailure(PessimisticLockingFailureException ex) {
+        ApiError error = new ApiError("TRANSACTION_CONFLICT",
+                "Kho đang xử lý một giao dịch khác cùng lúc. Vui lòng thử lại sau vài giây.");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(error));
+    }
+
+    /**
+     * The database rejected the write: a CHECK constraint (e.g. stock below zero), a FK that
+     * still references the row (deleting a product/warehouse that has stock transactions),
+     * or a unique key hit by a concurrent insert. The raw SQL message is deliberately not
+     * returned to the client.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        ApiError error = new ApiError("DATA_INTEGRITY_VIOLATION",
+                "Thao tác vi phạm ràng buộc dữ liệu (ví dụ tồn kho âm hoặc dữ liệu đang được tham chiếu). "
+                        + "Vui lòng tải lại dữ liệu và kiểm tra lại.");
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(error));
     }
 

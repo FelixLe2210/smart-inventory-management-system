@@ -72,6 +72,18 @@ export const inventoryApi = {
   },
 
   /**
+   * Chuyển kho (Transfer): trừ tồn ở dòng tồn nguồn {id} và cộng vào kho đích trong MỘT giao dịch.
+   * Backend tự tạo dòng tồn ở kho đích nếu chưa có, và ghi 2 giao dịch TRANSFER_OUT / TRANSFER_IN.
+   * Trả về dòng tồn của KHO ĐÍCH sau khi chuyển.
+   * @param {number|string} id Inventory ID của kho NGUỒN
+   * @param {{destinationWarehouseId:number, quantity:number, reason?:string|null, referenceDoc?:string|null}} data
+   */
+  async transfer(id, data) {
+    const res = await httpClient.post(`/inventories/${id}/transfer`, data);
+    return res.data;
+  },
+
+  /**
    * Lịch sử giao dịch biến động kho của bản ghi tồn kho
    * @param {number|string} id Inventory ID
    * @returns {Promise<Array>}
