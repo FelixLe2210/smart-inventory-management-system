@@ -385,6 +385,13 @@ git push origin phutrong
 | 2 | **Sprint5-10** | M3 | **Issuing UI** | 5h | FE | ✅ Hoàn thành | Giao diện Xuất kho (`/outbound`): Form xuất kho, validation chống xuất vượt tồn khả dụng (`availableStock`), cảnh báo trạng thái kho không ACTIVE, mô phỏng tồn giảm tức thì. |
 | 3 | **Sprint5-11** | M3 | **Transaction History UI** | 4h | FE | ✅ Hoàn thành | Màn hình Lịch sử Giao dịch (`/transactions`) & Tab Lịch sử trong `InventoryDetailModal`: Bộ lọc đa tiêu chí (Loại GD, Kho, Sản phẩm, Từ khóa), phân loại Badge màu cho `RECEIVING`, `ISSUING`, `TRANSFER_IN`, `TRANSFER_OUT`, `ADJUSTMENT`. Tương thích liền mạch với backend Sprint 5 M1. |
 | 4 | **Sprint5-12** | M3 | **Receiving/Issuing API Integration** | 4h | FE / Int | ✅ Hoàn thành | Bổ sung `receive()`, `issue()`, `getTransactions()` trong `inventoryApi.js`; hook điều phối `useStockMovement.js` & `useTransactionHistory.js`; xử lý lỗi chi tiết tiếng Việt và thông báo Toast; bổ sung route & thanh điều hướng `AppSidebar`. 9/9 Node tests PASS 100%, Vite Build thành công. |
+## 🚀 SPRINT 6 — TIẾN ĐỘ THỰC HIỆN MILESTONE M3 (Frontend Dashboard & Visualizations)
 
+| STT | Mã Thẻ | Milestone | Tên Card / Hạng mục | Effort | Phân loại | Trạng thái | Chi tiết triển khai |
+|:---:|:------:|:---------:|----------------------|:------:|:---------:|:----------:|:--------------------|
+| 1 | **Sprint6-09** | M3 | **Dashboard Layout** | 4h | FE | ✅ Hoàn thành | Thiết kế bố cục trung tâm Bàn làm việc (`/dashboard`): Top Header thông tin thời gian thực, Quick Actions Bar (Nhập kho, Xuất kho, Chuyển kho), thiết kế chuẩn responsive lưới chia cột Material You, liên kết trực tiếp vào Router chính `App.jsx`. |
+| 2 | **Sprint6-10** | M3 | **KPI Cards** | 4h | FE | ✅ Hoàn thành | Bộ 4 thẻ KPI tổng quan: Tổng SKU đang quản lý, Tổng tồn kho hiện hữu (Khả dụng & Giữ chỗ), Cảnh báo sắp hết hàng (`Low Stock`), Cảnh báo hết hàng (`Out of Stock`), Giá trị tổng tài sản kho. |
+| 3 | **Sprint6-11** | M3 | **Inventory Charts** | 5h | FE | ✅ Hoàn thành | Trực quan hóa dữ liệu tồn kho bằng Bar Chart phân bổ tồn kho theo từng chi nhánh kho (`Warehouse Stock`), Cơ cấu tỷ trọng hàng hóa theo danh mục (`Category Distribution`), Thống kê lưu lượng xuất/nhập/chuyển kho. |
+| 4 | **Sprint6-12** | M3 | **Recent Transactions UI** | 4h | FE | ✅ Hoàn thành | Bảng đối soát các giao dịch kho mới nhất (`RecentTransactions.jsx`): Hiển thị mã GD, thời gian, loại giao dịch (Badge màu), sản phẩm, kho đích/nguồn, số lượng biến động và số dư tồn sau biến động; danh sách cảnh báo tồn khẩn cấp `StockAlertList.jsx` hỗ trợ điều hướng tức thì sang Nhập kho. |
 
-
+---

@@ -10,6 +10,7 @@ import InventoryPage from './pages/inventory/InventoryPage';
 import StockMovementPage from './pages/stock-movement/StockMovementPage';
 import StockTransferPage from './pages/stock-transfer/StockTransferPage';
 import TransactionHistoryPage from './pages/transactions/TransactionHistoryPage';
+import DashboardPage from './pages/dashboard/DashboardPage';
 
 /**
  * App – Router chính của Hệ thống Smart Inventory Management System for Demand Forecasting and Reorder Recommendation.
@@ -43,7 +44,7 @@ export default function App() {
             <Route path="/recommendations" element={<PlaceholderPage title="Đề xuất Đặt hàng Thông minh (Intelligent Reorder Recommendation)" icon="auto_awesome" />} />
 
             {/* Các phân hệ mở rộng theo kế hoạch Sprint sau */}
-            <Route path="/dashboard" element={<PlaceholderPage title="Bàn làm việc (Dashboard)" icon="dashboard" />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/inbound" element={<StockMovementPage mode="RECEIVING" />} />
             <Route path="/outbound" element={<StockMovementPage mode="ISSUING" />} />
