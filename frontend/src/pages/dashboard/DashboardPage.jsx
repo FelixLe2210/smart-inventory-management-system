@@ -43,11 +43,6 @@ export default function DashboardPage() {
             <h1 className="text-xl md:text-2xl font-bold text-on-surface tracking-tight">
               Tổng quan Vận hành Kho vận
             </h1>
-            {lastRefreshedAt && (
-              <span className="hidden sm:inline-block text-[11px] text-secondary font-mono bg-slate-100 px-2 py-0.5 rounded-full">
-                Cập nhật lúc: {lastRefreshedAt.toLocaleTimeString('vi-VN')}
-              </span>
-            )}
           </div>
         </div>
 
