@@ -395,3 +395,14 @@ git push origin phutrong
 | 4 | **Sprint6-12** | M3 | **Recent Transactions UI** | 4h | FE | ✅ Hoàn thành | Bảng đối soát các giao dịch kho mới nhất (`RecentTransactions.jsx`): Hiển thị mã GD, thời gian, loại giao dịch (Badge màu), sản phẩm, kho đích/nguồn, số lượng biến động và số dư tồn sau biến động; danh sách cảnh báo tồn khẩn cấp `StockAlertList.jsx` hỗ trợ điều hướng tức thì sang Nhập kho. |
 
 ---
+
+## 🚀 SPRINT 6 — TIẾN ĐỘ THỰC HIỆN MILESTONE M4 (Frontend Alerts, Reports & Dashboard Integration)
+
+| STT | Mã Thẻ | Milestone | Tên Card / Hạng mục | Effort | Phân loại | Trạng thái | Chi tiết triển khai |
+|:---:|:------:|:---------:|----------------------|:------:|:---------:|:----------:|:--------------------|
+| 1 | **Sprint6-13** | M4 | **Alert UI** | 4h | FE | ✅ Hoàn thành | Trang `/alerts` (`AlertsPage.jsx`): thẻ tổng hợp Hết hàng / Sắp hết bấm để lọc, tìm kiếm theo tên/SKU, bảng khả dụng/tối thiểu có thanh tiến độ, thiếu hụt, phân bổ theo kho, nút Xem tồn / Nhập hàng; đủ trạng thái rỗng/đang tải/lỗi. `StockAlertList` trên dashboard liên kết sang `/alerts`; thêm mục sidebar. |
+| 2 | **Sprint6-14** | M4 | **Report UI** | 5h | FE | ✅ Hoàn thành | Trang `/reports` (`ReportsPage.jsx`) 2 tab: Báo cáo tồn kho (lọc kho/danh mục/trạng thái/từ khóa) và Báo cáo giao dịch (khoảng ngày + preset 7/30 ngày, loại, kho, sản phẩm); thẻ tổng hợp, bảng chi tiết, xuất CSV (BOM UTF-8, chống formula injection). |
+| 3 | **Sprint6-15** | M4 | **Dashboard API Integration** | 4h | FE / Integration | ✅ Hoàn thành (chờ BE M1/M2) | `api/dashboardApi.js`: gọi Alert/KPI/Report API của backend trước, fallback tính tại client khi 404/405/501 hoặc sai contract; lỗi thật không bị nuốt. `useDashboard` viết lại: banner lỗi từng phần, chống race khi làm mới, badge nguồn số liệu. Contract: `docs/api/DASHBOARD_API_CONTRACT.md`. **Sửa lỗi M3:** `dashboard.js` đọc `quantity` thay vì `currentStock` nên KPI/biểu đồ ra 0 với dữ liệu thật. |
+| 4 | **Sprint6-16** | M4 | **Dashboard Acceptance Testing** | 4h | Testing | 🟡 Test tự động xong, chờ nghiệm thu thủ công | 65/65 Node tests PASS (thêm `stockAlerts.test.mjs`: 10, `reports.test.mjs`: 14); kịch bản nghiệm thu thủ công + hạn chế đã biết: `docs/api/DASHBOARD_ACCEPTANCE_TESTING.md`. |
+
+---

@@ -5,6 +5,7 @@ import KpiGrid from './KpiGrid';
 import InventoryCharts from './InventoryCharts';
 import RecentTransactions from './RecentTransactions';
 import StockAlertList from './StockAlertList';
+import DataSourceBadge from '../../components/common/DataSourceBadge';
 
 /**
  * DashboardPage - Bàn làm việc & Tổng quan quản trị kho
@@ -13,6 +14,9 @@ import StockAlertList from './StockAlertList';
  *   - Sprint6-10: KPI Cards (Products, stock, low stock, out of stock)
  *   - Sprint6-11: Inventory Charts (Tồn kho theo chi nhánh, phân bổ danh mục, biến động)
  *   - Sprint6-12: Recent Transactions UI (Hiển thị giao dịch kho mới nhất)
+ * Sprint 6 - Milestone M4:
+ *   - Sprint6-13: danh sách cảnh báo liên kết sang trang /alerts
+ *   - Sprint6-15: Dashboard API Integration (KPI API + Alert API, fallback tính tại client)
  */
 export default function DashboardPage() {
   const {
@@ -25,6 +29,9 @@ export default function DashboardPage() {
     transactionBreakdown,
     recentTransactions,
     stockAlerts,
+    alertSummary,
+    warnings,
+    dataSource,
     refetch,
   } = useDashboard();
 
@@ -43,7 +50,13 @@ export default function DashboardPage() {
             <h1 className="text-xl md:text-2xl font-bold text-on-surface tracking-tight">
               Tổng quan Vận hành Kho vận
             </h1>
+            <DataSourceBadge source={dataSource.kpis} label="KPI" />
           </div>
+          {lastRefreshedAt && (
+            <p className="text-[11px] text-secondary mt-0.5">
+              Cập nhật lúc {lastRefreshedAt.toLocaleTimeString('vi-VN')}
+            </p>
+          )}
         </div>
 
         {/* Quick actions buttons */}
@@ -89,9 +102,22 @@ export default function DashboardPage() {
       {/* ── Main Content Area ── */}
       <div className="p-margin flex-1 flex flex-col">
         {error && (
-          <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
-            <span className="material-symbols-outlined text-[18px]">error</span>
-            <span>{error}</span>
+          <div role="alert" className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center justify-between gap-2">
+            <span className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px]">error</span>
+              <span>{error}</span>
+            </span>
+            <button type="button" onClick={refetch} className="font-semibold underline">Thử lại</button>
+          </div>
+        )}
+        {warnings.length > 0 && (
+          <div className="mb-6 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex flex-col gap-1">
+            {warnings.map((w) => (
+              <span key={w} className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[18px]">info</span>
+                <span>{w}</span>
+              </span>
+            ))}
           </div>
         )}
 
@@ -111,7 +137,7 @@ export default function DashboardPage() {
             <RecentTransactions transactions={recentTransactions} isLoading={isLoading} />
           </div>
           <div className="lg:col-span-1">
-            <StockAlertList alerts={stockAlerts} />
+            <StockAlertList alerts={stockAlerts} totalCount={alertSummary.total} />
           </div>
         </div>
       </div>

@@ -5,7 +5,8 @@ import { Link } from 'react-router-dom';
  * StockAlertList - Danh sách các sản phẩm hết hàng hoặc chạm ngưỡng an toàn
  * Hỗ trợ liên kết trực tiếp sang màn hình Nhập kho để xử lý nhanh
  */
-export default function StockAlertList({ alerts = [] }) {
+export default function StockAlertList({ alerts = [], totalCount }) {
+  const total = totalCount ?? alerts.length;
   if (alerts.length === 0) {
     return (
       <div className="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/30 shadow-sm flex flex-col items-center justify-center text-center py-10">
@@ -28,7 +29,7 @@ export default function StockAlertList({ alerts = [] }) {
           <h2 className="text-base font-semibold text-on-surface">Cảnh báo Tồn kho</h2>
         </div>
         <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-red-50 text-red-700 border border-red-200">
-          {alerts.length} cảnh báo
+          {total} cảnh báo
         </span>
       </div>
 
@@ -69,8 +70,10 @@ export default function StockAlertList({ alerts = [] }) {
       </div>
 
       <div className="p-3 bg-slate-50/50 border-t border-slate-100 text-center">
-        <Link to="/inventory" className="text-xs text-primary hover:underline font-medium">
-          Xem toàn bộ danh sách tồn kho →
+        <Link to="/alerts" className="text-xs text-primary hover:underline font-medium">
+          {total > alerts.length
+            ? `Xem tất cả ${total} cảnh báo →`
+            : 'Xem trang cảnh báo tồn kho →'}
         </Link>
       </div>
     </div>
