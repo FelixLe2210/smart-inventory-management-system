@@ -377,6 +377,15 @@ git push origin phutrong
 
 ---
 
+## 🚀 SPRINT 5 — MILESTONE M1 (Backend Inventory Transactions)
+
+| STT | Mã Thẻ | Milestone | Tên Card / Hạng mục | Effort | Phân loại | Trạng thái | Chi tiết triển khai |
+|:---:|:------:|:---------:|----------------------|:------:|:---------:|:----------:|:--------------------|
+| 1 | **Sprint5-05** | M1 | **Inventory Transaction Service** | 6h | BE / DB | ✅ Hoàn thành | Dịch vụ nhập, xuất, điều chỉnh và chuyển kho cập nhật tồn cùng lịch sử trong transaction; khóa kho theo thứ tự ID, kiểm tra tồn khả dụng và ghi transactionNo/lineNo. |
+| 2 | **Sprint5-06** | M1 | **Transaction History API** | 4h | BE / API | ✅ Hoàn thành | Bổ sung `GET /api/transactions` có lọc theo sản phẩm/kho/loại/từ khóa và phân trang; màn hình lịch sử dùng API toàn cục thay vì giới hạn 15 dòng tồn. |
+| 3 | **Sprint5-07** | M1 | **Transaction Database Review** | 4h | DB | ✅ Hoàn thành | Migration V6 bổ sung transaction_no/line_no, backfill lịch sử, unique constraint theo cặp và kiểm tra line_no dương; giữ FK audit tới sản phẩm, kho và người tạo. |
+| 4 | **Sprint5-08** | M1 | **Transaction Consistency Testing** | 3h | DB / Testing | ✅ Hoàn thành | Bổ sung test lọc/phân trang/leg chuyển kho và identity dòng giao dịch; E2E kiểm tra chuỗi tồn sau nhiều giao dịch, cặp line và tổng tồn. |
+
 ## 🚀 SPRINT 5 — TIẾN ĐỘ THỰC HIỆN MILESTONE M3 (Frontend Stock Movement)
 
 | STT | Mã Thẻ | Milestone | Tên Card / Hạng mục | Effort | Phân loại | Trạng thái | Chi tiết triển khai |

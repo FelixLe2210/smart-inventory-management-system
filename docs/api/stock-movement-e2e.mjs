@@ -153,10 +153,20 @@ async function main() {
   check('cặp mã giao dịch cùng gốc: TXN-...-OUT / TXN-...-IN',
         !!tOut && !!tIn && tOut.transactionCode.endsWith('-OUT') && tIn.transactionCode.endsWith('-IN') &&
         tOut.transactionCode.replace(/-OUT$/, '') === tIn.transactionCode.replace(/-IN$/, ''));
+  check('cặp giao dịch cùng transactionNo, lineNo phân biệt 1/2',
+        !!tOut && !!tIn && tOut.transactionNo === tIn.transactionNo &&
+        tOut.lineNo === 1 && tIn.lineNo === 2);
   check('chứng từ và lý do được ghi cho cả hai phía',
         tOut?.referenceDoc === 'E2E-TRF' && tIn?.referenceDoc === 'E2E-TRF' && tOut?.reason === 'E2E chuyển kho');
   check('chuỗi số dư kho A liền mạch', balanceChainIsContinuous(txA));
   check('chuỗi số dư kho B liền mạch', balanceChainIsContinuous(txB));
+  const globalHistory = await call('GET',
+    `/transactions?productId=${prod.data.id}&page=0&size=100`);
+  check('API lịch sử toàn cục trả đủ giao dịch của sản phẩm',
+        globalHistory.status === 200 && globalHistory.data.content.length >= txA.length + txB.length);
+  check('API lịch sử có metadata phân trang',
+        globalHistory.data.page === 0 && globalHistory.data.size === 100 &&
+        globalHistory.data.totalElements >= globalHistory.data.content.length);
 
   console.log('\n7. Các trường hợp lỗi khi chuyển kho (tồn phải KHÔNG đổi sau mỗi lỗi)');
   await rejected('cùng kho nguồn và đích', transfer(idA, whA.data.id, 5), 400, 'SAME_WAREHOUSE_TRANSFER');

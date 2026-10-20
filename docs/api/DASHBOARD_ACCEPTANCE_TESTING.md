@@ -54,6 +54,6 @@ Chuẩn bị: backend chạy profile `dev`, đăng nhập `admin / Admin@123`. T
 
 ## 5. Hạn chế đã biết
 
-- Chưa có endpoint "tất cả giao dịch": báo cáo giao dịch ở chế độ client phải gọi `/inventories/{id}/transactions` cho **từng** dòng tồn kho (theo đợt 6 request). Với kho lớn nên dùng Transaction Report API (Sprint6-06). Dashboard chỉ lấy 15 dòng tồn mới cập nhật nhất cho "Giao dịch gần đây".
+- Endpoint lịch sử toàn cục `GET /transactions` đã có phân trang; Dashboard và báo cáo phía client hiện vẫn tải lịch sử qua `/inventories/{id}/transactions` theo từng dòng tồn (theo đợt 6 request). Với báo cáo nên dùng Transaction Report API (Sprint6-06). Dashboard chỉ lấy 15 dòng tồn mới cập nhật nhất cho "Giao dịch gần đây".
 - Bảng báo cáo hiển thị tối đa 200 dòng; số liệu tổng hợp và file CSV luôn tính trên toàn bộ.
 - Định nghĩa cảnh báo (theo sản phẩm, tồn khả dụng) khác trạng thái từng dòng tồn ở trang Tồn kho — xem `DASHBOARD_API_CONTRACT.md` mục 1.

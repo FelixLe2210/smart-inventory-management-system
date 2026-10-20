@@ -92,4 +92,14 @@ export const inventoryApi = {
     const res = await httpClient.get(`/inventories/${id}/transactions`);
     return res.data;
   },
+
+  /**
+   * Lịch sử giao dịch toàn hệ thống, có thể lọc và phân trang.
+   * @param {{productId?:number|string, warehouseId?:number|string, type?:string, search?:string, page?:number, size?:number}} params
+   * @returns {Promise<{content:Array, page:number, size:number, totalElements:number, totalPages:number, first:boolean, last:boolean}>}
+   */
+  async getTransactionHistory(params = {}) {
+    const res = await httpClient.get('/transactions', { params: cleanParams(params) });
+    return res.data;
+  },
 };

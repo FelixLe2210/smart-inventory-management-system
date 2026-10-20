@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 public record InventoryTransactionResponse(
         Long id,
         String transactionCode,
+        String transactionNo,
+        Integer lineNo,
         String transactionType,
         Long productId,
         Long sourceWarehouseId,
@@ -23,6 +25,8 @@ public record InventoryTransactionResponse(
         return new InventoryTransactionResponse(
                 transaction.getId(),
                 transaction.getTransactionCode(),
+                transaction.getTransactionNo(),
+                transaction.getLineNo(),
                 transaction.getTransactionType(),
                 transaction.getProduct().getId(),
                 transaction.getSourceWarehouse() != null ? transaction.getSourceWarehouse().getId() : null,
