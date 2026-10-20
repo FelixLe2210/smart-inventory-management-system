@@ -26,6 +26,12 @@ Do backend (`Inventory.getStockStatus()`) tính từ `currentStock` và `minStoc
 | POST | `/api/inventories/{id}/adjust` | `{adjustmentType: IN\|OUT\|SET\|RESERVE\|RELEASE, quantity, reason?, referenceDoc?}` |
 | POST | `/api/inventories/{id}/transfer` | `{destinationWarehouseId, quantity, reason?, referenceDoc?}` |
 | GET | `/api/inventories/{id}/transactions` | Lịch sử giao dịch của sản phẩm tại kho này |
+| GET | `/api/transactions?page=0&size=25&productId=&warehouseId=&type=&search=` | Lịch sử toàn hệ thống, lọc và phân trang (size tối đa 100) |
+
+Lịch sử toàn hệ thống trả `data.content` cùng `page`, `size`, `totalElements`, `totalPages`, `first`, `last`.
+Mỗi dòng có `transactionNo` và `lineNo`: hai dòng chuyển kho dùng chung số giao dịch, lần lượt là dòng 1 (`TRANSFER_OUT`)
+và dòng 2 (`TRANSFER_IN`). Khi lọc theo kho, mỗi giao dịch chỉ thuộc một kho: `RECEIVING`/`TRANSFER_IN` thuộc kho đích;
+`ISSUING`/`TRANSFER_OUT`/`ADJUSTMENT` thuộc kho nguồn.
 
 Lọc theo **trạng thái** và **từ khóa**, cùng các thẻ KPI, được thực hiện ở frontend (`src/utils/inventoryFilters.js`) trên danh sách đã tải theo kho / sản phẩm.
 

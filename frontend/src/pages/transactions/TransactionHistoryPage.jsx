@@ -31,7 +31,7 @@ export default function TransactionHistoryPage() {
               Lịch sử Giao dịch & Biến động Kho
             </h1>
             <span className="px-2.5 py-0.5 rounded-full font-label-sm text-label-sm bg-surface-container text-primary font-body-sm-medium">
-              {history.transactions.length} giao dịch
+              {history.rawCount} giao dịch
             </span>
           </div>
         </div>
@@ -89,6 +89,31 @@ export default function TransactionHistoryPage() {
           loadError={history.loadError}
           onRetry={history.fetchAll}
         />
+        <div className="flex items-center justify-between gap-3 text-secondary text-body-sm">
+          <span>
+            {history.totalPages === 0
+              ? 'Không có dữ liệu'
+              : `Trang ${history.page + 1} / ${history.totalPages}`}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={history.goToPreviousPage}
+              disabled={!history.canGoToPreviousPage || history.isLoading}
+              className="px-3 py-1.5 rounded-lg bg-surface-container text-on-surface disabled:opacity-50"
+            >
+              Trước
+            </button>
+            <button
+              type="button"
+              onClick={history.goToNextPage}
+              disabled={!history.canGoToNextPage || history.isLoading}
+              className="px-3 py-1.5 rounded-lg bg-surface-container text-on-surface disabled:opacity-50"
+            >
+              Tiếp
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

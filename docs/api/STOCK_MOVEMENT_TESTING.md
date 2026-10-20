@@ -11,6 +11,7 @@ cách giao diện xử lý lỗi giao dịch, và cách chạy các bộ kiểm 
 | Xuất kho | `POST /api/inventories/{id}/adjust` với `adjustmentType: OUT` | `ISSUING` |
 | Chuyển kho | `POST /api/inventories/{sourceId}/transfer` | `TRANSFER_OUT` (kho nguồn) + `TRANSFER_IN` (kho đích) |
 | Nhật ký của một dòng tồn | `GET /api/inventories/{id}/transactions` | |
+| Nhật ký toàn hệ thống | `GET /api/transactions?page=0&size=25&productId=&warehouseId=&type=&search=` | Lọc theo sản phẩm, kho sở hữu giao dịch, loại, từ khóa; size tối đa 100 |
 
 Giữ chỗ (`RESERVE`, `RELEASE`) không ghi giao dịch.
 
@@ -87,12 +88,9 @@ Script không dọn dữ liệu: sản phẩm và kho đã có giao dịch khôn
 
 Ghi nhận khi nối giao diện với backend giao dịch. Chưa sửa vì thuộc phần của người khác.
 
-1. **Trang Nhật ký giao dịch chỉ đọc 15 dòng tồn đầu tiên** (`useTransactionHistory.js`, `invs.slice(0, 15)`).
-   Giao dịch của các dòng tồn từ thứ 16 trở đi không hiện. Cần backend có endpoint liệt kê giao dịch toàn cục
-   (có phân trang), hoặc bỏ giới hạn này.
-2. **Nhập kho lần đầu cho sản phẩm chưa có dòng tồn** (`useStockMovement.js`) gọi `inventoryApi.create({ initialStock })`.
+1. **Nhập kho lần đầu cho sản phẩm chưa có dòng tồn** (`useStockMovement.js`) gọi `inventoryApi.create({ initialStock })`.
    Backend ghi giao dịch loại `ADJUSTMENT` với lý do "Initial stock" và **mất mã chứng từ, lý do** người dùng nhập.
    Cách khắc phục: tạo dòng tồn với `initialStock: 0` rồi gọi `receive`, để ghi đúng `RECEIVING` kèm chứng từ.
-3. **Xóa sản phẩm hoặc kho đã có giao dịch** bị chặn bởi khóa ngoại. Nay trả `409 DATA_INTEGRITY_VIOLATION`
+2. **Xóa sản phẩm hoặc kho đã có giao dịch** bị chặn bởi khóa ngoại. Nay trả `409 DATA_INTEGRITY_VIOLATION`
    thay vì 500, nhưng thông báo còn chung chung. Nếu cần thông báo cụ thể hơn, thêm kiểm tra ở
    `ProductService` và `WarehouseService` (tương tự `PRODUCT_HAS_STOCK`).
