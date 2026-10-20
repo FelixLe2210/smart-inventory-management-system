@@ -46,6 +46,14 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     @Query("SELECT i FROM Inventory i JOIN FETCH i.product p JOIN FETCH i.warehouse w")
     List<Inventory> findAllWithDetails();
 
+    @Query("""
+            SELECT i FROM Inventory i
+            JOIN FETCH i.product p
+            JOIN FETCH p.category c
+            JOIN FETCH i.warehouse w
+            """)
+    List<Inventory> findAllWithReportDetails();
+
     @Query("SELECT i FROM Inventory i JOIN FETCH i.product p JOIN FETCH i.warehouse w WHERE i.currentStock <= p.minStockLevel")
     List<Inventory> findLowStockInventories();
 }
