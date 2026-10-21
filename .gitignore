@@ -28,6 +28,8 @@ venv/
 env/
 ENV/
 *.egg-info/
+*.joblib
+*.pkl
 
 # IntelliJ IDEA
 .idea/

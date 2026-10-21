@@ -395,3 +395,14 @@ git push origin phutrong
 | 4 | **Sprint6-12** | M3 | **Recent Transactions UI** | 4h | FE | ✅ Hoàn thành | Bảng đối soát các giao dịch kho mới nhất (`RecentTransactions.jsx`): Hiển thị mã GD, thời gian, loại giao dịch (Badge màu), sản phẩm, kho đích/nguồn, số lượng biến động và số dư tồn sau biến động; danh sách cảnh báo tồn khẩn cấp `StockAlertList.jsx` hỗ trợ điều hướng tức thì sang Nhập kho. |
 
 ---
+
+## 🚀 SPRINT 7 — TIẾN ĐỘ THỰC HIỆN MILESTONE M4 (Python AI Service & Demand Forecasting)
+
+| STT | Mã Thẻ | Milestone | Tên Card / Hạng mục | Effort | Phân loại | Trạng thái | Chi tiết triển khai |
+|:---:|:------:|:---------:|----------------------|:------:|:---------:|:----------:|:--------------------|
+| 1 | **Sprint7-13** | M4 | **Create Python AI Service** | 5h | AI / API | ✅ Hoàn thành | Khởi tạo FastAPI AI microservice tại `ai-service/`: cấu hình ứng dụng (`config.py`), CORS middleware, lifespan quản lý nạp model tự động, hệ thống chuẩn hóa envelope response `ApiResponse`/`ApiErrorDetail` theo `docs/api/API_CONVENTIONS.md`, endpoints `/health`, `/api/health`. |
+| 2 | **Sprint7-14** | M4 | **Create Training Pipeline** | 5h | AI / ML | ✅ Hoàn thành | Xây dựng pipeline xử lý đặc trưng chuỗi thời gian (`feature_engineering.py` với lag features, rolling statistics, calendar features), huấn luyện mô hình Random Forest/Gradient Boosting (`pipeline.py`), tính toán các độ đo đánh giá sai số (MAE, RMSE, R², MAPE), lưu trữ và nạp model artifacts (`.joblib`) qua `model_registry.py` tại `models/`. |
+| 3 | **Sprint7-15** | M4 | **Create Forecast Endpoint Skeleton** | 4h | AI / API | ✅ Hoàn thành | Xây dựng RESTful endpoint `POST /api/forecast/demand`, `GET /api/forecast/product/{id}`, `POST /api/forecast/train`, `GET /api/forecast/models`: nhận product/warehouse/horizon_days/dữ liệu lịch sử, tính toán dự báo đệ quy đa bước, dải tin cậy 95% (lower/upper bounds), tổng nhu cầu dự báo và trung bình ngày. Hỗ trợ fallback rule-based khi chưa có model. |
+| 4 | **Sprint7-16** | M4 | **AI Service Testing** | 3h | Testing | ✅ Hoàn thành | Viết toàn diện bộ kiểm thử tự động với `pytest` và `TestClient`: `test_health.py`, `test_forecast_api.py`, `test_training_pipeline.py`. Toàn bộ **15/15 tests PASS 100%**. Soạn thảo tài liệu hướng dẫn kiểm thử chi tiết tại `docs/api/AI_SERVICE_TESTING.md`. |
+
+---
