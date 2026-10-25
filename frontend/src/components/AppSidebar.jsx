@@ -218,6 +218,20 @@ export default function AppSidebar() {
           </NavLink>
 
           <NavLink
+            to="/alerts"
+            className={({ isActive }) =>
+              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
+                isActive
+                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
+                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
+              }`
+            }
+          >
+            <span className="material-symbols-outlined text-[20px]">notification_important</span>
+            <span>Cảnh báo tồn kho</span>
+          </NavLink>
+
+          <NavLink
             to="/reports"
             className={({ isActive }) =>
               `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${

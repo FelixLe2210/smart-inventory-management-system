@@ -377,6 +377,15 @@ git push origin phutrong
 
 ---
 
+## 🚀 SPRINT 5 — MILESTONE M1 (Backend Inventory Transactions)
+
+| STT | Mã Thẻ | Milestone | Tên Card / Hạng mục | Effort | Phân loại | Trạng thái | Chi tiết triển khai |
+|:---:|:------:|:---------:|----------------------|:------:|:---------:|:----------:|:--------------------|
+| 1 | **Sprint5-05** | M1 | **Inventory Transaction Service** | 6h | BE / DB | ✅ Hoàn thành | Dịch vụ nhập, xuất, điều chỉnh và chuyển kho cập nhật tồn cùng lịch sử trong transaction; khóa kho theo thứ tự ID, kiểm tra tồn khả dụng và ghi transactionNo/lineNo. |
+| 2 | **Sprint5-06** | M1 | **Transaction History API** | 4h | BE / API | ✅ Hoàn thành | Bổ sung `GET /api/transactions` có lọc theo sản phẩm/kho/loại/từ khóa và phân trang; màn hình lịch sử dùng API toàn cục thay vì giới hạn 15 dòng tồn. |
+| 3 | **Sprint5-07** | M1 | **Transaction Database Review** | 4h | DB | ✅ Hoàn thành | Migration V6 bổ sung transaction_no/line_no, backfill lịch sử, unique constraint theo cặp và kiểm tra line_no dương; giữ FK audit tới sản phẩm, kho và người tạo. |
+| 4 | **Sprint5-08** | M1 | **Transaction Consistency Testing** | 3h | DB / Testing | ✅ Hoàn thành | Bổ sung test lọc/phân trang/leg chuyển kho và identity dòng giao dịch; E2E kiểm tra chuỗi tồn sau nhiều giao dịch, cặp line và tổng tồn. |
+
 ## 🚀 SPRINT 5 — TIẾN ĐỘ THỰC HIỆN MILESTONE M3 (Frontend Stock Movement)
 
 | STT | Mã Thẻ | Milestone | Tên Card / Hạng mục | Effort | Phân loại | Trạng thái | Chi tiết triển khai |
@@ -404,5 +413,16 @@ git push origin phutrong
 | 2 | **Sprint7-14** | M4 | **Create Training Pipeline** | 5h | AI / ML | ✅ Hoàn thành | Xây dựng pipeline xử lý đặc trưng chuỗi thời gian (`feature_engineering.py` với lag features, rolling statistics, calendar features), huấn luyện mô hình Random Forest/Gradient Boosting (`pipeline.py`), tính toán các độ đo đánh giá sai số (MAE, RMSE, R², MAPE), lưu trữ và nạp model artifacts (`.joblib`) qua `model_registry.py` tại `models/`. |
 | 3 | **Sprint7-15** | M4 | **Create Forecast Endpoint Skeleton** | 4h | AI / API | ✅ Hoàn thành | Xây dựng RESTful endpoint `POST /api/forecast/demand`, `GET /api/forecast/product/{id}`, `POST /api/forecast/train`, `GET /api/forecast/models`: nhận product/warehouse/horizon_days/dữ liệu lịch sử, tính toán dự báo đệ quy đa bước, dải tin cậy 95% (lower/upper bounds), tổng nhu cầu dự báo và trung bình ngày. Hỗ trợ fallback rule-based khi chưa có model. |
 | 4 | **Sprint7-16** | M4 | **AI Service Testing** | 3h | Testing | ✅ Hoàn thành | Viết toàn diện bộ kiểm thử tự động với `pytest` và `TestClient`: `test_health.py`, `test_forecast_api.py`, `test_training_pipeline.py`. Toàn bộ **15/15 tests PASS 100%**. Soạn thảo tài liệu hướng dẫn kiểm thử chi tiết tại `docs/api/AI_SERVICE_TESTING.md`. |
+
+---
+
+## 🚀 SPRINT 6 — TIẾN ĐỘ THỰC HIỆN MILESTONE M4 (Frontend Alerts, Reports & Dashboard Integration)
+
+| STT | Mã Thẻ | Milestone | Tên Card / Hạng mục | Effort | Phân loại | Trạng thái | Chi tiết triển khai |
+|:---:|:------:|:---------:|----------------------|:------:|:---------:|:----------:|:--------------------|
+| 1 | **Sprint6-13** | M4 | **Alert UI** | 4h | FE | ✅ Hoàn thành | Trang `/alerts` (`AlertsPage.jsx`): thẻ tổng hợp Hết hàng / Sắp hết bấm để lọc, tìm kiếm theo tên/SKU, bảng khả dụng/tối thiểu có thanh tiến độ, thiếu hụt, phân bổ theo kho, nút Xem tồn / Nhập hàng; đủ trạng thái rỗng/đang tải/lỗi. `StockAlertList` trên dashboard liên kết sang `/alerts`; thêm mục sidebar. |
+| 2 | **Sprint6-14** | M4 | **Report UI** | 5h | FE | ✅ Hoàn thành | Trang `/reports` (`ReportsPage.jsx`) 2 tab: Báo cáo tồn kho (lọc kho/danh mục/trạng thái/từ khóa) và Báo cáo giao dịch (khoảng ngày + preset 7/30 ngày, loại, kho, sản phẩm); thẻ tổng hợp, bảng chi tiết, xuất CSV (BOM UTF-8, chống formula injection). |
+| 3 | **Sprint6-15** | M4 | **Dashboard API Integration** | 4h | FE / Integration | ✅ Hoàn thành (chờ BE M1/M2) | `api/dashboardApi.js`: gọi Alert/KPI/Report API của backend trước, fallback tính tại client khi 404/405/501 hoặc sai contract; lỗi thật không bị nuốt. `useDashboard` viết lại: banner lỗi từng phần, chống race khi làm mới, badge nguồn số liệu. Contract: `docs/api/DASHBOARD_API_CONTRACT.md`. **Sửa lỗi M3:** `dashboard.js` đọc `quantity` thay vì `currentStock` nên KPI/biểu đồ ra 0 với dữ liệu thật. |
+| 4 | **Sprint6-16** | M4 | **Dashboard Acceptance Testing** | 4h | Testing | 🟡 Test tự động xong, chờ nghiệm thu thủ công | 65/65 Node tests PASS (thêm `stockAlerts.test.mjs`: 10, `reports.test.mjs`: 14); kịch bản nghiệm thu thủ công + hạn chế đã biết: `docs/api/DASHBOARD_ACCEPTANCE_TESTING.md`. |
 
 ---

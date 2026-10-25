@@ -1,5 +1,14 @@
+import {
+  classifyStock,
+  getAvailableStock,
+  getCurrentStock,
+  getReservedStock,
+  isTrackedProduct,
+} from './stockAlerts.js';
+
 /**
  * Dashboard calculation utilities for Sprint 6 - Milestone M3
+ * (M4: đọc `currentStock` của backend, dùng chung logic phân loại tồn với trang Cảnh báo)
  */
 
 /**
@@ -30,9 +39,9 @@ export function calculateKpis(products = [], inventories = [], warehouses = []) 
   const productStockAggregation = new Map();
 
   inventories.forEach((item) => {
-    const qty = Number(item.quantity || 0);
-    const rsv = Number(item.reservedStock || 0);
-    const avail = Number(item.availableStock !== undefined ? item.availableStock : qty - rsv);
+    const qty = getCurrentStock(item);
+    const rsv = getReservedStock(item);
+    const avail = getAvailableStock(item);
 
     totalStockQuantity += qty;
     totalReservedQuantity += rsv;
@@ -56,13 +65,14 @@ export function calculateKpis(products = [], inventories = [], warehouses = []) 
   let lowStockCount = 0;
 
   products.forEach((p) => {
+    if (!isTrackedProduct(p)) return;
     const agg = productStockAggregation.get(p.id);
     const available = agg ? agg.available : 0;
-    const minStock = Number(p.minStockLevel || 0);
+    const status = classifyStock(available, p.minStockLevel);
 
-    if (available === 0) {
+    if (status === 'OUT_OF_STOCK') {
       outOfStockCount++;
-    } else if (minStock > 0 && available <= minStock) {
+    } else if (status === 'LOW_STOCK') {
       lowStockCount++;
     }
   });
@@ -105,7 +115,7 @@ export function calculateCategoryDistribution(inventories = [], products = [], c
   inventories.forEach((item) => {
     const catId = productCategoryMap.get(item.productId);
     const catName = (catId && categoryMap.get(catId)) || 'Chưa phân loại';
-    const qty = Number(item.quantity || 0);
+    const qty = getCurrentStock(item);
     const price = productPriceMap.get(item.productId) || 0;
     const val = qty * price;
 
@@ -141,9 +151,8 @@ export function calculateWarehouseStock(inventories = [], warehouses = []) {
     const whId = item.warehouseId;
     const whName = wh ? wh.name : `Kho #${whId}`;
     const whCode = wh ? wh.code : `WH-${whId}`;
-    const qty = Number(item.quantity || 0);
-    const rsv = Number(item.reservedStock || 0);
-    const avail = Number(item.availableStock !== undefined ? item.availableStock : qty - rsv);
+    const qty = getCurrentStock(item);
+    const avail = getAvailableStock(item);
 
     const curr = whTotals.get(whId) || {
       id: whId,

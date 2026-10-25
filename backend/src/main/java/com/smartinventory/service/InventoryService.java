@@ -6,6 +6,7 @@ import com.smartinventory.dto.InventoryResponse;
 import com.smartinventory.dto.InventoryTransactionResponse;
 import com.smartinventory.dto.InventoryTransferRequest;
 import com.smartinventory.dto.InventoryUpdateRequest;
+import com.smartinventory.dto.TransactionHistoryPageResponse;
 import com.smartinventory.exception.BadRequestException;
 import com.smartinventory.exception.ConflictException;
 import com.smartinventory.exception.NotFoundException;
@@ -24,6 +25,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -326,6 +330,30 @@ public class InventoryService {
                 .stream()
                 .map(InventoryTransactionResponse::from)
                 .toList();
+    }
+
+    public TransactionHistoryPageResponse getTransactionHistory(
+            Long productId, Long warehouseId, String type, String search, int page, int size) {
+        if (page < 0) {
+            throw new BadRequestException("INVALID_PAGE", "Số trang không được âm.");
+        }
+        if (size < 1 || size > 100) {
+            throw new BadRequestException("INVALID_PAGE_SIZE", "Kích thước trang phải từ 1 đến 100.");
+        }
+
+        String transactionType = type == null || type.isBlank() ? null : type.trim().toUpperCase(java.util.Locale.ROOT);
+        if (transactionType != null && !List.of(
+                "RECEIVING", "ISSUING", "TRANSFER_IN", "TRANSFER_OUT", "ADJUSTMENT"
+        ).contains(transactionType)) {
+            throw new BadRequestException("INVALID_TRANSACTION_TYPE", "Loại giao dịch không hợp lệ: " + type);
+        }
+        String keyword = search == null || search.isBlank() ? null : search.trim();
+
+        Page<InventoryTransactionResponse> result = transactionRepository.searchTransactions(
+                        productId, warehouseId, transactionType, keyword,
+                        PageRequest.of(page, size, Sort.unsorted()))
+                .map(InventoryTransactionResponse::from);
+        return TransactionHistoryPageResponse.from(result);
     }
 
     private Warehouse lockWarehouse(Long warehouseId) {

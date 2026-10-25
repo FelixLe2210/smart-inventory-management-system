@@ -25,8 +25,7 @@ export default function TransactionTable({
           <div className="flex-1">
             <h4 className="font-body-sm-medium text-body-sm-medium">Tính năng đang đồng bộ từ Backend Sprint 5</h4>
             <p className="text-body-sm text-amber-800 mt-0.5">
-              API truy vấn lịch sử <code>GET /api/inventories/{'{id}'}/transactions</code> thuộc nhánh Sprint 5 M1.
-              Giao diện phía Frontend đã sẵn sàng 100%. Khi backend được hợp nhất vào nhánh chính, bảng sẽ tự động hiển thị đầy đủ dữ liệu.
+            API lịch sử giao dịch chưa khả dụng. Hãy kiểm tra phiên bản backend hoặc thử tải lại.
             </p>
           </div>
         </div>

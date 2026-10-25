@@ -31,6 +31,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -192,6 +193,30 @@ class InventoryServiceTest {
                 transaction.getTransactionType().equals("RECEIVING")
                         && transaction.getBalanceBefore() == 50
                         && transaction.getBalanceAfter() == 70));
+    }
+
+    @Test
+    @DisplayName("Nhiều giao dịch liên tiếp giữ tồn và chuỗi balance trước/sau nhất quán")
+    void sequentialStockTransactionsKeepBalancesConsistent() {
+        List<com.smartinventory.model.InventoryTransaction> recorded = new ArrayList<>();
+        when(inventoryRepository.findByIdWithDetails(100L)).thenReturn(Optional.of(inventory));
+        when(transactionRepository.save(any())).thenAnswer(invocation -> {
+            var transaction = invocation.<com.smartinventory.model.InventoryTransaction>getArgument(0);
+            recorded.add(transaction);
+            return transaction;
+        });
+
+        inventoryService.adjustStock(100L, new InventoryAdjustRequest("IN", 10, "nhập", "PN-1"));
+        inventoryService.adjustStock(100L, new InventoryAdjustRequest("OUT", 15, "xuất", "PX-1"));
+        InventoryResponse response = inventoryService.adjustStock(
+                100L, new InventoryAdjustRequest("SET", 20, "kiểm kê", "KK-1"));
+
+        assertThat(response.currentStock()).isEqualTo(20);
+        assertThat(recorded).hasSize(3);
+        assertThat(recorded).extracting("balanceBefore").containsExactly(50, 60, 45);
+        assertThat(recorded).extracting("balanceAfter").containsExactly(60, 45, 20);
+        assertThat(recorded.get(1).getBalanceBefore()).isEqualTo(recorded.get(0).getBalanceAfter());
+        assertThat(recorded.get(2).getBalanceBefore()).isEqualTo(recorded.get(1).getBalanceAfter());
     }
 
     @Test

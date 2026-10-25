@@ -1,11 +1,14 @@
 package com.smartinventory.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Check;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "inventory_transactions")
+@Table(name = "inventory_transactions", uniqueConstraints =
+        @UniqueConstraint(name = "uq_inv_txn_transaction_line", columnNames = {"transaction_no", "line_no"}))
+@Check(constraints = "line_no > 0")
 public class InventoryTransaction {
 
     @Id
@@ -14,6 +17,12 @@ public class InventoryTransaction {
 
     @Column(name = "transaction_code", nullable = false, unique = true, length = 50)
     private String transactionCode;
+
+    @Column(name = "transaction_no", nullable = false, length = 50)
+    private String transactionNo;
+
+    @Column(name = "line_no", nullable = false)
+    private Integer lineNo;
 
     @Column(name = "transaction_type", nullable = false, length = 30)
     private String transactionType;
@@ -60,6 +69,13 @@ public class InventoryTransaction {
                                 int balanceBefore, int balanceAfter, String referenceDoc, String reason,
                                 User createdBy) {
         this.transactionCode = transactionCode;
+        boolean transferOut = "TRANSFER_OUT".equals(transactionType);
+        boolean transferIn = "TRANSFER_IN".equals(transactionType);
+        String transferSuffix = transferOut ? "-OUT" : transferIn ? "-IN" : "";
+        this.transactionNo = !transferSuffix.isEmpty() && transactionCode.endsWith(transferSuffix)
+                ? transactionCode.substring(0, transactionCode.length() - transferSuffix.length())
+                : transactionCode;
+        this.lineNo = transferIn ? 2 : 1;
         this.transactionType = transactionType;
         this.product = product;
         this.sourceWarehouse = sourceWarehouse;
@@ -75,6 +91,8 @@ public class InventoryTransaction {
 
     public Long getId() { return id; }
     public String getTransactionCode() { return transactionCode; }
+    public String getTransactionNo() { return transactionNo; }
+    public Integer getLineNo() { return lineNo; }
     public String getTransactionType() { return transactionType; }
     public Product getProduct() { return product; }
     public Warehouse getSourceWarehouse() { return sourceWarehouse; }

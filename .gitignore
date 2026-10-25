@@ -45,3 +45,8 @@ ENV/
 .env.*
 *.log
 .postman/
+
+# AI data 
+data/raw/
+data/processed/
+__pycache__/
