@@ -6,17 +6,20 @@
 | Sprint7-02 | Data Cleaning | `data_prep/s02_clean_data.py` |
 | Sprint7-03 | EDA for Demand Data | `data_prep/s03_eda.py` → `docs/ai/EDA_REPORT.md` |
 | Sprint7-04 | Prepare Training Dataset | `data_prep/s04_prepare_training_dataset.py` |
+| Sprint7-05 | Calendar Feature Engineering | `data_prep/s05_calendar_features.py` |
+| Sprint7-07 | Baseline Forecast Model | `data_prep/s07_baseline_forecast.py` |
+| Sprint7-08 | AI Data Pipeline Testing | `tests/test_data_prep.py` |
 
 ## Chạy
 
 ```bash
 cd ai-service
 pip install -r requirements.txt
-python run_data_prep.py                 # chạy cả 4 bước với dữ liệu mô phỏng
-python -m unittest discover -s tests -v # 9 test
+python run_data_prep.py                 # chạy Sprint7-01..07 với dữ liệu mô phỏng
+python -m unittest discover -s tests -v # kiểm thử toàn bộ pipeline
 ```
 
-Chạy từng bước: `python -m data_prep.s02_clean_data` (cần chạy từ thư mục `ai-service`).
+Chạy từng bước: `python -m data_prep.s05_calendar_features` (cần chạy từ thư mục `ai-service`).
 
 ## Dùng dữ liệu thật
 
@@ -38,6 +41,9 @@ data/processed/sales_clean.csv             # sau làm sạch
 data/processed/cleaning_report.json        # số dòng bị ảnh hưởng ở mỗi bước
 data/processed/train.csv, test.csv         # chia theo thời gian (test = 60 ngày cuối)
 data/processed/data_schema.json            # mô tả cột, khoảng ngày, chuỗi lịch sử ngắn
+data/processed/train_features.csv, test_features.csv # feature lịch; không fit trên test
+data/processed/calendar_features.json      # mô tả các feature lịch
+data/processed/baseline_predictions.csv, baseline_metrics.json # baseline 7 ngày và weekday mean
 docs/ai/EDA_REPORT.md, docs/ai/eda/*.png
 ```
 
@@ -51,4 +57,7 @@ docs/ai/EDA_REPORT.md, docs/ai/eda/*.png
    hết hàng thật (nhu cầu bị che khuất), nên đừng coi `units_sold` = nhu cầu thật ở các dòng đó.
 4. **Chuỗi intermittent** (nhiều ngày bán 0): đánh giá bằng MAE/WAPE thay vì MAPE.
 5. `sku`, `warehouse_code` khớp `products.sku`, `warehouses.code` của backend để map ngược không cần bảng trung gian.
-6. Feature (lịch, lag, Tết, khuyến mãi) chưa làm ở đây, thuộc Sprint7-05 trở đi; phải fit trên train rồi áp lên test.
+6. Feature ngày/tuần/tháng được tạo bằng cùng một phép biến đổi cho train và test; không fit trên test.
+7. Sprint7-07 tạo hai baseline không cần thư viện ML: seasonal-naive 7 ngày và trung bình theo thứ trong tuần.
+   Predictions chỉ dùng train; test chỉ dùng để tính MAE/WAPE. Kết quả trên dữ liệu mô phỏng chỉ xác nhận pipeline,
+   không phải bằng chứng độ chính xác thực tế.

@@ -6,6 +6,8 @@ from data_prep.s01_collect_sales_dataset import generate_clean_truth, inject_dir
 from data_prep.s02_clean_data import clean, parse_dates
 from data_prep.s03_eda import classify_demand
 from data_prep.s04_prepare_training_dataset import split_by_time, validate
+from data_prep.s05_calendar_features import add_calendar_features
+from data_prep.s07_baseline_forecast import evaluate_baselines
 from data_prep.common import CANONICAL_COLUMNS
 
 
@@ -94,6 +96,74 @@ class SplitTests(unittest.TestCase):
         self.assertTrue(any("RÒ RỈ" in p for p in validate(pd.concat([train, test.head(2)]), test, self.df)))
         gappy = train.drop(train.index[10])
         self.assertTrue(any("đứt quãng" in p for p in validate(gappy, test, pd.concat([gappy, test]))))
+
+
+class CalendarFeatureTests(unittest.TestCase):
+    def test_creates_calendar_features(self):
+        frame = pd.DataFrame({"date": ["2025-01-01", "2025-01-04"], "units_sold": [2, 5]})
+
+        result = add_calendar_features(frame)
+
+        self.assertEqual(result["day_of_week"].tolist(), [2, 5])
+        self.assertEqual(result["is_weekend"].tolist(), [0, 1])
+        self.assertAlmostEqual(result.loc[0, "day_of_week_sin"], np.sin(2 * np.pi * 2 / 7))
+
+    def test_rejects_invalid_dates(self):
+        with self.assertRaisesRegex(ValueError, "date"):
+            add_calendar_features(pd.DataFrame({"date": ["not-a-date"]}))
+
+
+class BaselineTests(unittest.TestCase):
+    def test_baselines_use_training_history_and_score_holdout(self):
+        dates = pd.date_range("2025-01-01", periods=14)
+        frame = pd.DataFrame({
+            "date": dates,
+            "sku": "A",
+            "warehouse_code": "W1",
+            "units_sold": np.tile(np.arange(1, 8), 2),
+        })
+        train, test = frame.iloc[:7].copy(), frame.iloc[7:].copy()
+        result, metrics = evaluate_baselines(train, test)
+        self.assertEqual(result["seasonal_naive_7d"].tolist(), test["units_sold"].tolist())
+        self.assertEqual(metrics["models"]["seasonal_naive_7d"]["mae"], 0)
+        self.assertEqual(metrics["models"]["seasonal_naive_7d"]["wape"], 0)
+        self.assertEqual(metrics["models"]["weekday_mean"]["mae"], 0)
+
+    def test_baseline_rejects_leakage_and_cold_start(self):
+        train = pd.DataFrame({
+            "date": ["2025-01-01"], "sku": ["A"], "warehouse_code": ["W1"], "units_sold": [1],
+        })
+        overlapping_test = train.copy()
+        with self.assertRaisesRegex(ValueError, "chồng lấn"):
+            evaluate_baselines(train, overlapping_test)
+        cold_start_test = pd.DataFrame({
+            "date": ["2025-01-02"], "sku": ["B"], "warehouse_code": ["W1"], "units_sold": [1],
+        })
+        with self.assertRaisesRegex(ValueError, "cold-start"):
+            evaluate_baselines(train, cold_start_test)
+
+
+class PipelineIntegrationTests(unittest.TestCase):
+    def test_split_calendar_features_and_baseline_work_together(self):
+        dates = pd.date_range("2025-01-01", periods=21)
+        frame = pd.DataFrame({
+            "date": dates,
+            "sku": "A",
+            "warehouse_code": "W1",
+            "units_sold": np.arange(1, 22),
+            "unit_price": 100.0,
+            "promotion_flag": 0,
+            "is_imputed": 0,
+            "is_outlier_capped": 0,
+        })
+        train, test, _ = split_by_time(frame, 7)
+        train_features = add_calendar_features(train)
+        test_features = add_calendar_features(test)
+        predictions, metrics = evaluate_baselines(train_features, test_features)
+
+        self.assertEqual(len(train_features) + len(test_features), len(frame))
+        self.assertEqual(len(predictions), 7)
+        self.assertEqual(metrics["models"]["seasonal_naive_7d"]["rows"], 7)
 
 
 if __name__ == "__main__":
