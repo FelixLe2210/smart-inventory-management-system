@@ -76,7 +76,7 @@ def build_schema(train, test, cutoff, test_days):
         "series_count": int(train.groupby(KEY).ngroups),
         "series_with_short_history": [f"{a} @ {b}" for a, b in short.index],
         "notes": [
-            "Chưa có feature lịch/lag: sẽ tạo ở Sprint7-05 trên train rồi áp lên test (không fit trên test).",
+            "Feature lịch được tạo sau bước chia bằng cùng phép biến đổi cho train/test; không fit trên test.",
             "Đánh giá nên loại hoặc giảm trọng số dòng is_imputed=1.",
         ],
     }
