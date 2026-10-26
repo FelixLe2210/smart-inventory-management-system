@@ -426,3 +426,12 @@ git push origin phutrong
 | 4 | **Sprint6-16** | M4 | **Dashboard Acceptance Testing** | 4h | Testing | 🟡 Test tự động xong, chờ nghiệm thu thủ công | 65/65 Node tests PASS (thêm `stockAlerts.test.mjs`: 10, `reports.test.mjs`: 14); kịch bản nghiệm thu thủ công + hạn chế đã biết: `docs/api/DASHBOARD_ACCEPTANCE_TESTING.md`. |
 
 ---
+
+## 🚀 SPRINT 8 — TIẾN ĐỘ THỰC HIỆN MILESTONE M3 (AI Forecast Frontend Integration)
+
+| STT | Mã Thẻ | Milestone | Tên Card / Hạng mục | Effort | Phân loại | Trạng thái | Chi tiết triển khai |
+|:---:|:------:|:---------:|----------------------|:------:|:---------:|:----------:|:--------------------|
+| 1 | **Sprint8-09** | M3 | **Forecast Results UI** | 5h | FE | ✅ Hoàn thành | Giao diện hiển thị kết quả dự báo 7/14/30 ngày tại `/forecasting`: 4 thẻ KPI tổng quan (Tổng nhu cầu, Trung bình/ngày, Ngày cao điểm nhất, Ngày thấp điểm nhất); hỗ trợ chuyển đổi linh hoạt thời đoạn 7, 14, 30 ngày. |
+| 2 | **Sprint8-10** | M3 | **Forecast Chart** | 4h | FE | ✅ Hoàn thành | Biểu đồ SVG tương tác mượt mà (`ForecastChart.jsx`): vẽ đường dự báo với animation, vùng dải tin cậy 95% (Lower/Upper bounds), đường gióng trung bình kỳ vọng, nhãn trục Y tự động chia bước đẹp, tooltip tương tác theo trỏ chuột và bàn phím (ArrowRight/Left). |
+| 3 | **Sprint8-11** | M3 | **Model Accuracy UI** | 4h | FE | ✅ Hoàn thành | Thẻ thông tin mô hình học máy (`ModelAccuracyCard.jsx`): lấy dữ liệu thực tế từ `GET /api/forecast/models`, hiển thị đầy đủ các chỉ số đánh giá MAPE, MAE, RMSE, R²; tự động phân loại xếp hạng độ chính xác theo thang đo Lewis (1982) kèm thanh tiến trình trực quan. |
+| 4 | **Sprint8-12** | M3 | **Forecast Loading / Error UI** | 4h | FE | ✅ Hoàn thành | Xử lý toàn diện trạng thái tải và lỗi: Hiệu ứng Skeleton loader dạng shimmer (`ForecastSkeleton.jsx`); Banner lỗi chuyên biệt phân loại theo nguyên nhân (`ForecastErrorBanner.jsx`: Mất kết nối AI service, Hết thời gian chờ, Sai dữ liệu, Lỗi server) kèm nút Thử lại (Retry) và cơ chế AbortController chống race condition. |

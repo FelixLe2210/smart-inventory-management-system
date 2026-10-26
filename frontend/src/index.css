@@ -73,3 +73,53 @@
     outline-offset: 2px;
   }
 }
+
+/* Forecasting (Sprint 8 - M3) */
+@keyframes forecast-line-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes forecast-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes forecast-shimmer {
+  100% { transform: translateX(100%); }
+}
+@keyframes forecast-progress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
+
+.forecast-line-draw {
+  stroke-dashoffset: 0;
+  animation: forecast-line-draw 0.9s ease-out;
+}
+.forecast-fade-in {
+  animation: forecast-fade-in 0.35s ease-out both;
+}
+.forecast-skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: #e8eef9;
+}
+.forecast-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+  animation: forecast-shimmer 1.4s infinite;
+}
+.forecast-progress-bar {
+  animation: forecast-progress 1.3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .forecast-line-draw,
+  .forecast-fade-in,
+  .forecast-skeleton::after,
+  .forecast-progress-bar {
+    animation: none;
+  }
+}

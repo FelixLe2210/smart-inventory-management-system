@@ -246,6 +246,20 @@ export default function AppSidebar() {
           </NavLink>
 
           <NavLink
+            to="/forecasting"
+            className={({ isActive }) =>
+              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
+                isActive
+                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
+                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
+              }`
+            }
+          >
+            <span className="material-symbols-outlined text-[20px]">auto_awesome</span>
+            <span>Dự báo nhu cầu AI</span>
+          </NavLink>
+
+          <NavLink
             to="/settings"
             className={({ isActive }) =>
               `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
