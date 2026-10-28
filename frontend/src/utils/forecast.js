@@ -25,35 +25,39 @@ function optionalBound(value) {
 }
 
 /**
- * Chuẩn hoá `data` của POST /api/forecast/demand (snake_case) thành object camelCase
- * cho UI. Ném INVALID_FORECAST_RESPONSE nếu response không khớp yêu cầu hoặc hỏng.
+ * Chuẩn hoá `data` của POST /api/forecast/demand từ contract backend camelCase
+ * (hoặc AI snake_case cũ) thành object cho UI.
  */
 export function normalizeForecastResponse(data, { productId, horizonDays }) {
+  const responseProductId = data?.product_id ?? data?.productId;
+  const responseHorizonDays = data?.horizon_days ?? data?.horizonDays;
+  const responsePredictions = data?.predictions;
   if (
     !data ||
     typeof data !== 'object' ||
-    data.product_id !== productId ||
-    data.horizon_days !== horizonDays ||
-    !Array.isArray(data.predictions)
+    responseProductId !== productId ||
+    responseHorizonDays !== horizonDays ||
+    !Array.isArray(responsePredictions)
   ) {
     throw invalidResponse('AI service trả về dữ liệu dự báo không đúng định dạng.');
   }
 
-  if (data.predictions.length !== horizonDays) {
+  if (responsePredictions.length !== horizonDays) {
     throw invalidResponse(
-      `Dự báo cần có ${horizonDays} ngày nhưng AI service trả về ${data.predictions.length} ngày.`
+      `Dự báo cần có ${horizonDays} ngày nhưng AI service trả về ${responsePredictions.length} ngày.`
     );
   }
 
   const seenDates = new Set();
-  const predictions = data.predictions.map((point) => {
-    const lowerBound = optionalBound(point?.lower_bound);
-    const upperBound = optionalBound(point?.upper_bound);
+  const predictions = responsePredictions.map((point) => {
+    const predictedDemand = point?.predicted_demand ?? point?.predictedDemand;
+    const lowerBound = optionalBound(point?.lower_bound ?? point?.lowerBound);
+    const upperBound = optionalBound(point?.upper_bound ?? point?.upperBound);
 
     if (
       !isValidIsoDate(point?.date) ||
       seenDates.has(point.date) ||
-      !isNonNegativeNumber(point.predicted_demand) ||
+      !isNonNegativeNumber(predictedDemand) ||
       lowerBound === undefined ||
       upperBound === undefined ||
       (lowerBound !== null && upperBound !== null && lowerBound > upperBound)
@@ -64,7 +68,7 @@ export function normalizeForecastResponse(data, { productId, horizonDays }) {
     seenDates.add(point.date);
     return {
       date: point.date,
-      predictedDemand: point.predicted_demand,
+      predictedDemand,
       lowerBound,
       upperBound,
     };
@@ -73,17 +77,23 @@ export function normalizeForecastResponse(data, { productId, horizonDays }) {
   predictions.sort((a, b) => a.date.localeCompare(b.date));
 
   return {
-    productId: data.product_id,
-    warehouseId: data.warehouse_id ?? null,
-    horizonDays: data.horizon_days,
-    startDate: isValidIsoDate(data.forecast_start_date) ? data.forecast_start_date : predictions[0].date,
-    endDate: isValidIsoDate(data.forecast_end_date)
-      ? data.forecast_end_date
+    productId: responseProductId,
+    warehouseId: data.warehouse_id ?? data.warehouseId ?? null,
+    horizonDays: responseHorizonDays,
+    startDate: isValidIsoDate(data.forecast_start_date ?? data.forecastStartDate)
+      ? data.forecast_start_date ?? data.forecastStartDate
+      : predictions[0].date,
+    endDate: isValidIsoDate(data.forecast_end_date ?? data.forecastEndDate)
+      ? data.forecast_end_date ?? data.forecastEndDate
       : predictions[predictions.length - 1].date,
     predictions,
-    modelName: typeof data.model_name === 'string' ? data.model_name : null,
-    modelVersion: typeof data.model_version === 'string' ? data.model_version : null,
-    fallbackApplied: data.fallback_applied === true,
+    modelName: typeof (data.model_name ?? data.modelName) === 'string'
+      ? data.model_name ?? data.modelName
+      : null,
+    modelVersion: typeof (data.model_version ?? data.modelVersion) === 'string'
+      ? data.model_version ?? data.modelVersion
+      : null,
+    fallbackApplied: (data.fallback_applied ?? data.fallbackApplied) === true,
   };
 }
 
@@ -109,7 +119,8 @@ export function summarizeForecast(forecast) {
  * để UI hiển thị "Chưa có" thay vì số sai.
  */
 export function normalizeModelInfo(data) {
-  if (!data || typeof data !== 'object' || typeof data.is_loaded !== 'boolean') {
+  const isLoaded = data?.is_loaded ?? data?.isLoaded;
+  if (!data || typeof data !== 'object' || typeof isLoaded !== 'boolean') {
     throw new ApiClientError({
       code: 'INVALID_MODEL_INFO_RESPONSE',
       message: 'AI service trả về thông tin mô hình không đúng định dạng.',
@@ -124,11 +135,12 @@ export function normalizeModelInfo(data) {
   };
 
   return {
-    modelName: data.model_name ?? null,
-    isLoaded: data.is_loaded,
+    modelName: data.model_name ?? data.modelName ?? null,
+    isLoaded,
     version: data.version ?? null,
-    trainedAt: typeof data.trained_at === 'string' && !Number.isNaN(Date.parse(data.trained_at))
-      ? data.trained_at
+    trainedAt: typeof (data.trained_at ?? data.trainedAt) === 'string'
+      && !Number.isNaN(Date.parse(data.trained_at ?? data.trainedAt))
+      ? data.trained_at ?? data.trainedAt
       : null,
     algorithm: data.algorithm ?? null,
     featureCount: Array.isArray(data.features) ? data.features.length : 0,
@@ -169,12 +181,12 @@ export function describeForecastError(error) {
   const status = error?.status ?? null;
   const serverMessage = error?.message;
 
-  if (code === 'AI_SERVICE_UNAVAILABLE') {
+  if (code === 'AI_SERVICE_UNAVAILABLE' || code === 'NETWORK_ERROR') {
     return {
       kind: 'offline',
       title: 'Không kết nối được AI service',
       message: 'Dịch vụ dự báo chưa chạy hoặc không truy cập được.',
-      hint: 'Chạy `python main.py` trong thư mục ai-service (cổng 8000) hoặc kiểm tra VITE_AI_SERVICE_BASE_URL.',
+      hint: 'Kiểm tra Spring Boot backend và AI service (cổng 8000) đang chạy.',
       retryable: true,
     };
   }
@@ -187,7 +199,11 @@ export function describeForecastError(error) {
       retryable: true,
     };
   }
-  if (code === 'INVALID_FORECAST_RESPONSE' || code === 'INVALID_MODEL_INFO_RESPONSE') {
+  if (
+    code === 'INVALID_FORECAST_RESPONSE' ||
+    code === 'INVALID_MODEL_INFO_RESPONSE' ||
+    code === 'AI_SERVICE_INVALID_RESPONSE'
+  ) {
     return {
       kind: 'invalid',
       title: 'Dữ liệu trả về không hợp lệ',

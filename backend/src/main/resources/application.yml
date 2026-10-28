@@ -8,3 +8,9 @@ spring:
 
 server:
   port: ${SERVER_PORT:8080}
+
+app:
+  ai-service:
+    base-url: ${AI_SERVICE_BASE_URL:http://localhost:8000}
+    connect-timeout: ${AI_SERVICE_CONNECT_TIMEOUT:3s}
+    read-timeout: ${AI_SERVICE_READ_TIMEOUT:35s}
