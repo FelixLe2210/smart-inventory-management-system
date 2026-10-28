@@ -84,6 +84,44 @@ Bắt buộc có `date`, `sku`, `units_sold`; `warehouse_code`, `unit_price`, `p
 Khi có dữ liệu thật từ hệ thống (bảng `inventory_transactions`, loại `ISSUING`), gộp theo
 ngày × sản phẩm × kho (`SUM(quantity)`) rồi xuất CSV với các cột trên.
 
+## Sprint 8 · M1 – Đánh giá và so sánh mô hình dự báo
+
+Sau khi có `data/processed/train.csv` và `test.csv`, chạy benchmark trên cùng test set:
+
+```bash
+cd ai-service
+python -m data_prep.s08_model_evaluation
+```
+
+Kết quả được lưu tại `data/processed/model_comparison_metrics.json` và
+`data/processed/model_comparison_predictions.csv`. Báo cáo gồm seasonal-naive,
+weekday mean, Random Forest dùng feature lịch và feature lag/rolling, cùng
+Gradient Boosting. XGBoost và Prophet chỉ được đánh giá nếu package tương ứng
+đã cài; nếu không, báo cáo ghi rõ trạng thái thay vì làm hỏng benchmark.
+
+Đây là đánh giá walk-forward một ngày: feature của mỗi ngày chỉ sử dụng lịch sử
+đến ngày trước đó; số liệu thực tế của ngày test chỉ trở thành lịch sử cho dự
+báo ngày kế tiếp. MAPE bỏ qua ngày có nhu cầu thực tế bằng 0; xem thêm MAE/WAPE
+cho chuỗi intermittent. Dữ liệu hiện tại là mô phỏng, không đại diện cho độ
+chính xác khi triển khai với dữ liệu bán hàng thật.
+
+Kết quả hiện tại (2026-08-02 đến 2026-09-30, 24 chuỗi; MAPE tính trên 1.334
+dòng có nhu cầu thực tế khác 0):
+
+| Model | MAE | MAPE (%) | WAPE |
+|---|---:|---:|---:|
+| Weekday mean | 2.3738 | 39.2285 | 0.250712 |
+| Random Forest · calendar | 2.4537 | 43.6243 | 0.259157 |
+| Random Forest · calendar + lags/rolling | 2.3951 | 42.5276 | 0.252967 |
+| Gradient Boosting · calendar + lags/rolling | 2.3969 | 42.3503 | 0.253156 |
+| Seasonal naive · 7 ngày | 3.2965 | 56.9513 | 0.348174 |
+
+Feature lag/rolling giảm MAE của Random Forest khoảng 2.4% so với feature lịch
+đơn thuần, nhưng weekday mean vẫn là baseline tốt nhất trên holdout này. Chưa
+chọn candidate ML làm mặc định dựa trên dữ liệu mô phỏng; XGBoost và Prophet
+không được cài nên không có điểm số. Các số liệu đầy đủ và dự đoán nằm trong
+hai file kết quả được tạo bởi lệnh benchmark ở trên.
+
 ## Đầu ra
 
 ```
