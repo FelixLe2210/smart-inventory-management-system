@@ -50,3 +50,4 @@ ENV/
 data/raw/
 data/processed/
 __pycache__/
+models/*.json

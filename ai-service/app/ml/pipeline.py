@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 import joblib
 import numpy as np
 import pandas as pd
@@ -8,6 +8,7 @@ from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 from app.ml.feature_engineering import FEATURE_COLUMNS, build_feature_matrix
+from app.ml.model_store import atomic_dump, validate_payload, write_metadata
 
 
 class DemandForecastPipeline:
@@ -30,7 +31,6 @@ class DemandForecastPipeline:
                 max_depth=5,
                 random_state=42,
             )
-        # Default: Random Forest
         return RandomForestRegressor(
             n_estimators=100,
             max_depth=12,
@@ -51,7 +51,6 @@ class DemandForecastPipeline:
 
         self.features = feature_cols
 
-        # Chronological split to prevent future data leakage
         split_idx = int(len(X) * (1 - test_size))
         X_train, X_test = X.iloc[:split_idx], X.iloc[split_idx:]
         y_train, y_test = y.iloc[:split_idx], y.iloc[split_idx:]
@@ -59,20 +58,17 @@ class DemandForecastPipeline:
         self.model = self._init_model()
         self.model.fit(X_train, y_train)
 
-        # Evaluate performance
         y_pred = self.model.predict(X_test)
         mae = float(mean_absolute_error(y_test, y_pred))
         rmse = float(np.sqrt(mean_squared_error(y_test, y_pred)))
         r2 = float(r2_score(y_test, y_pred))
 
-        # Calculate Mean Absolute Percentage Error (MAPE) safely
         non_zero = y_test > 0.1
         if non_zero.any():
             mape = float(np.mean(np.abs((y_test[non_zero] - y_pred[non_zero]) / y_test[non_zero])) * 100)
         else:
             mape = 0.0
 
-        # Estimate residual std for prediction intervals
         residuals = y_test - y_pred
         self.residual_std = max(1.0, float(np.std(residuals)))
 
@@ -101,9 +97,7 @@ class DemandForecastPipeline:
         if warehouse_id is None:
             warehouse_id = 1
 
-        # Prepare working history DataFrame
         if historical_series is None or len(historical_series) < 14:
-            # Fallback baseline history if historical series is short
             hist_dates = [start_date - timedelta(days=i) for i in range(30, 0, -1)]
             base_qty = 15.0 + (product_id * 3.5) % 30
             hist_records = [
@@ -129,12 +123,10 @@ class DemandForecastPipeline:
         predictions = []
         z_score = 1.96 if confidence_level >= 0.95 else 1.645
 
-        # Recursive forecasting step by step
         for step in range(horizon_days):
             current_target_date = start_date + timedelta(days=step)
             current_dt = pd.to_datetime(current_target_date)
 
-            # Build feature vector for the step
             tail_df = working_df.tail(20).copy()
             last_demands = tail_df["demand"].tolist()
 
@@ -171,13 +163,11 @@ class DemandForecastPipeline:
             if self.model is not None:
                 step_pred = float(self.model.predict(input_row)[0])
             else:
-                # Rule-based fallback: weighted recent rolling mean + weekday adjustment
                 dow_weight = 1.2 if current_dt.dayofweek in (4, 5) else 1.0
                 step_pred = rolling_7 * 0.7 + lag_7 * 0.3 * dow_weight
 
             step_pred = max(0.0, round(step_pred, 1))
 
-            # Horizon uncertainty expansion factor
             horizon_factor = np.sqrt(1 + 0.08 * step)
             margin = z_score * self.residual_std * horizon_factor
             lower_bound = max(0.0, round(step_pred - margin, 1))
@@ -193,7 +183,6 @@ class DemandForecastPipeline:
                 }
             )
 
-            # Append predicted demand to working_df to feed future lags
             new_row = pd.DataFrame(
                 [
                     {
@@ -209,8 +198,7 @@ class DemandForecastPipeline:
         return predictions
 
     def save(self, file_path: Path) -> None:
-        """Persist model and pipeline artifacts to disk."""
-        file_path.parent.mkdir(parents=True, exist_ok=True)
+        """Ghi artifact atomic + sidecar metadata JSON (Sprint8-08)."""
         payload = {
             "model": self.model,
             "model_type": self.model_type,
@@ -220,18 +208,30 @@ class DemandForecastPipeline:
             "trained_at": self.trained_at,
             "residual_std": self.residual_std,
         }
-        joblib.dump(payload, file_path)
+        atomic_dump(payload, file_path)
+        write_metadata(file_path, {
+            "model_name": file_path.name,
+            "model_type": self.model_type,
+            "version": self.version,
+            "trained_at": self.trained_at,
+            "metrics": self.metrics,
+            "features": self.features,
+        })
 
     @classmethod
     def load(cls, file_path: Path) -> "DemandForecastPipeline":
-        """Load trained pipeline from disk."""
+        """Nạp và kiểm tra artifact; ném FileNotFoundError / ValueError nếu không dùng được."""
         if not file_path.exists():
             raise FileNotFoundError(f"Model file not found at: {file_path}")
+        try:
+            payload = joblib.load(file_path)
+        except Exception as exc:
+            raise ValueError(f"Không đọc được file model {file_path.name}: {exc}") from exc
+        validate_payload(payload)
 
-        payload = joblib.load(file_path)
         pipeline = cls(model_type=payload.get("model_type", "random_forest"))
         pipeline.model = payload["model"]
-        pipeline.features = payload.get("features", FEATURE_COLUMNS)
+        pipeline.features = payload["features"]
         pipeline.metrics = payload.get("metrics", {})
         pipeline.version = payload.get("version", "1.0.0")
         pipeline.trained_at = payload.get("trained_at")

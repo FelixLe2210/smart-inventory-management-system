@@ -212,9 +212,40 @@ curl -X GET http://localhost:8000/api/forecast/models
 
 ---
 
+### 3.6. Dự Báo Chuẩn 7 / 14 / 30 Ngày (`GET /api/forecast/product/{id}/horizon/{days}`) — Sprint8-05/06/07
+Chỉ chấp nhận `days` là `7`, `14` hoặc `30`; giá trị khác trả `400 BAD_REQUEST`.
+
+```bash
+curl "http://localhost:8000/api/forecast/product/1/horizon/14?warehouse_id=1&start_date=2026-11-01"
+curl http://localhost:8000/api/forecast/horizons     # {"horizons": [7, 14, 30]}
+```
+
+### 3.7. Lưu / Nạp Model — Sprint8-08
+Mỗi lần train, artifact `.joblib` được ghi atomic kèm file metadata `.json` cùng tên trong `models/`.
+
+```bash
+# Liệt kê model đã lưu (đọc metadata, không nạp model)
+curl http://localhost:8000/api/forecast/models/saved
+
+# Nạp một model đã lưu làm model đang dùng
+curl -X POST http://localhost:8000/api/forecast/models/load \
+  -H "Content-Type: application/json" \
+  -d '{"model_name": "demand_forecast_model.joblib"}'
+```
+
+| Tình huống | Kết quả |
+|---|---|
+| Model không tồn tại | `404`, model đang dùng giữ nguyên |
+| Tên không hợp lệ (vd `../x.joblib`) hoặc file hỏng | `400`, model đang dùng giữ nguyên |
+| Train với `save_as_default=false` | Lưu thành `demand_forecast_<loại>_<timestamp>.joblib`, không ghi đè |
+
+> Chỉ nạp file do hệ thống tự ghi trong `models/` (`joblib` dựa trên pickle).
+
+---
+
 ## 4. Kiểm Thử Tự Động (Automated Testing Suite)
 
-Bộ kiểm thử được xây dựng bằng `pytest` và `httpx.TestClient`, bao gồm 15 bài kiểm thử đơn vị và tích hợp:
+Bộ kiểm thử được xây dựng bằng `pytest` và `httpx.TestClient`, bao gồm 28 bài kiểm thử đơn vị và tích hợp (15 của Sprint 7 + 13 của Sprint 8 M2: `test_forecast_horizons.py`, `test_model_store.py`):
 
 ### Lệnh chạy test:
 ```bash

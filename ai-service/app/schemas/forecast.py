@@ -2,6 +2,8 @@ from datetime import date
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field, field_validator
 
+SUPPORTED_HORIZONS = (7, 14, 30)  # Sprint8-05/06/07: khớp FORECAST_HORIZONS ở frontend
+
 
 class HistoricalDataPoint(BaseModel):
     """Historical demand data point for a product."""
@@ -98,3 +100,9 @@ class ModelInfoResponse(BaseModel):
     metrics: Optional[Dict[str, float]] = None
     features: Optional[List[str]] = None
     algorithm: Optional[str] = None
+
+
+class ModelLoadRequest(BaseModel):
+    """Yêu cầu nạp một model đã lưu làm model đang dùng."""
+
+    model_name: str = Field(..., min_length=8, max_length=105, description="Tên file, ví dụ demand_forecast_model.joblib")

@@ -435,3 +435,21 @@ git push origin phutrong
 | 2 | **Sprint8-10** | M3 | **Forecast Chart** | 4h | FE | ✅ Hoàn thành | Biểu đồ SVG tương tác mượt mà (`ForecastChart.jsx`): vẽ đường dự báo với animation, vùng dải tin cậy 95% (Lower/Upper bounds), đường gióng trung bình kỳ vọng, nhãn trục Y tự động chia bước đẹp, tooltip tương tác theo trỏ chuột và bàn phím (ArrowRight/Left). |
 | 3 | **Sprint8-11** | M3 | **Model Accuracy UI** | 4h | FE | ✅ Hoàn thành | Thẻ thông tin mô hình học máy (`ModelAccuracyCard.jsx`): lấy dữ liệu thực tế từ `GET /api/forecast/models`, hiển thị đầy đủ các chỉ số đánh giá MAPE, MAE, RMSE, R²; tự động phân loại xếp hạng độ chính xác theo thang đo Lewis (1982) kèm thanh tiến trình trực quan. |
 | 4 | **Sprint8-12** | M3 | **Forecast Loading / Error UI** | 4h | FE | ✅ Hoàn thành | Xử lý toàn diện trạng thái tải và lỗi: Hiệu ứng Skeleton loader dạng shimmer (`ForecastSkeleton.jsx`); Banner lỗi chuyên biệt phân loại theo nguyên nhân (`ForecastErrorBanner.jsx`: Mất kết nối AI service, Hết thời gian chờ, Sai dữ liệu, Lỗi server) kèm nút Thử lại (Retry) và cơ chế AbortController chống race condition. |
+
+---
+
+## 🚀 SPRINT 8 — TIẾN ĐỘ THỰC HIỆN MILESTONE M2 (AI Forecast 7/14/30 ngày & Model Save/Load)
+
+| STT | Mã Thẻ | Milestone | Tên Card / Hạng mục | Effort | Phân loại | Trạng thái | Chi tiết triển khai |
+|:---:|:------:|:---------:|----------------------|:------:|:---------:|:----------:|:--------------------|
+| 1 | **Sprint8-05** | M2 | **7-Day Forecast** | 4h | AI / ML | ✅ Hoàn thành | Endpoint chuẩn `GET /api/forecast/product/{id}/horizon/7` (dự báo đệ quy 7 ngày, dải tin cậy 95%). |
+| 2 | **Sprint8-06** | M2 | **14-Day Forecast** | 4h | AI / ML | ✅ Hoàn thành | Endpoint `.../horizon/14`; khoảng tin cậy nới rộng dần theo số bước dự báo. |
+| 3 | **Sprint8-07** | M2 | **30-Day Forecast** | 4h | AI / ML | ✅ Hoàn thành | Endpoint `.../horizon/30`. Chỉ nhận 7/14/30 (khác trả 400), liệt kê qua `GET /api/forecast/horizons`; khớp `FORECAST_HORIZONS` ở frontend. `POST /demand` cũ vẫn nhận 1–90 ngày. |
+| 4 | **Sprint8-08** | M2 | **Model Save / Load** | 5h | AI / ML | ✅ Hoàn thành | `app/ml/model_store.py`: ghi atomic (file tạm + `os.replace`), sidecar `.json`, kiểm tra artifact khi nạp, chặn path traversal, lưu model phụ kèm timestamp (không ghi đè). Registry thêm `list_models()`, `load_model()`; nạp lỗi giữ nguyên model đang dùng. Endpoint `GET /api/forecast/models/saved`, `POST /api/forecast/models/load`. |
+
+**Kiểm thử:** `tests/test_forecast_horizons.py` (4 test), `tests/test_model_store.py` (9 test). Chạy: `cd ai-service && pytest -v`.
+
+**Hạn chế đã biết:**
+- Khi không truyền `historical_data`, dự báo dùng lịch sử giả; model huấn luyện trên dữ liệu mô phỏng nên MAPE chỉ có giá trị kiểm thử pipeline. Nối lịch sử xuất kho thật thuộc Sprint8-14 (M4).
+- `joblib` dựa trên pickle: chỉ nạp file do hệ thống tự ghi trong `models/`; không mở endpoint cho người dùng tải model lên.
+
