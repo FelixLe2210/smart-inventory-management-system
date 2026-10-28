@@ -48,6 +48,30 @@ test('normalizeForecastResponse: validates and sorts predictions by date', () =>
   assert.equal(result.predictions[0].predictedDemand, 10);
 });
 
+test('normalizeForecastResponse: maps the backend camelCase response contract', () => {
+  const result = normalizeForecastResponse(
+    {
+      productId: 1,
+      warehouseId: 2,
+      horizonDays: 1,
+      forecastStartDate: '2026-10-26',
+      forecastEndDate: '2026-10-26',
+      predictions: [
+        { date: '2026-10-26', predictedDemand: 10, lowerBound: 7, upperBound: 13 },
+      ],
+      modelName: 'random_forest',
+      modelVersion: '1.0.0',
+      fallbackApplied: false,
+    },
+    { productId: 1, horizonDays: 1 }
+  );
+
+  assert.equal(result.warehouseId, 2);
+  assert.equal(result.startDate, '2026-10-26');
+  assert.equal(result.predictions[0].predictedDemand, 10);
+  assert.equal(result.fallbackApplied, false);
+});
+
 test('normalizeForecastResponse: rejects mismatch productId or horizonDays', () => {
   const payload = makeResponse([
     { date: '2026-10-26', predicted_demand: 10, lower_bound: null, upper_bound: null },
@@ -125,6 +149,18 @@ test('normalizeModelInfo: normalizes metrics and flags missing values gracefully
   const emptyMetrics = normalizeModelInfo({ is_loaded: false });
   assert.equal(emptyMetrics.isLoaded, false);
   assert.equal(emptyMetrics.metrics.mape, null);
+
+  const backendInfo = normalizeModelInfo({
+    modelName: 'random_forest',
+    isLoaded: true,
+    version: '2.0.0',
+    trainedAt: '2026-10-28T00:00:00Z',
+    features: ['lag_1'],
+    metrics: { mape: 4.5 },
+  });
+  assert.equal(backendInfo.modelName, 'random_forest');
+  assert.equal(backendInfo.isLoaded, true);
+  assert.equal(backendInfo.metrics.mape, 4.5);
 });
 
 test('rateMape & accuracyPercent: evaluates according to Lewis scale', () => {
@@ -143,6 +179,7 @@ test('describeForecastError: categorizes AI service errors correctly', () => {
   const offlineErr = describeForecastError({ code: 'AI_SERVICE_UNAVAILABLE' });
   assert.equal(offlineErr.kind, 'offline');
   assert.equal(offlineErr.retryable, true);
+  assert.equal(describeForecastError({ code: 'NETWORK_ERROR' }).kind, 'offline');
 
   const timeoutErr = describeForecastError({ code: 'AI_SERVICE_TIMEOUT' });
   assert.equal(timeoutErr.kind, 'timeout');
