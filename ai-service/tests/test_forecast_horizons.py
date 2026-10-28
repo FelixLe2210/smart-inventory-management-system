@@ -33,3 +33,39 @@ def test_horizons_listing(client):
 def test_forecast_is_deterministic_for_same_input(client):
     url = "/api/forecast/product/3/horizon/7?warehouse_id=1&start_date=2026-11-01"
     assert client.get(url).json()["data"]["predictions"] == client.get(url).json()["data"]["predictions"]
+
+
+def test_forecast_scenarios_cover_multiple_products_and_warehouses(client):
+    scenarios = [(1, 1, 8.0), (3, 2, 24.0), (8, 3, 45.0)]
+    start_date = date(2026, 11, 1)
+
+    for product_id, warehouse_id, quantity in scenarios:
+        history = [
+            {
+                "date": (start_date - timedelta(days=30 - index)).isoformat(),
+                "quantity": quantity + index % 5,
+            }
+            for index in range(30)
+        ]
+        response = client.post(
+            "/api/forecast/demand",
+            json={
+                "product_id": product_id,
+                "warehouse_id": warehouse_id,
+                "horizon_days": 14,
+                "start_date": start_date.isoformat(),
+                "historical_data": history,
+            },
+        )
+
+        assert response.status_code == 200
+        data = response.json()["data"]
+        assert data["product_id"] == product_id
+        assert data["warehouse_id"] == warehouse_id
+        assert data["horizon_days"] == 14
+        assert len(data["predictions"]) == 14
+        assert data["predictions"][0]["date"] == start_date.isoformat()
+        assert all(
+            0 <= point["lower_bound"] <= point["predicted_demand"] <= point["upper_bound"]
+            for point in data["predictions"]
+        )
