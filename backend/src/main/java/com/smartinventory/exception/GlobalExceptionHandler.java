@@ -61,6 +61,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(error));
     }
 
+    @ExceptionHandler(AiServiceException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAiServiceFailure(AiServiceException ex) {
+        ApiError error = new ApiError(ex.getCode(), ex.getMessage());
+        return ResponseEntity.status(ex.getStatus()).body(ApiResponse.error(error));
+    }
+
     /** Resource not found: warehouse, product, category, supplier, etc. */
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNotFound(NotFoundException ex) {
