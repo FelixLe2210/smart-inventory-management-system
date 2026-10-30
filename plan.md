@@ -453,3 +453,55 @@ git push origin phutrong
 - Khi không truyền `historical_data`, dự báo dùng lịch sử giả; model huấn luyện trên dữ liệu mô phỏng nên MAPE chỉ có giá trị kiểm thử pipeline. Nối lịch sử xuất kho thật thuộc Sprint8-14 (M4).
 - `joblib` dựa trên pickle: chỉ nạp file do hệ thống tự ghi trong `models/`; không mở endpoint cho người dùng tải model lên.
 
+---
+
+## 🚀 SPRINT 9 — TIẾN ĐỘ THỰC HIỆN MILESTONE M1 (Reorder Logic & Safety Stock Calculation)
+
+| STT | Mã Thẻ | Milestone | Tên Card / Hạng mục | Effort | Phân loại | Trạng thái | Chi tiết triển khai |
+|:---:|:------:|:---------:|----------------------|:------:|:---------:|:----------:|:--------------------|
+| 1 | **Sprint9-01** | M1 | **Reorder Decision Logic** | 5h | AI / Logic | ✅ Hoàn thành | Xác định thời điểm cần tái đặt hàng (`decide_reorder` trong `ai-service/app/services/reorder_logic.py`): Tính toán vị trí tồn kho khả dụng `inventory_position = on_hand + on_order`, điểm đặt hàng lại ROP (`reorder_point = avg_daily_demand * lead_time + safety_stock`). Đưa ra quyết định đặt hàng và phân loại 4 mức độ khẩn cấp (`CRITICAL`, `HIGH`, `MEDIUM`, `NONE`) kèm lý do chi tiết và số ngày tồn trữ (`days_of_cover`). |
+| 2 | **Sprint9-02** | M1 | **Safety Stock Calculation** | 5h | AI / Logic | ✅ Hoàn thành | Tính toán tồn kho an toàn (`calculate_safety_stock`): Hỗ trợ linh hoạt 3 phương pháp tiêu chuẩn công nghiệp gồm: Thống kê sai số nhu cầu & thời gian giao hàng (`statistical` theo Z-score service level), Biên độ cực đại trừ trung bình (`max_min`), và Số ngày bán hàng an toàn cố định (`fixed_days`). Đảm bảo kết quả làm tròn nguyên dương không âm. |
+| 3 | **Sprint9-03** | M1 | **Recommended Quantity Calculation** | 5h | AI / Logic | ✅ Hoàn thành | Tính số lượng đề xuất đặt hàng theo mô hình Order-up-to (`calculate_recommended_quantity`): Xác định mục tiêu tồn kho `target_stock` theo chu kỳ đánh giá (`review_period_days`), áp dụng chặn trần mức tồn kho tối đa (`max_stock_level`), tự động điều chỉnh theo số lượng đặt hàng tối thiểu (`moq`) và làm tròn theo bội số đóng gói/thùng (`order_multiple`). |
+| 4 | **Sprint9-04** | M1 | **Reorder Scenario Testing** | 4h | Testing | ✅ Hoàn thành | Bộ kiểm thử tự động toàn diện kịch bản tái đặt hàng (`ai-service/tests/test_reorder_logic.py`): Bao gồm 37 test cases cho phân phối Z-score, 3 phương pháp Safety Stock, các ngưỡng cảnh báo khẩn cấp, điều chỉnh trần tồn/MOQ/Pack size, và kịch bản End-to-End thực tế. Toàn bộ **37/37 tests PASS 100%**. |
+
+### 📐 Chi Tiết Kiến Trúc & Công Thức Toán Học Sprint 9 M1 (`reorder_logic.py`)
+
+Toàn bộ logic được đóng gói dạng **Pure Functions (không I/O, không side-effects)** tại [`ai-service/app/services/reorder_logic.py`](file:///d:/smart-inventory-management-system/ai-service/app/services/reorder_logic.py), sẵn sàng tích hợp vào API endpoint hoặc batch scheduler:
+
+#### 1. Quyết định Đặt hàng & Điểm đặt hàng lại (Sprint9-01):
+- **Vị trí tồn kho (Inventory Position):**
+  $$\text{Inventory Position} = \text{on\_hand} + \text{on\_order}$$
+- **Điểm đặt hàng lại (Reorder Point - ROP):**
+  $$\text{ROP} = \lceil d_{\text{avg}} \times LT + SS \rceil$$
+- **Điều kiện kích hoạt Reorder:** Khi $\text{Inventory Position} \le \text{ROP}$ hoặc $\text{on\_hand} < \text{min\_stock\_level}$.
+- **Phân cấp mức độ khẩn cấp (Urgency Matrix):**
+  - `CRITICAL`: Hết hàng ($\text{on\_hand} \le 0$) hoặc số ngày tồn trữ nhỏ hơn thời gian giao hàng ($\text{days\_of\_cover} < LT$).
+  - `HIGH`: Tồn kho nằm trong vùng tồn kho an toàn ($\text{on\_hand} \le SS$).
+  - `MEDIUM`: Cần đặt hàng thông thường ($\text{Inventory Position} \le \text{ROP}$).
+  - `NONE`: Tồn kho dồi dào, chưa cần đặt.
+
+#### 2. Các phương pháp tính Safety Stock (Sprint9-02):
+Hỗ trợ 3 phương pháp tiêu chuẩn công nghiệp:
+1. **Thống kê biến thiên (Statistical):**
+   $$SS = \max\left(0, \lceil Z \times \sqrt{LT \cdot \sigma_d^2 + d_{\text{avg}}^2 \cdot \sigma_{LT}^2} \rceil\right)$$
+   *(Hệ số $Z$ tính chính xác từ phân phối chuẩn tắc chuẩn tắc nghịch đảo `statistics.NormalDist().inv_cdf(service_level)`).*
+2. **Biên độ Cực đại – Cực tiểu (Max-Min):**
+   $$SS = \max(0, \lceil d_{\max} \times LT_{\max} - d_{\text{avg}} \times LT_{\text{avg}} \rceil)$$
+3. **Số ngày bán cố định (Fixed Days):**
+   $$SS = \max(0, \lceil d_{\text{avg}} \times \text{fixed\_days} \rceil)$$
+
+#### 3. Mô hình Tính Số lượng Đề xuất (Sprint9-03):
+- **Mục tiêu tồn kho (Order-Up-To Target):**
+   $$\text{Target Stock} = \min(\text{max\_stock\_level}, \lceil d_{\text{avg}} \times (LT + \text{review\_period}) + SS \rceil)$$
+- **Số lượng thô:** $\text{raw\_qty} = \max(0, \text{Target Stock} - \text{Inventory Position})$.
+- **Ràng buộc cung ứng (Supply Constraints):**
+  - Áp dụng số lượng tối thiểu: $\text{qty} = \max(\text{raw\_qty}, \text{MOQ})$.
+  - Làm tròn theo thùng/bội số: $\text{qty} = \lceil \text{qty} / \text{order\_multiple} \rceil \times \text{order\_multiple}$.
+  - Kiểm soát trần tối đa: Nếu vượt $\text{max\_stock\_level}$, tự động hạ về bội số đóng gói gần nhất vừa khít trần.
+
+#### 4. Nghiệm thu Kiểm thử Tự động (Sprint9-04):
+- File test: [`ai-service/tests/test_reorder_logic.py`](file:///d:/smart-inventory-management-system/ai-service/tests/test_reorder_logic.py)
+- **Kết quả:** **37/37 tests PASS 100%** (0.37s).
+- Bao phủ: Kiểm thử Z-score, 3 phương pháp Safety Stock, các mức cảnh báo khẩn cấp, biên MOQ/bội số thùng/trần kho, và kịch bản End-to-End chuỗi cung ứng thực tế.
+
+
