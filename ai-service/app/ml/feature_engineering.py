@@ -61,32 +61,38 @@ def add_rolling_features(
     target_col: str = "demand",
     windows: Optional[List[int]] = None,
 ) -> pd.DataFrame:
-    """Compute rolling window summary statistics on lag 1 to avoid lookahead bias."""
+    """Rolling statistics of the PAST demand, computed separately for every series.
+
+    The window is shifted by one day (no look-ahead) and is applied inside each
+    (product, warehouse) group, so the first rows of a series never borrow values
+    from the previous series. ``rolling_std`` uses ``ddof=1`` (pandas default); the
+    inference code in ``DemandForecastPipeline`` uses the same convention.
+    """
     if windows is None:
         windows = [7, 14]
     if group_cols is None:
         group_cols = ["product_id", "warehouse_id"]
 
     df = df.copy()
-    grouped = df.groupby(group_cols, group_keys=False)
+    grouped = df.groupby(group_cols, group_keys=False)[target_col]
 
     for w in windows:
-        # Use shift(1) to avoid data leakage
-        shifted = grouped[target_col].shift(1)
-        df[f"rolling_mean_{w}"] = shifted.rolling(window=w, min_periods=1).mean()
-        df[f"rolling_std_{w}"] = (
-            shifted.rolling(window=w, min_periods=1).std().fillna(0.0)
+        df[f"rolling_mean_{w}"] = grouped.transform(
+            lambda s, w=w: s.shift(1).rolling(window=w, min_periods=1).mean()
+        )
+        df[f"rolling_std_{w}"] = grouped.transform(
+            lambda s, w=w: s.shift(1).rolling(window=w, min_periods=1).std().fillna(0.0)
         )
 
     return df
 
 
-def build_feature_matrix(
+def build_feature_frame(
     df: pd.DataFrame,
     target_col: str = "demand",
     drop_na: bool = True,
-) -> Tuple[pd.DataFrame, Optional[pd.Series], List[str]]:
-    """Transform raw transaction/demand time-series into ML feature matrix."""
+) -> pd.DataFrame:
+    """Full feature table INCLUDING ``date`` (needed for a chronological split)."""
     df = df.copy()
     if "warehouse_id" not in df.columns:
         df["warehouse_id"] = 1
@@ -99,12 +105,19 @@ def build_feature_matrix(
         # Drop rows where lag features are NaN (initial history warm-up)
         df = df.dropna(subset=[col for col in FEATURE_COLUMNS if col in df.columns]).reset_index(drop=True)
     else:
-        # Fill missing values with median / 0 for inference
         for col in FEATURE_COLUMNS:
             if col in df.columns:
                 df[col] = df[col].fillna(0.0)
+    return df
 
+
+def build_feature_matrix(
+    df: pd.DataFrame,
+    target_col: str = "demand",
+    drop_na: bool = True,
+) -> Tuple[pd.DataFrame, Optional[pd.Series], List[str]]:
+    """Transform raw transaction/demand time-series into ML feature matrix."""
+    df = build_feature_frame(df, target_col=target_col, drop_na=drop_na)
     X = df[FEATURE_COLUMNS].copy()
     y = df[target_col].copy() if target_col in df.columns else None
-
     return X, y, FEATURE_COLUMNS

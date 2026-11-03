@@ -66,6 +66,12 @@ class DemandForecastResponse(BaseModel):
     model_name: str
     model_version: str
     fallback_applied: bool = False
+    history_source: str = Field(
+        default="provided",
+        description="'provided' = forecast built from the caller's real history; "
+        "'synthetic_placeholder' = no/too little history was sent, so the model was fed a "
+        "made-up recent history and the numbers are NOT product-specific.",
+    )
 
 
 class TrainingRequest(BaseModel):
