@@ -13,6 +13,8 @@ from app.schemas.forecast import (
 
 logger = logging.getLogger("ai_service.services.forecast")
 
+MIN_REAL_HISTORY_POINTS = 14  # must match the threshold in DemandForecastPipeline.predict_multi_step
+
 
 class ForecastService:
     """Service handling demand forecast generation and calculations."""
@@ -52,6 +54,13 @@ class ForecastService:
                 for pt in request.historical_data
             ]
             hist_df = pd.DataFrame(hist_records)
+
+        # With < 14 real points the pipeline substitutes a made-up history (see
+        # DemandForecastPipeline.predict_multi_step); tell the caller instead of hiding it.
+        history_source = (
+            "provided" if hist_df is not None and len(hist_df) >= MIN_REAL_HISTORY_POINTS
+            else "synthetic_placeholder"
+        )
 
         # Generate predictions
         if pipeline is not None and not fallback_applied:
@@ -116,6 +125,7 @@ class ForecastService:
             model_name=model_name,
             model_version=model_version,
             fallback_applied=fallback_applied,
+            history_source=history_source,
         )
 
 

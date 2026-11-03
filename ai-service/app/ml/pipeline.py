@@ -7,7 +7,7 @@ import pandas as pd
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-from app.ml.feature_engineering import FEATURE_COLUMNS, build_feature_matrix
+from app.ml.feature_engineering import FEATURE_COLUMNS, build_feature_frame
 from app.ml.model_store import atomic_dump, validate_payload, write_metadata
 
 
@@ -44,32 +44,50 @@ class DemandForecastPipeline:
         df: pd.DataFrame,
         test_size: float = 0.2,
     ) -> Dict[str, float]:
-        """Fit model on historical dataset with chronological train/test split."""
-        X, y, feature_cols = build_feature_matrix(df, target_col="demand", drop_na=True)
-        if len(X) < 20:
-            raise ValueError(f"Insufficient training samples ({len(X)} samples, minimum 20 required).")
+        """Fit on history with a CHRONOLOGICAL hold-out: the last ``test_size`` share of
+        the calendar days is the test set for every product/warehouse series.
 
-        self.features = feature_cols
+        (Splitting by row position would be wrong here: rows are ordered by series first,
+        so the "test set" would be a few whole products instead of the most recent days.)
+        """
+        frame = build_feature_frame(df, target_col="demand", drop_na=True)
+        if len(frame) < 20:
+            raise ValueError(f"Insufficient training samples ({len(frame)} samples, minimum 20 required).")
 
-        split_idx = int(len(X) * (1 - test_size))
-        X_train, X_test = X.iloc[:split_idx], X.iloc[split_idx:]
-        y_train, y_test = y.iloc[:split_idx], y.iloc[split_idx:]
+        self.features = list(FEATURE_COLUMNS)
+
+        days = np.sort(frame["date"].unique())
+        n_test_days = max(1, int(round(len(days) * test_size)))
+        if n_test_days >= len(days):
+            raise ValueError("Not enough distinct days to hold out a test period.")
+        cutoff = days[-n_test_days - 1]  # last day that still belongs to training
+        train_mask = frame["date"] <= cutoff
+        train_df, test_df = frame[train_mask], frame[~train_mask]
+        if len(train_df) < 10 or test_df.empty:
+            raise ValueError("Chronological split produced an empty train or test set.")
+
+        X_train, y_train = train_df[self.features], train_df["demand"]
+        X_test, y_test = test_df[self.features], test_df["demand"]
 
         self.model = self._init_model()
         self.model.fit(X_train, y_train)
 
-        y_pred = self.model.predict(X_test)
+        y_pred = np.maximum(0.0, self.model.predict(X_test))
         mae = float(mean_absolute_error(y_test, y_pred))
         rmse = float(np.sqrt(mean_squared_error(y_test, y_pred)))
         r2 = float(r2_score(y_test, y_pred))
 
-        non_zero = y_test > 0.1
+        non_zero = (y_test > 0.1).to_numpy()
         if non_zero.any():
-            mape = float(np.mean(np.abs((y_test[non_zero] - y_pred[non_zero]) / y_test[non_zero])) * 100)
+            mape = float(np.mean(np.abs((y_test.to_numpy()[non_zero] - y_pred[non_zero]) / y_test.to_numpy()[non_zero])) * 100)
         else:
             mape = 0.0
+        total_actual = float(np.abs(y_test).sum())
+        wape = float(np.abs(y_test.to_numpy() - y_pred).sum() / total_actual * 100) if total_actual > 0 else 0.0
+        # Reference point: "same weekday last week". A useful model must beat it.
+        baseline_mae = float(mean_absolute_error(y_test, test_df["lag_7"]))
 
-        residuals = y_test - y_pred
+        residuals = y_test.to_numpy() - y_pred
         self.residual_std = max(1.0, float(np.std(residuals)))
 
         self.metrics = {
@@ -77,6 +95,9 @@ class DemandForecastPipeline:
             "rmse": round(rmse, 3),
             "r2": round(r2, 3),
             "mape": round(mape, 2),
+            "wape": round(wape, 2),
+            "baseline_mae": round(baseline_mae, 3),
+            "test_rows": float(len(test_df)),
         }
         self.trained_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -137,7 +158,7 @@ class DemandForecastPipeline:
             lag_14 = last_demands[-14] if len(last_demands) >= 14 else lag_7
 
             rolling_7 = float(np.mean(last_demands[-7:])) if len(last_demands) >= 7 else lag_1
-            rolling_std_7 = float(np.std(last_demands[-7:])) if len(last_demands) >= 7 else 1.0
+            rolling_std_7 = float(np.std(last_demands[-7:], ddof=1)) if len(last_demands) >= 7 else 0.0  # same ddof=1 as training
             rolling_14 = float(np.mean(last_demands[-14:])) if len(last_demands) >= 14 else rolling_7
 
             feature_dict = {
