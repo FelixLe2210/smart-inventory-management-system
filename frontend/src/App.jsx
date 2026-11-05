@@ -14,6 +14,7 @@ import DashboardPage from './pages/dashboard/DashboardPage';
 import AlertsPage from './pages/alerts/AlertsPage';
 import ReportsPage from './pages/reports/ReportsPage';
 import ForecastPage from './pages/forecasting/ForecastPage';
+import RecommendationPage from './pages/recommendations/RecommendationPage';
 
 /**
  * App – Router chính của Hệ thống Smart Inventory Management System for Demand Forecasting and Reorder Recommendation.
@@ -44,7 +45,7 @@ export default function App() {
 
             {/* Phân hệ Trọng tâm: Dự báo nhu cầu & Đề xuất đặt hàng (AI Core) */}
             <Route path="/forecasting" element={<ForecastPage />} />
-            <Route path="/recommendations" element={<PlaceholderPage title="Đề xuất Đặt hàng Thông minh (Intelligent Reorder Recommendation)" icon="auto_awesome" />} />
+            <Route path="/recommendations" element={<RecommendationPage />} />
 
             {/* Các phân hệ mở rộng theo kế hoạch Sprint sau */}
             <Route path="/dashboard" element={<DashboardPage />} />
