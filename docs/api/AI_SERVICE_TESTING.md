@@ -4,7 +4,7 @@ Tài liệu hướng dẫn kiểm thử và tích hợp phân hệ **AI Microser
 
 ---
 
-## 1. Tổng Quan Kiến Trúc (Sprint 7 - Milestone M4)
+## 1. Tổng Quan Kiến Trúc
 
 Phân hệ AI Service được xây dựng theo mô hình Microservice độc lập bằng **FastAPI** và **scikit-learn**, đảm nhiệm:
 1. **Demand Forecasting (Dự báo nhu cầu hàng hóa)**: Sử dụng mô hình Machine Learning (Random Forest / Gradient Boosting) kết hợp kỹ thuật trích xuất đặc trưng chuỗi thời gian (Lag Features, Rolling Window Statistics, Calendar Features).
@@ -212,7 +212,7 @@ curl -X GET http://localhost:8000/api/forecast/models
 
 ---
 
-### 3.6. Dự Báo Chuẩn 7 / 14 / 30 Ngày (`GET /api/forecast/product/{id}/horizon/{days}`) — Sprint8-05/06/07
+### 3.6. Dự Báo Chuẩn 7 / 14 / 30 Ngày (`GET /api/forecast/product/{id}/horizon/{days}`)
 Chỉ chấp nhận `days` là `7`, `14` hoặc `30`; giá trị khác trả `400 BAD_REQUEST`.
 
 ```bash
@@ -220,7 +220,7 @@ curl "http://localhost:8000/api/forecast/product/1/horizon/14?warehouse_id=1&sta
 curl http://localhost:8000/api/forecast/horizons     # {"horizons": [7, 14, 30]}
 ```
 
-### 3.7. Lưu / Nạp Model — Sprint8-08
+### 3.7. Lưu / Nạp Model
 Mỗi lần train, artifact `.joblib` được ghi atomic kèm file metadata `.json` cùng tên trong `models/`.
 
 ```bash
@@ -245,7 +245,7 @@ curl -X POST http://localhost:8000/api/forecast/models/load \
 
 ## 4. Kiểm Thử Tự Động (Automated Testing Suite)
 
-Bộ kiểm thử được xây dựng bằng `pytest` và `httpx.TestClient`, bao gồm 28 bài kiểm thử đơn vị và tích hợp (15 của Sprint 7 + 13 của Sprint 8 M2: `test_forecast_horizons.py`, `test_model_store.py`):
+Bộ kiểm thử được xây dựng bằng `pytest` và `httpx.TestClient`, gồm các bài kiểm thử đơn vị và tích hợp (ví dụ `test_forecast_horizons.py`, `test_model_store.py`):
 
 ### Lệnh chạy test:
 ```bash

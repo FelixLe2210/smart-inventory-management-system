@@ -1,25 +1,37 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import NotificationBell from './NotificationBell';
+import ThemeToggle from './ThemeToggle';
+import { titleFor } from './navConfig';
+import { useRealtime } from '../realtime/RealtimeProvider';
 import { getCurrentUser, clearAccessToken, clearCurrentUser } from '../api/httpClient';
 
-/**
- * AppHeader – Thanh header cố định phía trên của toàn ứng dụng.
- * Hiển thị: Logo, thanh tìm kiếm toàn cục, bộ chọn chi nhánh, thông báo, thông tin user và nút Đăng xuất.
- */
+const ROLE_LABEL = { ADMIN: 'Quản trị', MANAGER: 'Quản lý', STAFF: 'Nhân viên kho', VIEWER: 'Chỉ xem' };
+
+/** Header trên vùng nội dung: tên trang, trạng thái dữ liệu trực tiếp, đổi giao diện, thông báo, tài khoản. */
 export default function AppHeader() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const { status } = useRealtime();
   const [user, setUser] = useState(() => getCurrentUser());
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+  const { title, group } = titleFor(pathname);
 
-  const displayName = user?.name || user?.username || 'Lý Nguyễn';
-  const displayRole = user?.roles?.[0] ? user.roles[0].replace('ROLE_', '') : 'Quản lý';
-  const initials = displayName
-    .split(' ')
-    .filter(Boolean)
-    .slice(-2)
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase() || 'LN';
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const close = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [menuOpen]);
+
+  const displayName = user?.fullName || user?.name || user?.username || 'Người dùng';
+  const rawRole = String(user?.roles?.[0] || '').replace('ROLE_', '');
+  const roleText = ROLE_LABEL[rawRole] || rawRole || 'Thành viên';
+  const initials =
+    displayName.split(' ').filter(Boolean).slice(-2).map((w) => w[0]).join('').toUpperCase() || 'U';
 
   const handleLogout = () => {
     clearAccessToken();
@@ -28,95 +40,68 @@ export default function AppHeader() {
     navigate('/login', { replace: true });
   };
 
+  const live = status === 'open';
+
   return (
-    <header className="fixed top-0 left-0 right-0 h-14 z-50 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
-      <div className="h-14 w-full px-margin flex items-center justify-between gap-space-lg">
-
-        {/* ── Logo & Brand ── */}
-        <div className="flex items-center gap-space-md">
-          <div className="w-9 h-9 rounded-xl bg-primary text-on-primary flex items-center justify-center shadow-sm">
-            <span className="material-symbols-outlined text-[22px]">inventory_2</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="font-title text-title text-primary tracking-tight font-bold">Smart Inventory</span>
-            <span className="font-label-sm text-label-sm text-secondary uppercase font-semibold text-[10.5px] tracking-wide">
-              Demand Forecasting & Reorder Recommendation
-            </span>
-          </div>
+    <header className="fixed top-0 left-64 right-0 h-14 z-30 bg-surface-container-lowest/90 backdrop-blur border-b border-outline-variant/60">
+      <div className="h-full px-margin flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          {group && <p className="text-[11px] text-secondary leading-none mb-1">{group}</p>}
+          <h1 className="text-[15px] font-semibold text-on-surface leading-none truncate">{title}</h1>
         </div>
 
-        {/* ── Global Search ── */}
-        <div className="flex-1 max-w-xl mx-space-lg">
-          <div className="relative flex items-center w-full">
-            <span className="material-symbols-outlined absolute left-3 text-secondary text-[18px]">
-              search
-            </span>
-            <input
-              className="w-full h-8 pl-9 pr-4 bg-surface-container-low text-on-surface font-body-sm text-body-sm rounded-lg outline-none placeholder:text-outline focus:bg-surface-container-lowest transition-colors"
-              placeholder="Tìm kiếm mã kho, mã vị trí hoặc SKU sản phẩm (Phím tắt: Ctrl + K)..."
-              type="text"
-            />
-          </div>
-        </div>
-
-        {/* ── Right Actions ── */}
-        <div className="flex items-center gap-space-md">
-          {/* Branch selector */}
-          <div className="hidden lg:flex items-center gap-space-xs px-space-sm py-1 rounded-lg bg-surface-container-low text-on-surface cursor-pointer hover:bg-surface-container-high transition-colors">
-            <span className="material-symbols-outlined text-secondary text-[18px]">store</span>
-            <span className="font-label-default text-label-default text-on-surface-variant">Chi nhánh:</span>
-            <span className="font-body-sm-medium text-body-sm-medium text-primary">Toàn quốc / Miền Nam</span>
-            <span className="material-symbols-outlined text-secondary text-[16px]">expand_more</span>
-          </div>
-
-          {/* Notification bell */}
-          <button
-            className="relative p-1.5 rounded-lg text-secondary hover:bg-surface-container-high hover:text-on-surface transition-colors"
-            aria-label="Thông báo"
+        <div className="flex items-center gap-1.5">
+          <span
+            className={`hidden md:inline-flex items-center gap-2 mr-2 px-2.5 h-7 rounded-full text-[12px] font-medium border ${
+              live
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                : 'border-amber-200 bg-amber-50 text-amber-700'
+            }`}
+            title={live ? 'Số liệu tồn kho đang được cập nhật trực tiếp' : 'Mất kết nối trực tiếp, đang thử lại'}
           >
-            <span className="material-symbols-outlined text-[20px]">notifications</span>
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-error" />
-          </button>
+            <span
+              className={`w-2 h-2 rounded-full ${live ? 'bg-[rgb(var(--live))] animate-pulseDot' : 'bg-amber-500'}`}
+              aria-hidden="true"
+            />
+            {live ? 'Trực tiếp' : 'Đang kết nối lại'}
+          </span>
 
-          {/* User info & dropdown */}
-          <div className="relative">
+          <ThemeToggle />
+          <NotificationBell />
+
+          <div className="relative ml-1" ref={menuRef}>
             <button
               type="button"
-              onClick={() => setShowDropdown((prev) => !prev)}
-              className="flex items-center gap-space-sm pl-space-sm p-1 rounded-lg hover:bg-surface-container-low transition-colors"
+              onClick={() => setMenuOpen((v) => !v)}
+              className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-lg hover:bg-surface-container-low transition-colors"
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
               aria-label="Menu tài khoản"
             >
-              <div className="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-sm font-bold">
+              <span className="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center text-[12px] font-bold">
                 {initials}
-              </div>
-              <div className="hidden md:flex flex-col text-left">
-                <div className="flex items-center gap-space-xs">
-                  <span className="font-body-sm-medium text-body-sm-medium text-on-surface">{displayName}</span>
-                  <span className="px-1.5 py-0.5 rounded font-label-sm text-label-sm bg-secondary-container text-on-secondary-container">
-                    {displayRole}
-                  </span>
-                </div>
-                <span className="font-label-default text-label-default text-on-surface-variant">
-                  {user?.email || 'Vận hành Kho tổng'}
-                </span>
-              </div>
-              <span className="material-symbols-outlined text-secondary text-[18px]">expand_more</span>
+              </span>
+              <span className="hidden md:block text-left leading-tight">
+                <span className="block text-[13px] font-medium text-on-surface">{displayName}</span>
+                <span className="block text-[11px] text-secondary">{roleText}</span>
+              </span>
+              <span className="material-symbols-outlined text-secondary text-[18px]" aria-hidden="true">expand_more</span>
             </button>
 
-            {/* Dropdown menu */}
-            {showDropdown && (
-              <div className="absolute right-0 mt-2 w-48 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant py-1 z-50 animate-fadeIn">
-                <div className="px-4 py-2 border-b border-outline-variant md:hidden">
-                  <p className="font-body-sm-medium text-on-surface">{displayName}</p>
-                  <p className="text-secondary font-label-sm">{user?.email || 'admin@smartinventory.vn'}</p>
+            {menuOpen && (
+              <div role="menu" className="absolute right-0 mt-2 w-56 bg-surface-container-lowest rounded-xl shadow-lift border border-outline-variant py-1 animate-fadeIn">
+                <div className="px-4 py-2.5 border-b border-outline-variant/70">
+                  <p className="text-[13px] font-medium text-on-surface">{displayName}</p>
+                  <p className="text-[11px] text-secondary">{user?.email || roleText}</p>
                 </div>
                 <button
                   type="button"
+                  role="menuitem"
                   onClick={handleLogout}
-                  className="w-full px-4 py-2 text-left font-body-sm text-error hover:bg-error-container/30 flex items-center gap-2 transition-colors"
+                  className="w-full px-4 py-2 text-left text-[13px] text-error hover:bg-error-container/40 flex items-center gap-2 transition-colors"
                 >
-                  <span className="material-symbols-outlined text-[18px]">logout</span>
-                  <span>Đăng xuất</span>
+                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">logout</span>
+                  Đăng xuất
                 </button>
               </div>
             )}

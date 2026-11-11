@@ -1,8 +1,8 @@
-"""Pure reorder logic (no I/O) for Sprint 9 - M1.
+"""Pure reorder logic (no I/O).
 
-Sprint9-01  Reorder Decision Logic        -> :func:`decide_reorder`
-Sprint9-02  Safety Stock Calculation       -> :func:`calculate_safety_stock`
-Sprint9-03  Recommended Quantity Calculation -> :func:`calculate_recommended_quantity`
+  - Reorder decision                ->  :func:`decide_reorder`
+  - Safety stock                    ->  :func:`calculate_safety_stock`
+  - Recommended quantity            ->  :func:`calculate_recommended_quantity`
 
 Conventions
 -----------

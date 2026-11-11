@@ -1,4 +1,4 @@
-"""Sprint8-08 – Lưu / nạp artifact model an toàn.
+"""Lưu / nạp artifact model an toàn.
 
 - Ghi atomic (file tạm + os.replace): train/ghi lỗi giữa chừng không làm hỏng model đang dùng.
 - Sidecar JSON (<tên>.json) chứa metadata để liệt kê model mà không phải joblib.load.

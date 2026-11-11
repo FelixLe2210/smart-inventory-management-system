@@ -21,6 +21,10 @@ public class User {
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
+    /** Số điện thoại dạng E.164 (+84912345678), có thể trống. */
+    @Column(length = 20)
+    private String phone;
+
     @Column(name = "is_active", nullable = false)
     private Boolean active = true;
 
@@ -60,6 +64,14 @@ public class User {
         this.passwordHash = passwordHash;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     public Boolean getActive() {
         return active;
     }
@@ -75,4 +87,4 @@ public class User {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
-}
+}

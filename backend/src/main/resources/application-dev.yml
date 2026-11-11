@@ -22,6 +22,10 @@ app:
   jwt:
     secret: ${JWT_SECRET:development-only-secret-key-change-before-deployment-32bytes-minimum}
     expiration-ms: ${JWT_EXPIRATION_MS:3600000}
+  auth:
+    phone:
+      # Chạy dev: chưa có cổng SMS nên trả mã OTP về trình duyệt và ghi vào log để thử nghiệm.
+      dev-mode: ${AUTH_PHONE_DEV_MODE:true}
 
 logging:
   level:

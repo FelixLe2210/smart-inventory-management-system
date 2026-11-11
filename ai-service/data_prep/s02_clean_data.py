@@ -1,4 +1,4 @@
-"""Sprint7-02 – Data Cleaning.
+"""Data Cleaning.
 
 Đọc data/raw/sales_raw.csv -> data/processed/sales_clean.csv + cleaning_report.json.
 

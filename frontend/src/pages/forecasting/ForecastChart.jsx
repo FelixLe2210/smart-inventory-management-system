@@ -146,8 +146,8 @@ export default function ForecastChart({ predictions, unit = 'đơn vị', averag
         >
           <defs>
             <linearGradient id="forecast-area" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#2563eb" stopOpacity="0.18" />
-              <stop offset="100%" stopColor="#2563eb" stopOpacity="0" />
+              <stop offset="0%" stopColor="rgb(var(--primary))" stopOpacity="0.18" />
+              <stop offset="100%" stopColor="rgb(var(--primary))" stopOpacity="0" />
             </linearGradient>
           </defs>
 
@@ -158,17 +158,17 @@ export default function ForecastChart({ predictions, unit = 'đơn vị', averag
                 x2={WIDTH - PADDING.right}
                 y1={y(value)}
                 y2={y(value)}
-                stroke="#e2e8f0"
+                stroke="rgb(var(--outline-variant) / 0.7)"
                 strokeDasharray={index === 0 ? undefined : '4 5'}
               />
-              <text x={PADDING.left - 10} y={y(value) + 4} textAnchor="end" fill="#64748b" fontSize="11">
+              <text x={PADDING.left - 10} y={y(value) + 4} textAnchor="end" fill="rgb(var(--on-surface-variant))" fontSize="11">
                 {formatQuantity(value)}
               </text>
             </g>
           ))}
 
           {geometry.confidencePath && (
-            <path d={geometry.confidencePath} fill="#bfdbfe" opacity="0.6" className="animate-[fadeIn_0.5s_ease-out]" />
+            <path d={geometry.confidencePath} fill="rgb(var(--primary) / 0.25)" opacity="0.6" className="animate-[fadeIn_0.5s_ease-out]" />
           )}
           {geometry.areaPath && <path d={geometry.areaPath} fill="url(#forecast-area)" />}
 
@@ -179,11 +179,11 @@ export default function ForecastChart({ predictions, unit = 'đơn vị', averag
                 x2={WIDTH - PADDING.right}
                 y1={y(average)}
                 y2={y(average)}
-                stroke="#7c3aed"
+                stroke="rgb(var(--tertiary))"
                 strokeWidth="1.5"
                 strokeDasharray="6 4"
               />
-              <text x={WIDTH - PADDING.right} y={y(average) - 6} textAnchor="end" fill="#7c3aed" fontSize="11" fontWeight="600">
+              <text x={WIDTH - PADDING.right} y={y(average) - 6} textAnchor="end" fill="rgb(var(--tertiary))" fontSize="11" fontWeight="600">
                 TB {formatQuantity(average, 1)}
               </text>
             </g>
@@ -192,7 +192,7 @@ export default function ForecastChart({ predictions, unit = 'đơn vị', averag
           <path
             d={geometry.linePath}
             fill="none"
-            stroke="#2563eb"
+            stroke="rgb(var(--primary))"
             strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -207,7 +207,7 @@ export default function ForecastChart({ predictions, unit = 'đơn vị', averag
               x2={x(activeIndex)}
               y1={PADDING.top}
               y2={y(0)}
-              stroke="#94a3b8"
+              stroke="rgb(var(--outline))"
               strokeDasharray="3 3"
             />
           )}
@@ -221,8 +221,8 @@ export default function ForecastChart({ predictions, unit = 'đơn vị', averag
                 cx={x(index)}
                 cy={y(point.predictedDemand)}
                 r={isActive ? 6 : 3.5}
-                fill={isActive ? '#2563eb' : '#fff'}
-                stroke="#2563eb"
+                fill={isActive ? 'rgb(var(--primary))' : 'rgb(var(--surface-container-lowest))'}
+                stroke="rgb(var(--primary))"
                 strokeWidth="2"
                 style={{ transition: 'r 120ms ease-out' }}
               />
@@ -235,7 +235,7 @@ export default function ForecastChart({ predictions, unit = 'đơn vị', averag
               x={x(index)}
               y={HEIGHT - 16}
               textAnchor="middle"
-              fill={index === activeIndex ? '#0f172a' : '#64748b'}
+              fill={index === activeIndex ? 'rgb(var(--on-surface))' : 'rgb(var(--on-surface-variant))'}
               fontSize="11"
               fontWeight={index === activeIndex ? '600' : '400'}
             >
@@ -246,7 +246,7 @@ export default function ForecastChart({ predictions, unit = 'đơn vị', averag
 
         {active && (
           <div
-            className="pointer-events-none absolute top-2 z-10 min-w-[180px] rounded-xl border border-slate-200 bg-white/95 px-3 py-2.5 text-xs shadow-lg backdrop-blur"
+            className="pointer-events-none absolute top-2 z-10 min-w-[180px] rounded-xl border border-slate-200 bg-surface-container-lowest/95 px-3 py-2.5 text-xs shadow-lg backdrop-blur"
             style={{
               left: `${tooltipLeftPct}%`,
               transform:

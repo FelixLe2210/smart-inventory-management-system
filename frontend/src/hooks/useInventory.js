@@ -1,6 +1,5 @@
 /**
  * useInventory – state, API calls & logic cho trang Tồn kho.
- * Sprint4-13 (Stock Status UI) + Sprint4-14 (Filtering) + Sprint4-15 (Integration với Master Data).
  *
  * - Backend lọc theo kho / sản phẩm (GET /api/inventories?warehouseId=&productId=).
  * - Lọc theo trạng thái tồn + tìm kiếm thực hiện ở frontend trên danh sách đã tải,
@@ -16,6 +15,8 @@ import { warehouseApi } from '../api/warehouseApi';
 import { ApiClientError } from '../api/ApiClientError';
 import { STOCK_STATUS_KEYS } from '../components/inventory/StockStatusBadge';
 import { summarize, filterInventory, validateAdjustment } from '../utils/inventoryFilters';
+import { useRealtime } from '../realtime/RealtimeProvider';
+import { applyInventoryUpdate } from '../realtime/inventoryRealtime';
 
 const EMPTY_ADD = {
   productId: '',
@@ -51,7 +52,7 @@ export function useInventory() {
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
 
-  // ── Chi tiết tồn kho (InventoryDetailModal – Sprint4-11) ─────────────
+  // ── Chi tiết tồn kho ─────────────
   const [detailId, setDetailId] = useState(null);
 
   // ── Toast ────────────────────────────────────────────────────────────
@@ -112,6 +113,38 @@ export function useInventory() {
   useEffect(() => {
     fetchInventory();
   }, [fetchInventory]);
+
+  // ── Cập nhật trực tiếp từ WebSocket: dòng đổi thì sửa tại chỗ, bản ghi mới thì tải lại ──
+  const { subscribe, status: realtimeStatus } = useRealtime();
+  const fetchRef = useRef(fetchInventory);
+  fetchRef.current = fetchInventory;
+  const rowsRef = useRef(rows);
+  rowsRef.current = rows;
+  useEffect(
+    () =>
+      subscribe((msg) => {
+        if (msg.type !== 'INVENTORY_UPDATED' || !msg.data) return;
+        const result = applyInventoryUpdate(rowsRef.current, msg.data);
+        if (result.found) {
+          rowsRef.current = result.rows;
+          setRows(result.rows);
+        } else {
+          fetchRef.current(); // bản ghi mới tạo hoặc nằm ngoài danh sách đang xem
+        }
+      }),
+    [subscribe]
+  );
+
+  // Sau khi kết nối lại, số liệu có thể đã lỡ sự kiện: nạp lại một lần.
+  const wasOpenRef = useRef(false);
+  useEffect(() => {
+    if (realtimeStatus === 'open') {
+      if (wasOpenRef.current === 'dropped') fetchRef.current();
+      wasOpenRef.current = true;
+    } else if (wasOpenRef.current === true) {
+      wasOpenRef.current = 'dropped';
+    }
+  }, [realtimeStatus]);
 
   // ── Dữ liệu hiển thị ─────────────────────────────────────────────────
   const summary = useMemo(() => summarize(rows), [rows]);

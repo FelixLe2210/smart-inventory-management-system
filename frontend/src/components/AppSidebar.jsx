@@ -1,290 +1,78 @@
-import { NavLink } from "react-router-dom";
+import { NavLink } from 'react-router-dom';
+import { navGroupsFor } from './navConfig';
+import { getCurrentUser } from '../api/httpClient';
+import { useRealtime } from '../realtime/RealtimeProvider';
 
-/**
- * AppSidebar – Thanh điều hướng dọc cố định bên trái của Smart Inventory Management System
- * for Demand Forecasting and Reorder Recommendation.
- * Tương thích và đồng bộ toàn bộ Master Data của Sprint 3 (M1, M2, M3, M4).
- */
+/** Thanh điều hướng: mảng màu mực đậm làm điểm nhận diện, nhóm theo việc người dùng làm hằng ngày. */
 export default function AppSidebar() {
+  const { unread } = useRealtime();
+  const groups = navGroupsFor(getCurrentUser());
+
   return (
-    <aside className="fixed left-0 top-14 bottom-0 w-64 bg-surface-container-lowest z-40 flex flex-col justify-between overflow-y-auto shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
-      <div className="py-space-md">
-        {/* Section 1: Điều hành chung */}
-        <div className="px-space-lg mb-space-xs">
-          <span className="font-label-sm text-label-sm text-secondary uppercase font-bold tracking-wider">
-            Điều hành chung
-          </span>
+    <aside className="fixed inset-y-0 left-0 w-64 bg-nav text-nav-fg z-40 flex flex-col">
+      <div className="h-14 shrink-0 px-5 flex items-center gap-3 border-b border-nav-line">
+        <div className="w-8 h-8 rounded-lg bg-nav-accent text-nav flex items-center justify-center">
+          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">deployed_code</span>
         </div>
-
-        <nav className="flex flex-col gap-0.5 px-space-sm mb-space-md">
-          <NavLink
-            to="/dashboard"
-            className={({ isActive }) =>
-              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
-                isActive
-                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
-                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[20px]">dashboard</span>
-            <span>Bàn làm việc (Dashboard)</span>
-          </NavLink>
-        </nav>
-
-        {/* Section 2: Dữ liệu Danh mục (Master Data - Sprint 3) */}
-        <div className="px-space-lg mb-space-xs">
-          <span className="font-label-sm text-label-sm text-secondary uppercase font-bold tracking-wider">
-            Quản trị Master Data
-          </span>
+        <div className="leading-tight">
+          <p className="font-bold text-[15px] text-nav-active-fg tracking-tight">Smart Inventory</p>
+          <p className="text-[11px] text-nav-muted">Dự báo và đặt hàng</p>
         </div>
-
-        <nav className="flex flex-col gap-0.5 px-space-sm mb-space-md">
-          {/* Quản lý Kho bãi (M4) */}
-          <NavLink
-            to="/warehouses"
-            className={({ isActive }) =>
-              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
-                isActive
-                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
-                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[20px]">warehouse</span>
-            <span>Chi nhánh Kho bãi</span>
-          </NavLink>
-
-          {/* Quản lý Sản phẩm (M3: Sprint3-09, Sprint3-12) */}
-          <NavLink
-            to="/products"
-            className={({ isActive }) =>
-              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
-                isActive
-                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
-                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[20px]">inventory_2</span>
-            <span>Danh mục Sản phẩm (SKU)</span>
-          </NavLink>
-
-          {/* Phân loại hàng hóa (M3: Sprint3-10) */}
-          <NavLink
-            to="/categories"
-            className={({ isActive }) =>
-              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
-                isActive
-                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
-                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[20px]">category</span>
-            <span>Nhóm & Phân loại hàng</span>
-          </NavLink>
-
-          {/* Nhà cung cấp (M3: Sprint3-11) */}
-          <NavLink
-            to="/suppliers"
-            className={({ isActive }) =>
-              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
-                isActive
-                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
-                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[20px]">local_shipping</span>
-            <span>Nhà cung cấp đối tác</span>
-          </NavLink>
-        </nav>
-
-        {/* Section 3: AI Demand Forecasting & Reorder Recommendation */}
-        <div className="px-space-lg mb-space-xs">
-          <span className="font-label-sm text-label-sm text-secondary uppercase font-bold tracking-wider flex items-center justify-between">
-            <span>Dự báo & Đề xuất AI</span>
-            <span className="px-1.5 py-0.5 rounded text-[10px] bg-primary text-on-primary font-bold">AI CORE</span>
-          </span>
-        </div>
-
-        <nav className="flex flex-col gap-0.5 px-space-sm mb-space-md">
-          <NavLink
-            to="/forecasting"
-            className={({ isActive }) =>
-              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
-                isActive
-                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
-                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[20px]">trending_up</span>
-            <span>Dự báo nhu cầu (Forecasting)</span>
-          </NavLink>
-
-          <NavLink
-            to="/recommendations"
-            className={({ isActive }) =>
-              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
-                isActive
-                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
-                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[20px]">auto_awesome</span>
-            <span>Đề xuất đặt hàng (Reorder)</span>
-          </NavLink>
-        </nav>
-
-        {/* Section 4: Vận hành kho */}
-        <div className="px-space-lg mb-space-xs">
-          <span className="font-label-sm text-label-sm text-secondary uppercase font-bold tracking-wider">
-            Vận hành Kho vận
-          </span>
-        </div>
-
-        <nav className="flex flex-col gap-0.5 px-space-sm">
-          <NavLink
-            to="/inventory"
-            className={({ isActive }) =>
-              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
-                isActive
-                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
-                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[20px]">shelves</span>
-            <span>Kiểm kê & Tồn kho</span>
-          </NavLink>
-
-          <NavLink
-            to="/inbound"
-            className={({ isActive }) =>
-              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
-                isActive
-                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
-                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[20px]">move_to_inbox</span>
-            <span>Phiếu Nhập kho (Inbound)</span>
-          </NavLink>
-
-          <NavLink
-            to="/outbound"
-            className={({ isActive }) =>
-              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
-                isActive
-                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
-                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[20px]">outbox</span>
-            <span>Phiếu Xuất kho (Outbound)</span>
-          </NavLink>
-
-          <NavLink
-            to="/transfer"
-            className={({ isActive }) =>
-              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
-                isActive
-                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
-                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[20px]">swap_horiz</span>
-            <span>Chuyển kho (Transfer)</span>
-          </NavLink>
-
-          <NavLink
-            to="/transactions"
-            className={({ isActive }) =>
-              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
-                isActive
-                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
-                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[20px]">receipt_long</span>
-            <span>Lịch sử giao dịch kho</span>
-          </NavLink>
-
-          <NavLink
-            to="/alerts"
-            className={({ isActive }) =>
-              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
-                isActive
-                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
-                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[20px]">notification_important</span>
-            <span>Cảnh báo tồn kho</span>
-          </NavLink>
-
-          <NavLink
-            to="/reports"
-            className={({ isActive }) =>
-              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
-                isActive
-                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
-                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[20px]">monitoring</span>
-            <span>Báo cáo & Phân tích</span>
-          </NavLink>
-
-          <NavLink
-            to="/forecasting"
-            className={({ isActive }) =>
-              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
-                isActive
-                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
-                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[20px]">auto_awesome</span>
-            <span>Dự báo nhu cầu AI</span>
-          </NavLink>
-
-          <NavLink
-            to="/settings"
-            className={({ isActive }) =>
-              `flex items-center gap-space-sm px-space-md py-2 rounded-lg font-body-sm text-body-sm transition-colors ${
-                isActive
-                  ? "bg-primary-container text-on-primary-container font-body-sm-medium"
-                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-              }`
-            }
-          >
-            <span className="material-symbols-outlined text-[20px]">settings</span>
-            <span>Cài đặt hệ thống</span>
-          </NavLink>
-        </nav>
       </div>
 
-      {/* ── Capacity widget ── */}
-      <div className="p-space-md m-space-sm rounded-lg bg-surface-container-low">
-        <div className="flex items-center justify-between mb-1">
-          <span className="font-label-default text-label-default text-on-surface">Tải trọng kho TP.HCM</span>
-          <span className="font-label-sm text-label-sm text-primary font-bold">88%</span>
-        </div>
-        <div className="w-full h-1.5 rounded-full bg-secondary-container overflow-hidden">
-          <div className="h-full rounded-full bg-primary-container" style={{ width: "88%" }} />
-        </div>
-        <span className="block mt-1 font-label-sm text-label-sm text-secondary">14,080 / 16,000 Pallet</span>
+      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5" aria-label="Điều hướng chính">
+        {groups.map((group) => (
+          <div key={group.title}>
+            <p className="px-3 mb-1.5 flex items-center gap-2 text-[11px] font-semibold text-nav-muted">
+              {group.title}
+              {group.badge && (
+                <span className="px-1.5 rounded bg-nav-accent/15 text-nav-accent text-[10px] font-bold leading-4">
+                  {group.badge}
+                </span>
+              )}
+            </p>
+            <ul className="space-y-0.5">
+              {group.items.map((item) => (
+                <li key={item.to}>
+                  <NavLink
+                    to={item.to}
+                    className={({ isActive }) =>
+                      `group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] transition-colors ${
+                        isActive
+                          ? 'bg-nav-active text-nav-active-fg font-semibold'
+                          : 'text-nav-fg hover:bg-nav-hover hover:text-nav-active-fg'
+                      }`
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        {isActive && (
+                          <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r bg-nav-accent" aria-hidden="true" />
+                        )}
+                        <span
+                          className={`material-symbols-outlined text-[20px] ${isActive ? 'text-nav-accent' : 'text-nav-muted group-hover:text-nav-fg'}`}
+                          aria-hidden="true"
+                        >
+                          {item.icon}
+                        </span>
+                        <span className="flex-1 truncate">{item.label}</span>
+                        {item.alerts && unread > 0 && (
+                          <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-red-600 text-white text-[11px] font-bold flex items-center justify-center">
+                            {unread > 9 ? '9+' : unread}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </nav>
+
+      <div className="shrink-0 border-t border-nav-line px-5 py-3 text-[11px] text-nav-muted">
+        Phiên bản 1.0
       </div>
     </aside>
   );

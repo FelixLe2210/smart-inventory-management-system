@@ -13,7 +13,7 @@ import {
 import { calculateKpis } from './dashboard.js';
 import { isEndpointMissing, cleanParams } from './apiFallback.js';
 
-// ───────── Sprint6-04 / 06-16: các mức cảnh báo ─────────
+// ───────── các mức cảnh báo ─────────
 
 test('classifyStock - ranh giới Out of Stock / Low Stock / OK', () => {
   assert.equal(classifyStock(0, 10), 'OUT_OF_STOCK');
@@ -118,7 +118,7 @@ test('calculateKpis - đọc currentStock của backend (không còn ra 0 với 
   assert.equal(kpis.totalInventoryValue, 40000);
 });
 
-// ───────── Contract Alert API (Sprint6-03) ─────────
+// ───────── Hợp đồng Alert API ─────────
 
 test('normalizeBackendAlert - nhận dạng phẳng, từ chối loại không hợp lệ', () => {
   const a = normalizeBackendAlert({
@@ -144,7 +144,7 @@ test('normalizeBackendAlerts - sai kiểu trả về null để hook fallback; c
   assert.deepEqual(list.map((a) => a.type), ['OUT_OF_STOCK', 'LOW_STOCK']);
 });
 
-// ───────── Quy tắc fallback API (Sprint6-15) ─────────
+// ───────── Quy tắc fallback API ─────────
 
 test('isEndpointMissing - chỉ 404/405/501 mới được fallback', () => {
   assert.equal(isEndpointMissing({ status: 404 }), true);

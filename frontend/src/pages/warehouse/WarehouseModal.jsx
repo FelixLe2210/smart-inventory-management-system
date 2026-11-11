@@ -44,7 +44,7 @@ const inputCls =
 
 /**
  * WarehouseModal – Modal thêm mới / chỉnh sửa chi nhánh kho.
- * Hỗ trợ Sprint3-14 (API integration) & Sprint3-15 (validation & error handling).
+ * Gọi API, kiểm tra dữ liệu và hiển thị lỗi của form kho.
  */
 export default function WarehouseModal({
   mode,
@@ -120,7 +120,7 @@ export default function WarehouseModal({
         {/* ── Form Body (scrollable) ── */}
         <div className="p-space-xl overflow-y-auto flex-1 flex flex-col gap-space-lg">
 
-          {/* Banner lỗi chung nếu có (Sprint3-15 Error Handling) */}
+          {/* Banner lỗi chung nếu có */}
           {errors.general && (
             <div className="p-3 rounded-lg bg-error-container text-on-error-container text-body-sm flex items-start gap-2 animate-fadeIn border border-error/20">
               <span className="material-symbols-outlined text-[20px] text-error shrink-0">error</span>

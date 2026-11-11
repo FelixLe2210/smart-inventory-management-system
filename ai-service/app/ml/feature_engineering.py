@@ -2,9 +2,19 @@ from typing import List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
+# Scale-free features. Demand-valued columns (lags, rolling stats) are divided by the series'
+# own level (mean of the previous LEVEL_WINDOW days) and the model predicts the demand/level
+# ratio. A tree model cannot predict outside the target range it saw in training, so learning raw
+# units made a 3 units/day product forecast ~10 and a 200 units/day product ~83.
+# product_id / warehouse_id are NOT features: numeric ids carry no meaning and block new products.
+LEVEL_WINDOW = 28
+MIN_LEVEL = 0.1
+RATIO_COLUMNS = [
+    "lag_1", "lag_2", "lag_3", "lag_7", "lag_14",
+    "rolling_mean_7", "rolling_std_7", "rolling_mean_14",
+]
+
 FEATURE_COLUMNS = [
-    "product_id",
-    "warehouse_id",
     "day_of_week",
     "day_of_month",
     "month",
@@ -87,6 +97,17 @@ def add_rolling_features(
     return df
 
 
+def add_level(df: pd.DataFrame, group_cols: Optional[List[str]] = None, target_col: str = "demand") -> pd.DataFrame:
+    """Per-series demand level: mean of the previous ``LEVEL_WINDOW`` days (no look-ahead)."""
+    if group_cols is None:
+        group_cols = ["product_id", "warehouse_id"]
+    df = df.copy()
+    df["level"] = df.groupby(group_cols, group_keys=False)[target_col].transform(
+        lambda s: s.shift(1).rolling(window=LEVEL_WINDOW, min_periods=14).mean()
+    )
+    return df
+
+
 def build_feature_frame(
     df: pd.DataFrame,
     target_col: str = "demand",
@@ -100,14 +121,20 @@ def build_feature_frame(
     df = add_calendar_features(df, "date")
     df = add_lag_features(df, group_cols=["product_id", "warehouse_id"], target_col=target_col)
     df = add_rolling_features(df, group_cols=["product_id", "warehouse_id"], target_col=target_col)
+    df = add_level(df, group_cols=["product_id", "warehouse_id"], target_col=target_col)
 
     if drop_na:
-        # Drop rows where lag features are NaN (initial history warm-up)
-        df = df.dropna(subset=[col for col in FEATURE_COLUMNS if col in df.columns]).reset_index(drop=True)
+        # Drop rows where lag/level features are NaN (initial history warm-up)
+        df = df.dropna(subset=RATIO_COLUMNS + ["level"]).reset_index(drop=True)
     else:
-        for col in FEATURE_COLUMNS:
-            if col in df.columns:
-                df[col] = df[col].fillna(0.0)
+        for col in RATIO_COLUMNS + ["level"]:
+            df[col] = df[col].fillna(0.0)
+
+    df["level"] = df["level"].clip(lower=MIN_LEVEL)
+    for col in RATIO_COLUMNS:
+        df[col] = df[col] / df["level"]
+    if target_col in df.columns:
+        df["target_ratio"] = df[target_col] / df["level"]
     return df
 
 

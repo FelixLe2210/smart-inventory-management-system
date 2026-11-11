@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const fmt = (n) => (n === null || n === undefined ? '---' : Number(n).toLocaleString('vi-VN'));
 
-/** Kết quả giao dịch vừa thực hiện, kèm đối chiếu với tồn thật đọc lại từ server (Sprint5-14). */
+/** Kết quả giao dịch vừa thực hiện, kèm đối chiếu với tồn thật đọc lại từ server. */
 export default function TransferResultCard({ result }) {
   if (!result) return null;
   const ok = result.consistency?.ok;

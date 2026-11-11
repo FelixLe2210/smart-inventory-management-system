@@ -17,8 +17,8 @@ const DASHBOARD_ALERT_LIMIT = 6;
 /**
  * Hook useDashboard
  * Quản trị trạng thái và dữ liệu tổng hợp cho Bàn làm việc (Dashboard)
- *  - Sprint 6 M3 (Sprint6-09 → Sprint6-12): bố cục, KPI, biểu đồ, giao dịch gần đây
- *  - Sprint 6 M4 (Sprint6-15): kết nối backend (KPI API + Alert API) có fallback tính tại client
+ * M3: bố cục, KPI, biểu đồ, giao dịch gần đây
+ * M4: kết nối backend (KPI API + Alert API) có fallback tính tại client
  */
 export function useDashboard() {
   const [snapshot, setSnapshot] = useState({

@@ -62,6 +62,7 @@ test('normalizeForecastResponse: maps the backend camelCase response contract', 
       modelName: 'random_forest',
       modelVersion: '1.0.0',
       fallbackApplied: false,
+      historySource: 'provided',
     },
     { productId: 1, horizonDays: 1 }
   );
@@ -70,6 +71,7 @@ test('normalizeForecastResponse: maps the backend camelCase response contract', 
   assert.equal(result.startDate, '2026-10-26');
   assert.equal(result.predictions[0].predictedDemand, 10);
   assert.equal(result.fallbackApplied, false);
+  assert.equal(result.historySource, 'provided');
 });
 
 test('normalizeForecastResponse: rejects mismatch productId or horizonDays', () => {

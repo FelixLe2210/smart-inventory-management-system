@@ -1,4 +1,4 @@
-"""Sprint7-01 – Collect & Prepare Sales Dataset.
+"""Collect & Prepare Sales Dataset.
 
 Hai nguồn dữ liệu, cùng ra một schema chuẩn (`CANONICAL_COLUMNS`) tại data/raw/sales_raw.csv:
 

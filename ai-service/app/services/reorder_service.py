@@ -1,4 +1,4 @@
-"""Reorder recommendation service (AI #2) - composes the Sprint 9 building blocks. No I/O.
+"""Reorder recommendation service (AI #2) - composes the reorder building blocks. No I/O.
 
     forecast (AI #1) --+
     supplier / history +--> lead_time_logic ----+
@@ -7,7 +7,7 @@
 
 The service takes plain values (no database, no HTTP). The caller - the Spring Boot backend
 through the reorder API - loads stock, purchase orders and the forecast and passes them in.
-That keeps every rule unit-testable (Sprint9-08) and every number explainable: the result
+That keeps every rule unit-testable and every number explainable: the result
 carries ``assumptions`` and ``warnings`` so the UI can show *why* a quantity was proposed.
 
 Inventory used for the decision

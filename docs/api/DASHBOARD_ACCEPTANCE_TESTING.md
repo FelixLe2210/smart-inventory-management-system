@@ -1,6 +1,6 @@
-# Dashboard · Alert · Report – Nghiệm thu (Sprint 6 · M4)
+# Dashboard · Alert · Report – Nghiệm thu
 
-Phạm vi: **Sprint6-13** Alert UI · **Sprint6-14** Report UI · **Sprint6-15** Dashboard API Integration · **Sprint6-16** Dashboard Acceptance Testing.
+Phạm vi: giao diện cảnh báo, giao diện báo cáo, tích hợp Dashboard API và nghiệm thu Dashboard.
 
 ## 1. Test tự động
 
@@ -46,7 +46,7 @@ Chuẩn bị: backend chạy profile `dev`, đăng nhập `admin / Admin@123`. T
 - `npm test`: **65/65** test pass (gồm 10 + 14 test mới cho cảnh báo/báo cáo).
 - Render thử (SSR, dữ liệu mẫu) `AlertsPage`, `ReportsPage` (cả hai tab), `DashboardPage` ở các trạng thái có dữ liệu / rỗng / đang tải / lỗi / cảnh báo một phần / nguồn backend: không lỗi runtime, không có `undefined`/`NaN` trong HTML.
 - Lớp `dashboardApi` kiểm thử với `httpClient` giả lập: 404/405/501 → fallback; 401/403/500/mất mạng → ném lỗi; một nguồn dữ liệu lỗi không hỏng nguồn khác; loại giao dịch trùng id; giới hạn đồng thời request.
-- **Chưa kiểm chứng**: chạy trên trình duyệt thật với backend thật (môi trường kiểm thử không có Vite binary/mạng/DB). Cần chạy mục 2 ở máy dev trước khi đóng thẻ Sprint6-16.
+- **Chưa kiểm chứng**: chạy trên trình duyệt thật với backend thật (môi trường kiểm thử không có Vite binary/mạng/DB). Cần chạy mục 2 ở máy dev trước khi nghiệm thu.
 
 ## 4. Lỗi M3 được sửa trong đợt này
 
@@ -54,6 +54,6 @@ Chuẩn bị: backend chạy profile `dev`, đăng nhập `admin / Admin@123`. T
 
 ## 5. Hạn chế đã biết
 
-- Endpoint lịch sử toàn cục `GET /transactions` đã có phân trang; Dashboard và báo cáo phía client hiện vẫn tải lịch sử qua `/inventories/{id}/transactions` theo từng dòng tồn (theo đợt 6 request). Với báo cáo nên dùng Transaction Report API (Sprint6-06). Dashboard chỉ lấy 15 dòng tồn mới cập nhật nhất cho "Giao dịch gần đây".
+- Endpoint lịch sử toàn cục `GET /transactions` đã có phân trang; Dashboard và báo cáo phía client hiện vẫn tải lịch sử qua `/inventories/{id}/transactions` theo từng dòng tồn (theo đợt 6 request). Với báo cáo nên dùng Transaction Report API. Dashboard chỉ lấy 15 dòng tồn mới cập nhật nhất cho "Giao dịch gần đây".
 - Bảng báo cáo hiển thị tối đa 200 dòng; số liệu tổng hợp và file CSV luôn tính trên toàn bộ.
 - Định nghĩa cảnh báo (theo sản phẩm, tồn khả dụng) khác trạng thái từng dòng tồn ở trang Tồn kho — xem `DASHBOARD_API_CONTRACT.md` mục 1.

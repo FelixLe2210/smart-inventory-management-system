@@ -1,4 +1,4 @@
-"""Sprint8-05/06/07 – dự báo 7/14/30 ngày."""
+"""dự báo 7/14/30 ngày."""
 import pytest
 from datetime import date, timedelta
 

@@ -7,11 +7,10 @@ FastAPI-based microservice powering AI capabilities for the **Smart Inventory Ma
 
 ## Features
 
-- **Sprint 7 - M4**:
-  - `Sprint7-13`: Create Python AI Service (FastAPI, CORS, Lifespan, Health checks, Config)
-  - `Sprint7-14`: Create Training Pipeline (lag/rolling features, Random Forest, model persistence in `models/`)
-  - `Sprint7-15`: Create Forecast Endpoint Skeleton & implementation (`/api/forecast/demand`, `/api/forecast/product/{id}`, `/api/forecast/train`)
-  - `Sprint7-16`: AI Service Testing (Pytest unit & integration test suite)
+- **Service**: FastAPI with CORS, lifespan hooks, health checks and configuration.
+- **Training pipeline**: lag and rolling features, Random Forest, model persistence in `models/`.
+- **Forecast endpoints**: `/api/forecast/demand`, `/api/forecast/product/{id}`, `/api/forecast/train`.
+- **Tests**: pytest unit and integration suite.
 
 ## Quick Start
 
@@ -49,24 +48,24 @@ pytest
 
 ---
 
-# AI Service – Chuẩn bị dữ liệu dự báo nhu cầu (Sprint 7 · M1)
+# AI Service – Chuẩn bị dữ liệu dự báo nhu cầu
 
-| Thẻ | Hạng mục | File |
+| Bước | Hạng mục | File |
 |---|---|---|
-| Sprint7-01 | Collect & Prepare Sales Dataset | `data_prep/s01_collect_sales_dataset.py` |
-| Sprint7-02 | Data Cleaning | `data_prep/s02_clean_data.py` |
-| Sprint7-03 | EDA for Demand Data | `data_prep/s03_eda.py` → `docs/ai/EDA_REPORT.md` |
-| Sprint7-04 | Prepare Training Dataset | `data_prep/s04_prepare_training_dataset.py` |
-| Sprint7-05 | Calendar Feature Engineering | `data_prep/s05_calendar_features.py` |
-| Sprint7-07 | Baseline Forecast Model | `data_prep/s07_baseline_forecast.py` |
-| Sprint7-08 | AI Data Pipeline Testing | `tests/test_data_prep.py` |
+| 1 | Collect & Prepare Sales Dataset | `data_prep/s01_collect_sales_dataset.py` |
+| 2 | Data Cleaning | `data_prep/s02_clean_data.py` |
+| 3 | EDA for Demand Data | `data_prep/s03_eda.py` → `docs/ai/EDA_REPORT.md` |
+| 4 | Prepare Training Dataset | `data_prep/s04_prepare_training_dataset.py` |
+| 5 | Calendar Feature Engineering | `data_prep/s05_calendar_features.py` |
+| 7 | Baseline Forecast Model | `data_prep/s07_baseline_forecast.py` |
+| 8 | AI Data Pipeline Testing | `tests/test_data_prep.py` |
 
 ## Chạy
 
 ```bash
 cd ai-service
 pip install -r requirements.txt
-python run_data_prep.py                 # chạy Sprint7-01..07 với dữ liệu mô phỏng
+python run_data_prep.py                 # chạy các bước 1 đến 7 với dữ liệu mô phỏng
 python -m unittest discover -s tests -v # kiểm thử toàn bộ pipeline
 ```
 
@@ -84,7 +83,7 @@ Bắt buộc có `date`, `sku`, `units_sold`; `warehouse_code`, `unit_price`, `p
 Khi có dữ liệu thật từ hệ thống (bảng `inventory_transactions`, loại `ISSUING`), gộp theo
 ngày × sản phẩm × kho (`SUM(quantity)`) rồi xuất CSV với các cột trên.
 
-## Sprint 8 · M1 – Đánh giá và so sánh mô hình dự báo
+## Đánh giá và so sánh mô hình dự báo
 
 Sau khi có `data/processed/train.csv` và `test.csv`, chạy benchmark trên cùng test set:
 
@@ -141,12 +140,12 @@ docs/ai/EDA_REPORT.md, docs/ai/eda/*.png
 1. **Dữ liệu hiện tại là MÔ PHỎNG.** Hệ thống chưa có đủ lịch sử bán hàng thật (chỉ vài giao dịch E2E).
    Mô phỏng chỉ để dựng và kiểm thử pipeline; mọi kết luận EDA phải chạy lại trên dữ liệu thật.
    `data_source.json` và đầu báo cáo EDA luôn ghi rõ điều này.
-2. **Chia theo thời gian, không ngẫu nhiên**, để tránh rò rỉ tương lai (Sprint 8 đánh giá MAE/MAPE).
+2. **Chia theo thời gian, không ngẫu nhiên**, để tránh rò rỉ tương lai (đánh giá bằng MAE/MAPE).
 3. **Outlier bị chặn (cap), không xóa**; ngày thiếu được điền và gắn `is_imputed=1`. Ngày thiếu có thể là
    hết hàng thật (nhu cầu bị che khuất), nên đừng coi `units_sold` = nhu cầu thật ở các dòng đó.
 4. **Chuỗi intermittent** (nhiều ngày bán 0): đánh giá bằng MAE/WAPE thay vì MAPE.
 5. `sku`, `warehouse_code` khớp `products.sku`, `warehouses.code` của backend để map ngược không cần bảng trung gian.
 6. Feature ngày/tuần/tháng được tạo bằng cùng một phép biến đổi cho train và test; không fit trên test.
-7. Sprint7-07 tạo hai baseline không cần thư viện ML: seasonal-naive 7 ngày và trung bình theo thứ trong tuần.
+7. Bước 7 tạo hai baseline không cần thư viện ML: seasonal-naive 7 ngày và trung bình theo thứ trong tuần.
    Predictions chỉ dùng train; test chỉ dùng để tính MAE/WAPE. Kết quả trên dữ liệu mô phỏng chỉ xác nhận pipeline,
    không phải bằng chứng độ chính xác thực tế.

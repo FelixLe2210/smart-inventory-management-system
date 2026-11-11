@@ -1,6 +1,5 @@
 /**
  * Utility functions & validation rules for Stock Movement (Receiving / Issuing / Transactions)
- * Sprint 5 - M3
  */
 
 /**

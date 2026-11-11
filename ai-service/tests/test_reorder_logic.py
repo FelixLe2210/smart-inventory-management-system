@@ -1,4 +1,4 @@
-"""Sprint9-04 - Reorder scenario tests for app.services.reorder_logic."""
+"""Reorder scenario tests for app.services.reorder_logic."""
 import pytest
 
 from app.services.reorder_logic import (

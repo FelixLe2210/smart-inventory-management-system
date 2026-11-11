@@ -14,3 +14,16 @@ app:
     base-url: ${AI_SERVICE_BASE_URL:http://localhost:8000}
     connect-timeout: ${AI_SERVICE_CONNECT_TIMEOUT:3s}
     read-timeout: ${AI_SERVICE_READ_TIMEOUT:35s}
+  auth:
+    registration-enabled: ${AUTH_REGISTRATION_ENABLED:true}
+    # Vai trò của tài khoản tự đăng ký (không được là ADMIN).
+    default-role: ${AUTH_DEFAULT_ROLE:VIEWER}
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:}
+    facebook:
+      app-id: ${FACEBOOK_APP_ID:}
+      app-secret: ${FACEBOOK_APP_SECRET:}
+    phone:
+      enabled: ${AUTH_PHONE_ENABLED:true}
+      # true: trả mã OTP về trình duyệt và ghi vào log (chưa có cổng SMS). Luôn để false khi triển khai thật.
+      dev-mode: ${AUTH_PHONE_DEV_MODE:false}

@@ -23,7 +23,7 @@ export default function TransactionTable({
         <div className="p-4 bg-amber-50 border-b border-amber-200 text-amber-900 flex items-start gap-3">
           <span className="material-symbols-outlined text-[22px] text-amber-600 mt-0.5">info</span>
           <div className="flex-1">
-            <h4 className="font-body-sm-medium text-body-sm-medium">Tính năng đang đồng bộ từ Backend Sprint 5</h4>
+            <h4 className="font-body-sm-medium text-body-sm-medium">Chưa tải được lịch sử giao dịch</h4>
             <p className="text-body-sm text-amber-800 mt-0.5">
             API lịch sử giao dịch chưa khả dụng. Hãy kiểm tra phiên bản backend hoặc thử tải lại.
             </p>

@@ -1,6 +1,6 @@
 import { ApiClientError } from '../api/ApiClientError.js';
 
-/** Khoảng dự báo hỗ trợ trên UI (Sprint8-09: 7/14/30 ngày). */
+/** Khoảng dự báo hỗ trợ trên UI. */
 export const FORECAST_HORIZONS = [7, 14, 30];
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -94,6 +94,9 @@ export function normalizeForecastResponse(data, { productId, horizonDays }) {
       ? data.model_version ?? data.modelVersion
       : null,
     fallbackApplied: (data.fallback_applied ?? data.fallbackApplied) === true,
+    historySource: ['provided', 'synthetic_placeholder'].includes(data.history_source ?? data.historySource)
+      ? data.history_source ?? data.historySource
+      : null,
   };
 }
 
@@ -173,7 +176,7 @@ export function accuracyPercent(mape) {
 }
 
 /**
- * Chuyển lỗi bất kỳ thành nội dung hiển thị (Sprint8-12): tiêu đề, mô tả, gợi ý và
+ * Chuyển lỗi bất kỳ thành nội dung hiển thị: tiêu đề, mô tả, gợi ý và
  * có nên cho phép "Thử lại" hay không.
  */
 export function describeForecastError(error) {

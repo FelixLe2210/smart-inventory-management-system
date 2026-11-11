@@ -1,134 +1,9 @@
 /**
  * useWarehouse – state, API calls & logic cho trang Warehouse UI.
- * Sprint3-13 (UI) + Sprint3-14 (API Integration) + Sprint3-15 (Validation & Error Handling).
  */
 import { useState, useCallback, useRef, useEffect } from "react";
 import { warehouseApi } from "../../api/warehouseApi";
 import { ApiClientError } from "../../api/ApiClientError";
-
-// ── Demo data for UI previews; the page loads persisted rows from the API. ──
-export const INITIAL_WAREHOUSES = [
-  {
-    code: "KHO-SGN01",
-    name: "Kho Logistics Tân Tạo - TP.HCM",
-    description: "Hub trung tâm phân phối chính Miền Nam",
-    region: "south",
-    type: "fulfillment",
-    typeLabel: "Fulfillment Hub",
-    typeIcon: "local_shipping",
-    address: "Lô 12, KCN Tân Tạo, Q. Bình Tân, TP. Hồ Chí Minh",
-    area: "18,500 m²",
-    capacity: 16000,
-    used: 14200,
-    manager: { name: "Lý Nguyễn", initials: "LN", phone: "0908.123.456", color: "bg-primary text-on-primary" },
-    status: "active",
-  },
-  {
-    code: "KHO-HAN02",
-    name: "Kho Phân phối Quang Minh - Hà Nội",
-    description: "Trung chuyển hàng hóa cao tốc Bắc Nam",
-    region: "north",
-    type: "crossdock",
-    typeLabel: "Cross-dock",
-    typeIcon: "swap_horiz",
-    address: "KCN Quang Minh, H. Mê Linh, Hà Nội",
-    area: "11,200 m²",
-    capacity: 9500,
-    used: 7850,
-    manager: { name: "Trần Hoàng", initials: "TH", phone: "0912.889.922", color: "bg-tertiary text-on-tertiary" },
-    status: "active",
-  },
-  {
-    code: "KHO-BDG01",
-    name: "Kho Trung tâm Sóng Thần - Bình Dương",
-    description: "Kho bách hóa và vật tư công nghiệp nặng",
-    region: "south",
-    type: "standard",
-    typeLabel: "Kho tiêu chuẩn",
-    typeIcon: "warehouse",
-    address: "Đại lộ Độc Lập, KCN Sóng Thần 1, Dĩ An, Bình Dương",
-    area: "14,000 m²",
-    capacity: 12000,
-    used: 9120,
-    manager: { name: "Vũ Mạnh", initials: "VM", phone: "0933.456.789", color: "bg-secondary text-on-secondary" },
-    status: "active",
-  },
-  {
-    code: "KHO-DAD01",
-    name: "Kho Trung chuyển Hòa Khánh - Đà Nẵng",
-    description: "Cửa ngõ logistics vùng kinh tế trọng điểm Miền Trung",
-    region: "central",
-    type: "crossdock",
-    typeLabel: "Cross-dock",
-    typeIcon: "swap_horiz",
-    address: "Đường số 4, KCN Hòa Khánh, Q. Liên Chiểu, Đà Nẵng",
-    area: "5,600 m²",
-    capacity: 4500,
-    used: 3200,
-    manager: { name: "Đặng Phong", initials: "ĐP", phone: "0987.654.321", color: "bg-primary-container text-on-primary-container" },
-    status: "active",
-  },
-  {
-    code: "KHO-SGN02",
-    name: "Kho Lạnh Cát Lái - TP. Thủ Đức",
-    description: "Nhiệt độ âm sâu -18°C đến -25°C cho thủy hải sản & dược",
-    region: "south",
-    type: "cold",
-    typeLabel: "Kho mát/lạnh",
-    typeIcon: "ac_unit",
-    address: "Cụm cảng Cát Lái, P. Cát Lái, TP. Thủ Đức, TP.HCM",
-    area: "4,800 m²",
-    capacity: 4000,
-    used: 3980,
-    manager: { name: "Hà Quang", initials: "HQ", phone: "0903.771.882", color: "bg-tertiary-container text-on-tertiary-container" },
-    status: "active",
-  },
-  {
-    code: "KHO-DNI01",
-    name: "Kho Phân phối Long Thành - Đồng Nai",
-    description: "Đang bảo trì hệ thống AGV & băng tải tự động",
-    region: "south",
-    type: "fulfillment",
-    typeLabel: "Fulfillment Hub",
-    typeIcon: "local_shipping",
-    address: "KCN Lộc An - Bình Sơn, H. Long Thành, Đồng Nai",
-    area: "4,200 m²",
-    capacity: 3000,
-    used: 1400,
-    manager: { name: "Phạm Long", initials: "PL", phone: "0977.112.334", color: "bg-surface-container-high text-on-surface" },
-    status: "maintenance",
-  },
-  {
-    code: "KHO-HPG01",
-    name: "Kho Cảng Đình Vũ - Hải Phòng",
-    description: "Kho ngoại quan & tập kết công hàng cảng biển",
-    region: "north",
-    type: "standard",
-    typeLabel: "Kho tiêu chuẩn",
-    typeIcon: "warehouse",
-    address: "Khu kinh tế Đình Vũ, Q. Hải An, Hải Phòng",
-    area: "3,200 m²",
-    capacity: 2000,
-    used: 1800,
-    manager: { name: "Ngô Văn", initials: "NV", phone: "0918.332.991", color: "bg-secondary-fixed text-on-secondary-fixed" },
-    status: "active",
-  },
-  {
-    code: "KHO-CTH01",
-    name: "Kho Vận Trà Nóc - Cần Thơ",
-    description: "Khu vực Tây Nam Bộ (Tạm dừng dịch chuyển mặt bằng)",
-    region: "south",
-    type: "standard",
-    typeLabel: "Kho tiêu chuẩn",
-    typeIcon: "warehouse",
-    address: "KCN Trà Nóc 1, Q. Bình Thủy, Cần Thơ",
-    area: "3,000 m²",
-    capacity: 2000,
-    used: 0,
-    manager: { name: "Lê Dũng", initials: "LD", phone: "0945.667.112", color: "bg-surface-container-high text-secondary" },
-    status: "inactive",
-  },
-];
 
 // Helper chuẩn hóa thực thể từ backend về shape của UI
 function normalizeWarehouse(item, index = 0) {
@@ -323,7 +198,7 @@ export function useWarehouse() {
     setErrors({});
   }, []);
 
-  // ── Lưu form (Sprint3-14 & 15: Validations + API Integration) ────────
+  // ── Lưu form ────────
   const saveWarehouse = useCallback(async () => {
     const newErrors = {};
 

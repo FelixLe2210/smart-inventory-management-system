@@ -108,4 +108,19 @@ class AuthServiceTest {
         when(role.getName()).thenReturn("ADMIN");
         activeUser.setRoles(Set.of(role));
     }
+
+    @Test
+    void locksTheAccountAfterRepeatedWrongPasswords() {
+        when(userRepository.findByUsername("admin")).thenReturn(Optional.of(activeUser));
+        when(passwordEncoder.matches(any(), any())).thenReturn(false);
+
+        for (int i = 0; i < 5; i++) {
+            assertThrows(UnauthorizedException.class, () -> authService.login(new LoginRequest("admin", "wrong")));
+        }
+        com.smartinventory.exception.TooManyRequestsException ex = assertThrows(
+                com.smartinventory.exception.TooManyRequestsException.class,
+                () -> authService.login(new LoginRequest("admin", "wrong")));
+        assertEquals("TOO_MANY_ATTEMPTS", ex.getCode());
+        assertTrue(ex.getRetryAfterSeconds() > 0);
+    }
 }

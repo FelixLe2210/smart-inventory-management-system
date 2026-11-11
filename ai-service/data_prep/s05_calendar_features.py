@@ -1,4 +1,4 @@
-"""Sprint7-05 – Tạo feature lịch nhất quán cho train và test."""
+"""Tạo feature lịch nhất quán cho train và test."""
 import json
 
 import numpy as np
@@ -51,7 +51,7 @@ def main():
         (TRAIN_FILE, PROCESSED_DIR / "train_features.csv"),
         (TEST_FILE, PROCESSED_DIR / "test_features.csv"),
     ):
-        frame = add_calendar_features(pd.read_csv(source))
+        frame = add_calendar_features(pd.read_csv(source, dtype={"sku": str, "warehouse_code": str}))
         frame.to_csv(destination, index=False)
         print(f"-> {destination}")
 

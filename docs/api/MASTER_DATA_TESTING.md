@@ -1,4 +1,4 @@
-# Tài liệu Kiểm thử Master Data (Sprint3-16)
+# Tài liệu Kiểm thử Master Data
 
 Tài liệu này hướng dẫn chi tiết quy trình kiểm thử và kết quả thực hiện cho toàn bộ Master Data Flow: **Warehouse**, **Category**, **Supplier**, và **Product**.
 

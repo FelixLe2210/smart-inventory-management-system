@@ -8,7 +8,7 @@ const fieldClass = (hasError) =>
   `${inputBase} ${hasError ? 'border-error ring-1 ring-error' : 'border-outline-variant focus:border-primary'}`;
 
 /**
- * StockTransferForm - Form phiếu chuyển kho (Sprint5-13)
+ * StockTransferForm - Form phiếu chuyển kho
  * Mọi quy tắc nghiệp vụ nằm ở utils/stockTransfer.js và backend; form chỉ hiển thị.
  */
 export default function StockTransferForm({

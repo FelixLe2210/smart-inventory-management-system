@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Sprint4-16 – Inventory End-to-End test: Product -> Warehouse -> Inventory
+ * Inventory End-to-End test: Product -> Warehouse -> Inventory
  * Chạy với backend THẬT (SQL Server) đang bật:
  *
  *   node docs/api/inventory-e2e.mjs

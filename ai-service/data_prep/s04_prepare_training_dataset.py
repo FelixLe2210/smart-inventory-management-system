@@ -1,11 +1,11 @@
-"""Sprint7-04 – Prepare Training Dataset.
+"""Prepare Training Dataset.
 
 Chia train/test THEO THỜI GIAN (không xáo trộn ngẫu nhiên – xáo trộn sẽ làm lộ tương lai vào tập train
-và làm sai lệch MAPE/MAE ở Sprint 8). Mọi chuỗi dùng chung một ngày cắt.
+và làm sai lệch MAPE/MAE khi đánh giá mô hình). Mọi chuỗi dùng chung một ngày cắt.
 
   data/processed/train.csv, test.csv, data_schema.json
 
-Mặc định test = 60 ngày cuối (phủ được horizon 7/14/30 ngày của Sprint 8).
+Mặc định test = 60 ngày cuối (phủ được horizon 7/14/30 ngày khi đánh giá mô hình).
 """
 import argparse
 import json
@@ -44,7 +44,9 @@ def validate(train: pd.DataFrame, test: pd.DataFrame, full: pd.DataFrame) -> lis
     if len(train) + len(test) != len(full):
         problems.append("tổng dòng train+test khác dữ liệu gốc")
     for name, part in (("train", train), ("test", test)):
-        if part[CANONICAL_COLUMNS].isna().any().any():
+        # unit_price là cột tùy chọn: dataset ngoài không có giá thì cả cột rỗng (không dùng làm đặc trưng).
+        required = [c for c in CANONICAL_COLUMNS if not (c == "unit_price" and part[c].isna().all())]
+        if part[required].isna().any().any():
             problems.append(f"{name} còn giá trị null")
         if part.duplicated(["date", *KEY]).any():
             problems.append(f"{name} có khóa (ngày, SKU, kho) trùng")
@@ -87,7 +89,7 @@ def main(argv=None):
     ap.add_argument("--test-days", type=int, default=60)
     args = ap.parse_args(argv)
     ensure_dirs()
-    full = pd.read_csv(CLEAN_FILE, parse_dates=["date"])
+    full = pd.read_csv(CLEAN_FILE, parse_dates=["date"], dtype={"sku": str, "warehouse_code": str})
     train, test, cutoff = split_by_time(full, args.test_days)
     problems = validate(train, test, full)
     if problems:

@@ -159,7 +159,7 @@ export default function InventoryDetailModal({ inventory, onClose, onAdjust, isS
               <div className="p-4 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 mb-4 flex items-center gap-2">
                 <span className="material-symbols-outlined text-amber-600">info</span>
                 <span className="text-body-sm">
-                  Backend API {'GET /api/inventories/' + inventory.id + '/transactions'} đang được đồng bộ ở nhánh Sprint 5 M1.
+                  Chưa tải được lịch sử giao dịch của dòng tồn kho này. Hãy kiểm tra backend rồi tải lại.
                 </span>
               </div>
             )}
@@ -256,7 +256,7 @@ export default function InventoryDetailModal({ inventory, onClose, onAdjust, isS
             <label className="block">
               <span className="mb-1.5 block text-label-default font-medium text-on-surface">Loại điều chỉnh</span>
               <select
-                className="h-10 w-full rounded-lg border border-outline-variant bg-white px-3 text-body-sm outline-none focus:border-primary"
+                className="h-10 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 text-body-sm outline-none focus:border-primary"
                 onChange={(event) => setAdjustmentType(event.target.value)}
                 value={adjustmentType}
               >
@@ -269,7 +269,7 @@ export default function InventoryDetailModal({ inventory, onClose, onAdjust, isS
                 {adjustmentType === 'SET' ? 'Số lượng tồn mới' : 'Số lượng'}
               </span>
               <input
-                className="h-10 w-full rounded-lg border border-outline-variant bg-white px-3 text-body-sm outline-none focus:border-primary"
+                className="h-10 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 text-body-sm outline-none focus:border-primary"
                 min="0"
                 onChange={(event) => setQuantity(event.target.value)}
                 required
@@ -281,7 +281,7 @@ export default function InventoryDetailModal({ inventory, onClose, onAdjust, isS
             <label className="block">
               <span className="mb-1.5 block text-label-default font-medium text-on-surface">Lý do</span>
               <input
-                className="h-10 w-full rounded-lg border border-outline-variant bg-white px-3 text-body-sm outline-none focus:border-primary"
+                className="h-10 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 text-body-sm outline-none focus:border-primary"
                 maxLength={255}
                 onChange={(event) => setReason(event.target.value)}
                 placeholder="Ví dụ: kiểm kê định kỳ"
@@ -292,7 +292,7 @@ export default function InventoryDetailModal({ inventory, onClose, onAdjust, isS
             <label className="block">
               <span className="mb-1.5 block text-label-default font-medium text-on-surface">Mã chứng từ</span>
               <input
-                className="h-10 w-full rounded-lg border border-outline-variant bg-white px-3 text-body-sm outline-none focus:border-primary"
+                className="h-10 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 text-body-sm outline-none focus:border-primary"
                 maxLength={50}
                 onChange={(event) => setReferenceDoc(event.target.value)}
                 placeholder="Không bắt buộc"

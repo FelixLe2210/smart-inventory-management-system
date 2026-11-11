@@ -1,5 +1,5 @@
 /**
- * WarehousePage – Trang "Danh sách chi nhánh kho" (Sprint3-13: Warehouse UI).
+ * WarehousePage – Trang "Danh sách chi nhánh kho".
  *
  * Cấu trúc file trong thư mục này:
  *   WarehousePage.jsx        ← page chính (file này) – chỉ lắp ráp components
@@ -20,8 +20,10 @@ import WarehouseTable from "./WarehouseTable";
 import WarehouseModal from "./WarehouseModal";
 import StatusConfirmModal from "./StatusConfirmModal";
 import ToastNotification from "./ToastNotification";
+import { useCanManage } from '../../utils/permissions';
 
 export default function WarehousePage() {
+  const canManage = useCanManage();
   const hook = useWarehouse();
 
   return (
@@ -70,6 +72,7 @@ export default function WarehousePage() {
             <span className={`material-symbols-outlined text-[18px] ${hook.isLoading ? "animate-spin" : ""}`}>sync</span>
             <span>{hook.isLoading ? "Đang tải..." : "Làm mới dữ liệu"}</span>
           </button>
+          {canManage && (
           <button
             id="btn-add-warehouse"
             className="flex items-center gap-1.5 px-4 py-2 bg-primary-container text-on-primary-container font-body-sm-medium text-body-sm-medium rounded-lg hover:bg-primary hover:text-on-primary transition-colors shadow-sm"
@@ -78,6 +81,7 @@ export default function WarehousePage() {
             <span className="material-symbols-outlined text-[18px]">add_circle</span>
             <span>Thêm mới chi nhánh kho</span>
           </button>
+          )}
         </div>
       </div>
 

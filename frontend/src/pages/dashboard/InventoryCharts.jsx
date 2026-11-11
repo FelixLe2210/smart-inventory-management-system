@@ -2,7 +2,6 @@ import React from 'react';
 
 /**
  * InventoryCharts - Biểu đồ thống kê tồn kho theo kho & phân bổ danh mục
- * Sprint 6 - Milestone M3 (Sprint6-11: Biểu đồ tồn kho / giao dịch)
  * Thiết kế giao diện SVG Chart hiện đại, nhẹ, mượt mà và trực quan
  */
 export default function InventoryCharts({
@@ -13,7 +12,7 @@ export default function InventoryCharts({
   const maxWhQty = Math.max(...warehouseStocks.map((w) => w.quantity), 10);
 
   // Bảng màu cho Category donut/progress
-  const categoryPalette = ['#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#64748b'];
+  const categoryPalette = ['#14a3bb', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#64748b'];
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">

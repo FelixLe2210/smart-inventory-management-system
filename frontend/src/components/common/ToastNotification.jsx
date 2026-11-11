@@ -11,7 +11,7 @@ export default function ToastNotification({ visible, text, icon = "check_circle"
       role="status"
       aria-live="polite"
     >
-      <span className="material-symbols-outlined text-[20px] text-tertiary-fixed">{icon}</span>
+      <span className="material-symbols-outlined text-[20px] text-inverse-primary">{icon}</span>
       <span className="font-body-sm-medium text-body-sm-medium">{text}</span>
     </div>
   );

@@ -1,4 +1,4 @@
-"""Chạy toàn bộ Sprint 7 – M1: python run_data_prep.py [--source csv --input ... --map ...]"""
+"""Chạy toàn bộ pipeline chuẩn bị dữ liệu: python run_data_prep.py [--source csv --input ... --map ...]"""
 import sys
 from data_prep import (
     s01_collect_sales_dataset as s01,

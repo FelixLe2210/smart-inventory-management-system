@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import OperateOnly from '../../components/common/OperateOnly';
 import { useStockAlerts } from '../../hooks/useStockAlerts';
 import { ALERT_TYPES } from '../../utils/stockAlerts';
 import DataSourceBadge from '../../components/common/DataSourceBadge';
@@ -8,7 +9,6 @@ const fmt = (n) => new Intl.NumberFormat('vi-VN').format(Number(n) || 0);
 
 /**
  * AlertsPage - Cảnh báo tồn kho (/alerts)
- * Sprint 6 - M4 (Sprint6-13: Alert UI — hiển thị low-stock / out-of-stock alerts)
  */
 export default function AlertsPage() {
   const a = useStockAlerts();
@@ -56,13 +56,15 @@ export default function AlertsPage() {
             <span className={`material-symbols-outlined text-[18px] ${a.isLoading ? 'animate-spin' : ''}`}>sync</span>
             <span>{a.isLoading ? 'Đang tải...' : 'Làm mới'}</span>
           </button>
-          <Link
-            to="/inbound"
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 text-white font-body-sm-medium text-body-sm-medium rounded-lg hover:bg-emerald-700 transition-colors shadow-sm"
-          >
-            <span className="material-symbols-outlined text-[18px]">move_to_inbox</span>
-            <span>Nhập kho</span>
-          </Link>
+          <OperateOnly>
+            <Link
+              to="/inbound"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 text-white font-body-sm-medium text-body-sm-medium rounded-lg hover:bg-emerald-700 transition-colors shadow-sm"
+            >
+              <span className="material-symbols-outlined text-[18px]">move_to_inbox</span>
+              <span>Nhập kho</span>
+            </Link>
+          </OperateOnly>
         </div>
       </div>
 
@@ -247,13 +249,15 @@ function AlertRow({ alert }) {
           <span className="material-symbols-outlined text-[14px]">visibility</span>
           Xem tồn
         </Link>
-        <Link
-          to="/inbound"
-          className="ml-1 inline-flex items-center gap-1 px-2.5 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary text-[11px] font-medium rounded-md transition-colors"
-        >
-          <span className="material-symbols-outlined text-[14px]">add_shopping_cart</span>
-          Nhập hàng
-        </Link>
+        <OperateOnly>
+          <Link
+            to="/inbound"
+            className="ml-1 inline-flex items-center gap-1 px-2.5 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary text-[11px] font-medium rounded-md transition-colors"
+          >
+            <span className="material-symbols-outlined text-[14px]">add_shopping_cart</span>
+            Nhập hàng
+          </Link>
+        </OperateOnly>
       </td>
     </tr>
   );

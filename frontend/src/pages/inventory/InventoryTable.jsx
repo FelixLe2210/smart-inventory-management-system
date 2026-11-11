@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import OperateOnly from '../../components/common/OperateOnly';
 import StockStatusBadge, { STOCK_STATUS } from '../../components/inventory/StockStatusBadge';
 
 function fmtDate(value) {
@@ -33,7 +34,7 @@ function StockBar({ item }) {
   );
 }
 
-/** Bảng tồn kho (Sprint4-13). */
+/** Bảng tồn kho. */
 export default function InventoryTable({ items, total, isLoading, loadError, onView, onAdjust, onEditLocation, onRetry }) {
   return (
     <div className="rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant overflow-hidden flex flex-col">
@@ -112,31 +113,33 @@ export default function InventoryTable({ items, total, isLoading, loadError, onV
                       >
                         <span className="material-symbols-outlined text-[18px]">visibility</span>
                       </button>
-                      {Number(it.availableStock || 0) > 0 && (
-                        <Link
-                          to={`/transfer?productId=${it.productId}&sourceWarehouseId=${it.warehouseId}`}
-                          title="Chuyển kho sang chi nhánh khác"
+                      <OperateOnly>
+                        {Number(it.availableStock || 0) > 0 && (
+                          <Link
+                            to={`/transfer?productId=${it.productId}&sourceWarehouseId=${it.warehouseId}`}
+                            title="Chuyển kho sang chi nhánh khác"
+                            className="p-1.5 rounded-lg text-secondary hover:text-primary hover:bg-surface-container-high transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">swap_horiz</span>
+                          </Link>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => onAdjust(it)}
+                          title="Điều chỉnh tồn kho (nhập / xuất / kiểm kê / giữ chỗ)"
                           className="p-1.5 rounded-lg text-secondary hover:text-primary hover:bg-surface-container-high transition-colors"
                         >
-                          <span className="material-symbols-outlined text-[18px]">swap_horiz</span>
-                        </Link>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => onAdjust(it)}
-                        title="Điều chỉnh tồn kho (nhập / xuất / kiểm kê / giữ chỗ)"
-                        className="p-1.5 rounded-lg text-secondary hover:text-primary hover:bg-surface-container-high transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-[18px]">tune</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onEditLocation(it)}
-                        title="Đổi vị trí lưu kho"
-                        className="p-1.5 rounded-lg text-secondary hover:text-primary hover:bg-surface-container-high transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-[18px]">edit_location_alt</span>
-                      </button>
+                          <span className="material-symbols-outlined text-[18px]">tune</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onEditLocation(it)}
+                          title="Đổi vị trí lưu kho"
+                          className="p-1.5 rounded-lg text-secondary hover:text-primary hover:bg-surface-container-high transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">edit_location_alt</span>
+                        </button>
+                      </OperateOnly>
                     </div>
                   </td>
                 </tr>

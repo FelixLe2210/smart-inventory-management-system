@@ -119,4 +119,31 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.error.code").value("INTERNAL_ERROR"))
                 .andExpect(jsonPath("$.error.message", not(containsString("secret"))));
     }
+
+    @Test
+    @DisplayName("Wrong HTTP verb returns 405 METHOD_NOT_ALLOWED, not 500")
+    void testMethodNotAllowed() throws Exception {
+        mockMvc.perform(patch("/api/warehouses/1"))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("METHOD_NOT_ALLOWED"));
+    }
+
+    @Test
+    @DisplayName("Non-JSON content type returns 415 UNSUPPORTED_MEDIA_TYPE")
+    void testUnsupportedMediaType() throws Exception {
+        mockMvc.perform(post("/api/warehouses")
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content("hello"))
+                .andExpect(status().isUnsupportedMediaType())
+                .andExpect(jsonPath("$.error.code").value("UNSUPPORTED_MEDIA_TYPE"));
+    }
+
+    @Test
+    @DisplayName("Unknown path returns 404 ENDPOINT_NOT_FOUND, not 500")
+    void testUnknownPath() throws Exception {
+        mockMvc.perform(get("/api/does-not-exist"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error.code").value("ENDPOINT_NOT_FOUND"));
+    }
 }

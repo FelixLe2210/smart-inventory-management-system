@@ -1,9 +1,8 @@
 /**
  * Logic dựng báo cáo giao dịch & tồn kho (client-side).
- * Sprint 6 - Milestone M4 (Sprint6-14, Sprint6-15, Sprint6-16)
  *
  * Shape trả về ({ summary, rows, ... }) cũng chính là contract mà
- * Transaction Report API (Sprint6-06) / Inventory Report API (Sprint6-07) nên trả về,
+ * Transaction Report API / Inventory Report API nên trả về,
  * nên khi backend sẵn sàng UI dùng thẳng dữ liệu backend mà không phải đổi gì.
  */
 import { getAvailableStock, getCurrentStock, getReservedStock } from './stockAlerts.js';

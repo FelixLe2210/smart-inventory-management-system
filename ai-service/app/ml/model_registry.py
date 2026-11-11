@@ -14,7 +14,7 @@ logger = logging.getLogger("ai_service.ml.registry")
 
 
 class ModelRegistry:
-    """Quản lý model đang dùng + lưu/nạp artifact (Sprint8-08)."""
+    """Quản lý model đang dùng + lưu/nạp artifact."""
 
     def __init__(self, models_dir: Optional[Path] = None):
         self.models_dir = Path(models_dir or settings.MODELS_DIR)

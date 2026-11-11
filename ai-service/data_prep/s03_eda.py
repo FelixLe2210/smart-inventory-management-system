@@ -1,4 +1,4 @@
-"""Sprint7-03 – EDA for Demand Data.
+"""EDA for Demand Data.
 
 Đọc data/processed/sales_clean.csv, sinh biểu đồ (docs/ai/eda/*.png) và báo cáo
 docs/ai/EDA_REPORT.md. Mọi con số trong báo cáo được TÍNH từ dữ liệu, không gõ tay.
@@ -120,7 +120,7 @@ def write_report(r: dict, source: dict):
     best_m, worst_m = int(mon.idxmax()), int(mon.idxmin())
     classes = r["series_table"]["class"].value_counts().to_dict()
     acf = r["acf"]
-    lines = ["# Báo cáo EDA – Dữ liệu nhu cầu (Sprint7-03)", ""]
+    lines = ["# Báo cáo EDA – Dữ liệu nhu cầu", ""]
     if source.get("synthetic"):
         lines += ["> ⚠ **Dữ liệu MÔ PHỎNG** (sinh bởi `s01_collect_sales_dataset.py`). Các quy luật bên dưới",
                   "> phản ánh giả định khi sinh dữ liệu, **không** phải hành vi khách hàng thật. Chạy lại pipeline",
@@ -139,7 +139,7 @@ def write_report(r: dict, source: dict):
         "## 3. Ảnh hưởng của sự kiện", "",
         f"- **Nghỉ Tết** (−3…+5 ngày quanh mùng 1): nhu cầu chuẩn hóa ≈ **{r['tet_break']:.2f}** (1.0 = trung bình).",
         f"- **Trước Tết** (−21…−4 ngày): ≈ **{r['tet_pre']:.2f}**.",
-        "- Lịch Tết/ngày lễ phải đưa vào feature (Sprint7-05); lịch dương thông thường không bắt được hiệu ứng này.", "",
+        "- Lịch Tết/ngày lễ phải đưa vào feature; lịch dương thông thường không bắt được hiệu ứng này.", "",
     ]
     if len(r["promo_uplift"]):
         lines += ["### Khuyến mãi", "![](eda/03_promo_uplift.png)", "",
@@ -159,7 +159,7 @@ def write_report(r: dict, source: dict):
 
 def main():
     ensure_dirs()
-    df = pd.read_csv(CLEAN_FILE)
+    df = pd.read_csv(CLEAN_FILE, dtype={"sku": str, "warehouse_code": str})
     src_file = RAW_DIR / "data_source.json"
     source = json.loads(src_file.read_text()) if src_file.exists() else {}
     r = analyze(df)

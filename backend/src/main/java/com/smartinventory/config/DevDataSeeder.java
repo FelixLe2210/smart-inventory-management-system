@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 /**
- * Creates demo users on startup (dev profile only) so the login API has
- * accounts to authenticate against for testing.
+ * Creates sample accounts on startup (dev profile only) so the login API has
+ * accounts to authenticate against during local development.
  *
- * <p>Demo credentials:
+ * <p>Development credentials:
  * <pre>
  *   1. Quản trị viên: username: admin   | password: Admin@123   (Role: ADMIN)
  *   2. Quản lý kho:   username: tester  | password: Tester@123  (Role: MANAGER)
@@ -70,6 +70,6 @@ public class DevDataSeeder implements CommandLineRunner {
         user.setRoles(Set.of(role));
 
         userRepository.save(user);
-        log.info("Seeded demo user '{}' (role: {}) for login testing.", username, roleName);
+        log.info("Seeded development user '{}' (role: {}) for login testing.", username, roleName);
     }
 }

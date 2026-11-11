@@ -23,6 +23,11 @@ import java.io.IOException;
 @Configuration
 public class SecurityConfig {
 
+    private static final String ADMIN = "ADMIN";
+    private static final String MANAGER = "MANAGER";
+    private static final String STAFF = "STAFF";
+    // VIEWER: vai trò mặc định của tài khoản tự đăng ký, chỉ được xem (xem V9__viewer_role.sql).
+
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
@@ -42,9 +47,27 @@ public class SecurityConfig {
                                 writeError(response, objectMapper, HttpStatus.FORBIDDEN,
                                         "FORBIDDEN", "You do not have permission to access this resource.")))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/auth/login", "/api/health").permitAll()
+                        // Đăng nhập, đăng ký, Google/Facebook, mã điện thoại: công khai (tự kiểm tra danh tính bên trong).
+                        .requestMatchers("/api/auth/**", "/api/health").permitAll()
+                        // WebSocket tự xác thực JWT trong JwtHandshakeInterceptor (trình duyệt không gửi được header).
+                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .anyRequest().authenticated())
+                        // Nhận hàng là nghiệp vụ của nhân viên kho: STAFF được phép.
+                        .requestMatchers(HttpMethod.POST, "/api/purchase-orders/*/receive")
+                                .hasAnyRole(ADMIN, MANAGER, STAFF)
+                        // Quản lý tài khoản và vai trò: chỉ ADMIN (kể cả đọc danh sách).
+                        .requestMatchers("/api/users/**").hasRole(ADMIN)
+                        // Đọc dữ liệu: mọi người dùng đã đăng nhập.
+                        .requestMatchers(HttpMethod.GET, "/api/**").authenticated()
+                        // Quyết định mua hàng và danh mục gốc: chỉ ADMIN và MANAGER thay đổi.
+                        .requestMatchers("/api/purchase-orders/**", "/api/reorder/**",
+                                "/api/products/**", "/api/categories/**",
+                                "/api/suppliers/**", "/api/warehouses/**")
+                                .hasAnyRole(ADMIN, MANAGER)
+                        // Chạy dự báo là thao tác đọc (POST chỉ vì phải gửi tham số): mọi người dùng đã đăng nhập.
+                        .requestMatchers(HttpMethod.POST, "/api/forecast/demand").authenticated()
+                        // Ghi dữ liệu kho (nhập, xuất, điều chỉnh, chuyển kho): VIEWER không được.
+                        .anyRequest().hasAnyRole(ADMIN, MANAGER, STAFF))
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService),
                         UsernamePasswordAuthenticationFilter.class)
                 .build();

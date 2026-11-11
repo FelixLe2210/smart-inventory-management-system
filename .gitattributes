@@ -1,0 +1,4 @@
+# Giữ cuối dòng LF cho script chạy trên Linux/Docker, dù clone trên Windows.
+backend/mvnw text eol=lf
+*.sh text eol=lf
+*.cmd text eol=crlf

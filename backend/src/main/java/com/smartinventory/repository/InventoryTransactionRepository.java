@@ -90,4 +90,25 @@ public interface InventoryTransactionRepository extends JpaRepository<InventoryT
             @Param("transactionType") String transactionType,
             @Param("search") String search,
             Pageable pageable);
+
+    /** Xuất kho (ISSUING) của một sản phẩm tại một kho từ mốc {@code since}: lịch sử bán cho AI #1. */
+    @Query("""
+            SELECT t FROM InventoryTransaction t
+            WHERE t.product.id = :productId
+              AND t.sourceWarehouse.id = :warehouseId
+              AND t.transactionType = 'ISSUING'
+              AND t.createdAt >= :since
+            """)
+    List<InventoryTransaction> findIssuesSince(@Param("productId") Long productId,
+                                               @Param("warehouseId") Long warehouseId,
+                                               @Param("since") LocalDateTime since);
+
+    @Query("""
+            SELECT t FROM InventoryTransaction t
+            WHERE t.product.id = :productId
+              AND t.transactionType = 'ISSUING'
+              AND t.createdAt >= :since
+            """)
+    List<InventoryTransaction> findIssuesByProductSince(@Param("productId") Long productId,
+                                                        @Param("since") LocalDateTime since);
 }

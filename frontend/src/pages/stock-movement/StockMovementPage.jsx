@@ -7,7 +7,6 @@ import ToastNotification from '../../components/common/ToastNotification';
 
 /**
  * StockMovementPage - Trang Vận hành Nhập kho (/inbound) và Xuất kho (/outbound)
- * Sprint 5 - M3 (Sprint5-09, Sprint5-10, Sprint5-12)
  * @param {'RECEIVING' | 'ISSUING'} mode
  */
 export default function StockMovementPage({ mode = 'RECEIVING' }) {
