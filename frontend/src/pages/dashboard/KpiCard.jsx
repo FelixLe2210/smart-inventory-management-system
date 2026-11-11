@@ -2,14 +2,13 @@ import React from 'react';
 
 /**
  * KpiCard - Thẻ thống kê chỉ số hiệu suất
- * Sprint 6 - Milestone M3 (Sprint6-10)
  */
 export default function KpiCard({
   title,
   value,
   subValue,
   icon,
-  iconBgColor = 'bg-blue-50 text-blue-600',
+  iconBgColor = 'bg-sky-50 text-sky-600',
   trend,
   trendLabel,
   badgeText,
@@ -23,10 +22,10 @@ export default function KpiCard({
   };
 
   return (
-    <div className="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/30 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+    <div className="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/60 shadow-card hover:shadow-lift transition-shadow duration-200 flex flex-col justify-between">
       <div className="flex items-start justify-between">
         <div>
-          <span className="font-label-default text-xs uppercase tracking-wider text-secondary font-semibold">
+          <span className="text-[13px] text-secondary font-medium">
             {title}
           </span>
           <div className="mt-2 flex items-baseline gap-2">
@@ -50,7 +49,7 @@ export default function KpiCard({
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-secondary">
+      <div className="mt-4 pt-3 border-t border-outline-variant/50 flex items-center justify-between text-xs text-secondary">
         <span className="truncate">{subValue}</span>
         {trend && (
           <span

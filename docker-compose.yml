@@ -1,0 +1,101 @@
+# Chạy toàn bộ hệ thống:  docker compose up -d --build
+# Mở http://localhost:8081  (đăng nhập admin / Admin@123)
+# Dữ liệu mẫu:            docker compose --profile tools run --rm --no-deps db-seed
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64            # máy Apple Silicon chạy qua giả lập
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SA_PASSWORD:-Sa_StrongPass123!}
+    ports:
+      - "${MSSQL_PORT:-1435}:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q \"SELECT 1\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
+    depends_on:
+      mssql:
+        condition: service_healthy
+    restart: "no"
+    environment:
+      SA_PASSWORD: ${SA_PASSWORD:-Sa_StrongPass123!}
+      APP_DB_PASSWORD: ${DB_PASSWORD:-SmartPassword123!}
+    volumes:
+      - ./deploy/mssql-init.sql:/init.sql:ro
+    command: ["/bin/bash", "-c", "/opt/mssql-tools18/bin/sqlcmd -C -I -S mssql -U sa -P \"$$SA_PASSWORD\" -v APP_DB_PASSWORD=\"$$APP_DB_PASSWORD\" -i /init.sql"]
+
+  ai-service:
+    build: ./ai-service
+    volumes:
+      - ai-models:/models
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/health', timeout=4).status == 200 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 90s
+
+  backend:
+    build: ./backend
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+      ai-service:
+        condition: service_started
+    environment:
+      DB_URL: jdbc:sqlserver://mssql:1433;databaseName=smart_inventory;encrypt=true;trustServerCertificate=true
+      DB_USERNAME: smart_user
+      DB_PASSWORD: ${DB_PASSWORD:-SmartPassword123!}
+      AI_SERVICE_BASE_URL: http://ai-service:8000
+      JWT_SECRET: ${JWT_SECRET:-development-only-secret-key-change-before-deployment-32bytes-minimum}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}   # dev = tự tạo tài khoản admin/tester/staff
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    restart: on-failure
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "${WEB_PORT:-8081}:80"
+
+  # Nạp dữ liệu mẫu (chạy sau khi backend đã khởi động ít nhất một lần):
+  #   docker compose --profile tools run --rm --no-deps db-seed
+  db-seed:
+    profiles: ["tools"]
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
+    depends_on:
+      backend:
+        condition: service_started
+    environment:
+      SA_PASSWORD: ${SA_PASSWORD:-Sa_StrongPass123!}
+    volumes:
+      - ./deploy/sample-data:/sample:ro
+    command: ["/bin/bash", "-c", "/opt/mssql-tools18/bin/sqlcmd -C -I -S mssql -U sa -P \"$$SA_PASSWORD\" -d smart_inventory -b -i /sample/seed_sample_data.sql && /opt/mssql-tools18/bin/sqlcmd -C -I -S mssql -U sa -P \"$$SA_PASSWORD\" -d smart_inventory -b -i /sample/seed_sample_extra.sql"]
+
+  # Xóa toàn bộ dữ liệu mẫu (mã SI-* và mã cũ của phiên bản trước), giữ nguyên tài khoản và dữ liệu thật:
+  #   docker compose --profile tools run --rm --no-deps db-reset
+  db-reset:
+    profiles: ["tools"]
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
+    environment:
+      SA_PASSWORD: ${SA_PASSWORD:-Sa_StrongPass123!}
+    volumes:
+      - ./deploy/sample-data:/sample:ro
+    command: ["/bin/bash", "-c", "/opt/mssql-tools18/bin/sqlcmd -C -I -S mssql -U sa -P \"$$SA_PASSWORD\" -d smart_inventory -b -i /sample/reset_sample_data.sql"]
+
+volumes:
+  mssql-data:
+  ai-models:

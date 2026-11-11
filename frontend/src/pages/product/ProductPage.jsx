@@ -6,8 +6,10 @@ import { supplierApi } from '../../api/supplierApi';
 import { ApiClientError } from '../../api/ApiClientError';
 import ToastNotification from '../../components/common/ToastNotification';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
+import { useCanManage } from '../../utils/permissions';
 
 export default function ProductPage() {
+  const canManage = useCanManage();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
@@ -287,6 +289,7 @@ export default function ProductPage() {
             <span className={`material-symbols-outlined text-[18px] ${isLoading ? 'animate-spin' : ''}`}>sync</span>
             <span>{isLoading ? 'Đang tải...' : 'Làm mới dữ liệu'}</span>
           </button>
+          {canManage && (
           <button
             id="btn-add-product"
             className="flex items-center gap-1.5 px-4 py-2 bg-primary-container text-on-primary-container font-body-sm-medium text-body-sm-medium rounded-lg hover:bg-primary hover:text-on-primary transition-colors shadow-sm"
@@ -295,6 +298,7 @@ export default function ProductPage() {
             <span className="material-symbols-outlined text-[18px]">add_circle</span>
             <span>Thêm mới sản phẩm</span>
           </button>
+          )}
         </div>
       </div>
 
@@ -385,7 +389,7 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* Search & Filter Bar (Sprint3-12: Product Search & Filter UI) */}
+        {/* Search & Filter Bar */}
         <div className="p-space-md bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/40 flex flex-col lg:flex-row items-center justify-between gap-3">
           <div className="relative flex items-center w-full lg:max-w-md">
             <span className="material-symbols-outlined absolute left-3 text-secondary text-[18px]">search</span>
@@ -461,7 +465,7 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* Table Container (Sprint3-09: Product List UI) */}
+        {/* Table Container */}
         <div className="rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant overflow-hidden flex flex-col">
           <div className="overflow-x-auto w-full">
             <table className="w-full text-left border-collapse">
@@ -576,6 +580,8 @@ export default function ProductPage() {
                             >
                               <span className="material-symbols-outlined text-[18px]">shelves</span>
                             </Link>
+                            {canManage && (
+                              <>
                             <button
                               onClick={() => openEditModal(prod)}
                               title="Chỉnh sửa sản phẩm"
@@ -590,6 +596,8 @@ export default function ProductPage() {
                             >
                               <span className="material-symbols-outlined text-[18px]">delete</span>
                             </button>
+                              </>
+                            )}
                           </div>
                         </td>
                       </tr>

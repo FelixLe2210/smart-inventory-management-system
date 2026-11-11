@@ -1,4 +1,4 @@
-"""Sprint9-05 - Lead Time Logic (M2). Pure functions, no I/O.
+"""Lead time logic. Pure functions, no I/O.
 
 Lead time is the number of days between placing a purchase order and having the goods
 in the warehouse. It drives three decisions of the reorder AI:

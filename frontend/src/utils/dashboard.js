@@ -7,7 +7,7 @@ import {
 } from './stockAlerts.js';
 
 /**
- * Dashboard calculation utilities for Sprint 6 - Milestone M3
+ * Tiện ích tính toán cho trang Tổng quan
  * (M4: đọc `currentStock` của backend, dùng chung logic phân loại tồn với trang Cảnh báo)
  */
 
@@ -63,9 +63,11 @@ export function calculateKpis(products = [], inventories = [], warehouses = []) 
   // Đếm số sản phẩm hết hàng và sắp hết hàng
   let outOfStockCount = 0;
   let lowStockCount = 0;
+  let trackedCount = 0;
 
   products.forEach((p) => {
     if (!isTrackedProduct(p)) return;
+    trackedCount++;
     const agg = productStockAggregation.get(p.id);
     const available = agg ? agg.available : 0;
     const status = classifyStock(available, p.minStockLevel);
@@ -87,6 +89,8 @@ export function calculateKpis(products = [], inventories = [], warehouses = []) 
     totalInventoryValue,
     outOfStockCount,
     lowStockCount,
+    trackedCount,
+    okCount: Math.max(0, trackedCount - outOfStockCount - lowStockCount),
     totalWarehouses: warehouses.length,
     activeWarehouses,
   };

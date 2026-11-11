@@ -4,8 +4,10 @@ import { supplierApi } from '../../api/supplierApi';
 import { ApiClientError } from '../../api/ApiClientError';
 import ToastNotification from '../../components/common/ToastNotification';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
+import { useCanManage } from '../../utils/permissions';
 
 export default function SupplierPage() {
+  const canManage = useCanManage();
   const [suppliers, setSuppliers] = useState([]);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -250,6 +252,7 @@ export default function SupplierPage() {
             <span className={`material-symbols-outlined text-[18px] ${isLoading ? 'animate-spin' : ''}`}>sync</span>
             <span>{isLoading ? 'Đang tải...' : 'Làm mới dữ liệu'}</span>
           </button>
+          {canManage && (
           <button
             id="btn-add-supplier"
             className="flex items-center gap-1.5 px-4 py-2 bg-primary-container text-on-primary-container font-body-sm-medium text-body-sm-medium rounded-lg hover:bg-primary hover:text-on-primary transition-colors shadow-sm"
@@ -258,6 +261,7 @@ export default function SupplierPage() {
             <span className="material-symbols-outlined text-[18px]">add_circle</span>
             <span>Thêm mới nhà cung cấp</span>
           </button>
+          )}
         </div>
       </div>
 
@@ -498,6 +502,8 @@ export default function SupplierPage() {
                         </td>
                         <td className="py-3 px-4 text-right">
                           <div className="inline-flex items-center gap-1 justify-end">
+                            {canManage && (
+                              <>
                             <button
                               onClick={() => openEditModal(sup)}
                               title="Chỉnh sửa nhà cung cấp"
@@ -512,6 +518,8 @@ export default function SupplierPage() {
                             >
                               <span className="material-symbols-outlined text-[18px]">delete</span>
                             </button>
+                              </>
+                            )}
                           </div>
                         </td>
                       </tr>

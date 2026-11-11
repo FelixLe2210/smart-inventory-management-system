@@ -6,7 +6,6 @@ import TransactionTable from './TransactionTable';
 
 /**
  * TransactionHistoryPage - Màn hình Lịch sử Giao dịch Kho (/transactions)
- * Sprint 5 - M3 (Sprint5-11, Sprint5-12)
  */
 export default function TransactionHistoryPage() {
   const history = useTransactionHistory();

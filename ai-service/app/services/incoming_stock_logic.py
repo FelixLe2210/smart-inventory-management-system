@@ -1,4 +1,4 @@
-"""Sprint9-06 - Incoming Stock Logic (M2). Pure functions, no I/O.
+"""Incoming stock logic. Pure functions, no I/O.
 
 "Incoming stock" (``on_order``) is the quantity already ordered from suppliers but not yet
 received. The reorder AI needs it twice:

@@ -8,7 +8,7 @@ const STYLE = {
 };
 
 /**
- * Thẻ KPI tồn kho. Bấm vào thẻ để lọc nhanh theo trạng thái (Sprint4-13/14).
+ * Thẻ KPI tồn kho. Bấm vào thẻ để lọc nhanh theo trạng thái.
  */
 export default function InventoryKPICards({ summary, activeStatus, onSelectStatus }) {
   const countOf = {

@@ -1,85 +1,86 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import AppLayout from './components/AppLayout';
 import ProtectedRoute from './components/ProtectedRoute';
-import WarehousePage from './pages/warehouse/WarehousePage';
-import ProductPage from './pages/product/ProductPage';
-import CategoryPage from './pages/category/CategoryPage';
-import SupplierPage from './pages/supplier/SupplierPage';
-import InventoryPage from './pages/inventory/InventoryPage';
-import StockMovementPage from './pages/stock-movement/StockMovementPage';
-import StockTransferPage from './pages/stock-transfer/StockTransferPage';
-import TransactionHistoryPage from './pages/transactions/TransactionHistoryPage';
-import DashboardPage from './pages/dashboard/DashboardPage';
-import AlertsPage from './pages/alerts/AlertsPage';
-import ReportsPage from './pages/reports/ReportsPage';
-import ForecastPage from './pages/forecasting/ForecastPage';
+import RequireOperate from './components/RequireOperate';
+import RequireAdmin from './components/RequireAdmin';
+const WarehousePage = lazy(() => import('./pages/warehouse/WarehousePage'));
+const ProductPage = lazy(() => import('./pages/product/ProductPage'));
+const CategoryPage = lazy(() => import('./pages/category/CategoryPage'));
+const SupplierPage = lazy(() => import('./pages/supplier/SupplierPage'));
+const InventoryPage = lazy(() => import('./pages/inventory/InventoryPage'));
+const StockMovementPage = lazy(() => import('./pages/stock-movement/StockMovementPage'));
+const StockTransferPage = lazy(() => import('./pages/stock-transfer/StockTransferPage'));
+const TransactionHistoryPage = lazy(() => import('./pages/transactions/TransactionHistoryPage'));
+const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
+const AlertsPage = lazy(() => import('./pages/alerts/AlertsPage'));
+const ReportsPage = lazy(() => import('./pages/reports/ReportsPage'));
+const ForecastPage = lazy(() => import('./pages/forecasting/ForecastPage'));
+const RecommendationsPage = lazy(() => import('./pages/recommendations/RecommendationsPage'));
+const PurchaseOrdersPage = lazy(() => import('./pages/purchase-orders/PurchaseOrdersPage'));
+const UsersPage = lazy(() => import('./pages/users/UsersPage'));
 
 /**
- * App – Router chính của Hệ thống Smart Inventory Management System for Demand Forecasting and Reorder Recommendation.
- * Đồng bộ toàn diện tất cả các phân hệ Master Data Sprint 3 (M1, M2, M3, M4):
- *   - /login           → Màn hình Đăng nhập (Công khai)
- *   - /warehouses      → Quản lý Chi nhánh Kho (Sprint3-13, 14, 15, 16)
- *   - /products        → Quản lý Sản phẩm SKU (Sprint3-09, Sprint3-12)
- *   - /categories      → Danh mục hàng hóa (Sprint3-10)
- *   - /suppliers       → Nhà cung cấp đối tác (Sprint3-11)
- *   - /forecasting     → Dự báo Nhu cầu (Demand Forecasting)
- *   - /recommendations → Đề xuất Đặt hàng (Reorder Recommendation)
+ * Bộ định tuyến chính. /login là công khai; mọi trang còn lại cần đăng nhập.
+ * Nhập, xuất và chuyển kho yêu cầu quyền vận hành kho (RequireOperate); trang Người dùng chỉ dành cho ADMIN (RequireAdmin).
  */
 export default function App() {
   return (
     <BrowserRouter>
+      <Suspense fallback={<PageLoading />}>
       <Routes>
-        {/* Route công khai: Đăng nhập */}
+        {/* Công khai */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* Các route yêu cầu xác thực người dùng (Protected Routes) */}
+        {/* Cần đăng nhập */}
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
-            {/* Phân hệ Master Data (Sprint 3 hoàn chỉnh) */}
+            {/* Danh mục gốc */}
             <Route path="/warehouses" element={<WarehousePage />} />
             <Route path="/products" element={<ProductPage />} />
             <Route path="/categories" element={<CategoryPage />} />
             <Route path="/suppliers" element={<SupplierPage />} />
 
-            {/* Phân hệ Trọng tâm: Dự báo nhu cầu & Đề xuất đặt hàng (AI Core) */}
+            {/* Dự báo nhu cầu và đề xuất đặt hàng */}
             <Route path="/forecasting" element={<ForecastPage />} />
-            <Route path="/recommendations" element={<PlaceholderPage title="Đề xuất Đặt hàng Thông minh (Intelligent Reorder Recommendation)" icon="auto_awesome" />} />
+            <Route path="/recommendations" element={<RecommendationsPage />} />
+            <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />
 
-            {/* Các phân hệ mở rộng theo kế hoạch Sprint sau */}
+            {/* Vận hành kho, cảnh báo và báo cáo */}
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/inventory" element={<InventoryPage />} />
-            <Route path="/inbound" element={<StockMovementPage mode="RECEIVING" />} />
-            <Route path="/outbound" element={<StockMovementPage mode="ISSUING" />} />
-            <Route path="/transfer" element={<StockTransferPage />} />
+            <Route element={<RequireOperate />}>
+              <Route path="/inbound" element={<StockMovementPage mode="RECEIVING" />} />
+              <Route path="/outbound" element={<StockMovementPage mode="ISSUING" />} />
+              <Route path="/transfer" element={<StockTransferPage />} />
+            </Route>
             <Route path="/transactions" element={<TransactionHistoryPage />} />
             <Route path="/alerts" element={<AlertsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
-            <Route path="/settings" element={<PlaceholderPage title="Cài đặt hệ thống" icon="settings" />} />
+
+            {/* Quản trị tài khoản: chỉ ADMIN */}
+            <Route element={<RequireAdmin />}>
+              <Route path="/users" element={<UsersPage />} />
+            </Route>
           </Route>
         </Route>
 
-        {/* Mặc định chuyển hướng về /warehouses (sẽ qua kiểm tra đăng nhập) */}
-        <Route path="/" element={<Navigate to="/warehouses" replace />} />
-        <Route path="*" element={<Navigate to="/warehouses" replace />} />
+        {/* Mặc định về Tổng quan (qua kiểm tra đăng nhập) */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }
 
-/** Placeholder cho các route chưa implement */
-function PlaceholderPage({ title, icon }) {
+/** Hiển thị trong lúc tải mã của trang (mỗi trang được tách thành một gói riêng). */
+function PageLoading() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-on-surface-variant p-6 text-center">
-      <div className="w-20 h-20 rounded-2xl bg-surface-container-high flex items-center justify-center text-primary">
-        <span className="material-symbols-outlined text-[40px] opacity-80">{icon}</span>
-      </div>
-      <div>
-        <h2 className="font-headline-md text-headline-md text-on-surface mb-1">{title}</h2>
-        <p className="font-body-sm text-body-sm text-secondary max-w-md mx-auto">
-          Phân hệ đang được đội ngũ kỹ sư phát triển theo đúng kế hoạch Sprint tiếp theo. Vui lòng sử dụng các phân hệ Master Data (Kho, Sản phẩm, Danh mục, Nhà cung cấp).
-        </p>
-      </div>
+    <div className="flex min-h-screen items-center justify-center bg-background text-secondary" role="status" aria-live="polite">
+      <span className="material-symbols-outlined mr-2 animate-spin text-[20px]">progress_activity</span>
+      Đang tải...
     </div>
   );
 }

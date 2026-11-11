@@ -11,7 +11,6 @@ const TABS = [
 
 /**
  * ReportsPage - Báo cáo & Phân tích (/reports)
- * Sprint 6 - M4 (Sprint6-14: Report UI)
  */
 export default function ReportsPage() {
   const reports = useReports();

@@ -1,6 +1,5 @@
 /**
  * Quy tắc & hàm tiện ích cho Chuyển kho (Stock Transfer).
- * Sprint 5 - M4 (Sprint5-13 Stock Transfer UI/Flow, Sprint5-14 Transaction API Integration)
  *
  * Backend: POST /api/inventories/{sourceInventoryId}/transfer
  *   body { destinationWarehouseId, quantity, reason?, referenceDoc? }

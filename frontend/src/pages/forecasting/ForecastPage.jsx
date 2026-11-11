@@ -151,13 +151,13 @@ export default function ForecastPage() {
           </div>
           <div className="inline-flex w-fit items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-800">
             <span className="h-2 w-2 rounded-full bg-blue-600 animate-pulse" />
-            AI Demand Forecast (Sprint 8)
+            AI Demand Forecast
           </div>
         </div>
       </header>
 
       <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 p-5 sm:p-8">
-        {/* Sprint8-11: Model Accuracy Card */}
+        {/* Model Accuracy Card */}
         <ModelAccuracyCard
           modelInfo={modelInfo}
           isLoading={isLoadingModel}
@@ -186,7 +186,7 @@ export default function ForecastPage() {
                   handleSelectionChange(() => setSelectedProductId(event.target.value))
                 }
                 disabled={isLoadingProducts || isForecasting || products.length === 0}
-                className="h-11 rounded-lg border border-outline-variant bg-white px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:cursor-not-allowed disabled:bg-surface-container-low"
+                className="h-11 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:cursor-not-allowed disabled:bg-surface-container-low"
               >
                 {isLoadingProducts && <option value="">Đang tải danh mục sản phẩm...</option>}
                 {!isLoadingProducts && products.length === 0 && (
@@ -208,7 +208,7 @@ export default function ForecastPage() {
                   handleSelectionChange(() => setHorizonDays(Number(event.target.value)))
                 }
                 disabled={isForecasting}
-                className="h-11 rounded-lg border border-outline-variant bg-white px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
+                className="h-11 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
               >
                 {FORECAST_HORIZONS.map((days) => (
                   <option key={days} value={days}>
@@ -221,7 +221,7 @@ export default function ForecastPage() {
             <button
               type="submit"
               disabled={!selectedProductId || isLoadingProducts || isForecasting}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55 active:scale-95"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-6 text-sm font-semibold text-on-primary shadow-sm transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55 active:scale-95"
             >
               <span
                 className={`material-symbols-outlined text-[19px] ${
@@ -247,7 +247,7 @@ export default function ForecastPage() {
           )}
         </section>
 
-        {/* Sprint8-12: Error UI banner */}
+        {/* Error UI banner */}
         {forecastError && (
           <ForecastErrorBanner
             errorInfo={forecastError}
@@ -255,10 +255,10 @@ export default function ForecastPage() {
           />
         )}
 
-        {/* Sprint8-12: Loading Skeleton UI */}
+        {/* Loading Skeleton UI */}
         {isForecasting && <ForecastSkeleton />}
 
-        {/* Sprint8-09: Forecast Results UI & Sprint8-10: Forecast Chart */}
+        {/* Forecast Results UI & Forecast Chart */}
         {!isForecasting && forecast && summary && (
           <div className="flex flex-col gap-5 forecast-fade-in">
             {/* KPI Summary Cards */}
@@ -302,6 +302,19 @@ export default function ForecastPage() {
                     {forecast.fallbackApplied && (
                       <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold text-amber-900">
                         Rule-based Fallback
+                      </span>
+                    )}
+                    {forecast.historySource === 'provided' && (
+                      <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-300">
+                        Dựa trên lịch sử bán thật
+                      </span>
+                    )}
+                    {forecast.historySource === 'synthetic_placeholder' && (
+                      <span
+                        title="Sản phẩm chưa đủ 14 ngày lịch sử xuất kho nên mô hình dùng dữ liệu mẫu."
+                        className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold text-amber-900"
+                      >
+                        Chưa đủ lịch sử bán · dữ liệu mẫu
                       </span>
                     )}
                   </div>

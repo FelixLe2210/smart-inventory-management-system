@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useInventory } from '../../hooks/useInventory';
+import OperateOnly from '../../components/common/OperateOnly';
 import ToastNotification from '../../components/common/ToastNotification';
 import InventoryKPICards from './InventoryKPICards';
 import InventoryFilterBar from './InventoryFilterBar';
@@ -9,9 +10,9 @@ import InventoryDetailModal from './InventoryDetailModal';
 
 /**
  * InventoryPage – Tồn kho theo Sản phẩm x Kho (/inventory).
- *   Sprint4-13: hiển thị In Stock / Low Stock / Out of Stock (+ Over Stock)
- *   Sprint4-14: lọc theo kho / sản phẩm / trạng thái
- *   Sprint4-15: kết nối Master Data (Product, Warehouse) với Inventory
+ *   hiển thị In Stock / Low Stock / Out of Stock (+ Over Stock)
+ *   lọc theo kho / sản phẩm / trạng thái
+ *   kết nối Master Data (Product, Warehouse) với Inventory
  */
 export default function InventoryPage() {
   const inv = useInventory();
@@ -52,15 +53,17 @@ export default function InventoryPage() {
             <span className={`material-symbols-outlined text-[18px] ${inv.isLoading ? 'animate-spin' : ''}`}>sync</span>
             <span>{inv.isLoading ? 'Đang tải...' : 'Làm mới dữ liệu'}</span>
           </button>
-          <button
-            id="btn-add-inventory"
-            type="button"
-            className="flex items-center gap-1.5 px-4 py-2 bg-primary-container text-on-primary-container font-body-sm-medium text-body-sm-medium rounded-lg hover:bg-primary hover:text-on-primary transition-colors shadow-sm"
-            onClick={inv.openAddModal}
-          >
-            <span className="material-symbols-outlined text-[18px]">add_circle</span>
-            <span>Khai báo tồn kho</span>
-          </button>
+          <OperateOnly>
+            <button
+              id="btn-add-inventory"
+              type="button"
+              className="flex items-center gap-1.5 px-4 py-2 bg-primary-container text-on-primary-container font-body-sm-medium text-body-sm-medium rounded-lg hover:bg-primary hover:text-on-primary transition-colors shadow-sm"
+              onClick={inv.openAddModal}
+            >
+              <span className="material-symbols-outlined text-[18px]">add_circle</span>
+              <span>Khai báo tồn kho</span>
+            </button>
+          </OperateOnly>
         </div>
       </div>
 

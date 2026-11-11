@@ -17,7 +17,7 @@ against, plus the Postman collection in this folder
    ./mvnw spring-boot:run
    ```
 3. On first startup, Flyway applies the database migrations, then
-   `DevDataSeeder` creates demo users:
+   `DevDataSeeder` creates development users:
 
    | Field    | Value                     |
    |----------|---------------------------|
@@ -130,7 +130,7 @@ Expected: `400 Bad Request` with `error.code = "MALFORMED_REQUEST"`.
 
 ## Case 6 — disabled account
 
-Not reproducible with the seeded demo user (it's active by default). To test:
+Not reproducible with the seeded development user (it's active by default). To test:
 set `is_active = 0` for a user row directly in SQL Server, then attempt login with
 correct credentials. Expected: `401 Unauthorized` with
 `error.code = "ACCOUNT_DISABLED"`.

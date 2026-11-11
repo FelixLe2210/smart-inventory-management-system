@@ -1,4 +1,4 @@
-"""Hằng số & tiện ích dùng chung cho pipeline chuẩn bị dữ liệu AI #1 (Sprint 7 – M1)."""
+"""Hằng số & tiện ích dùng chung cho pipeline chuẩn bị dữ liệu AI #1."""
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -25,3 +25,17 @@ TARGET = "units_sold"
 def ensure_dirs():
     for d in (RAW_DIR, PROCESSED_DIR, DOCS_AI_DIR, EDA_DIR):
         d.mkdir(parents=True, exist_ok=True)
+
+
+def data_note() -> str:
+    """Ghi chú đúng với nguồn dữ liệu hiện tại (mô phỏng hay dữ liệu ngoài) để báo cáo không nói sai."""
+    import json
+
+    try:
+        info = json.loads((RAW_DIR / "data_source.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return "Data source is unknown (no data_source.json)."
+    if info.get("synthetic"):
+        return "Data is synthetic; results validate the evaluation pipeline, not real-world accuracy."
+    return (f"Data is external ({info.get('input')}); results are measured on that dataset, "
+            "not on this system's own sales history.")

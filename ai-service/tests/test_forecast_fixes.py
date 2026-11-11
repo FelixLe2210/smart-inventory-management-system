@@ -59,3 +59,31 @@ def test_history_source_flags_placeholder_history():
         DemandForecastRequest(product_id=3, horizon_days=7, start_date="2025-02-21", historical_data=hist)
     )
     assert real.history_source == "provided"
+
+
+@pytest.mark.parametrize("level", [3, 20, 200])
+def test_forecast_follows_the_products_own_volume(level):
+    """A tree model on raw units could not leave its training range (3/day -> ~10, 200/day -> ~83)."""
+    import datetime as dt
+
+    rng = np.random.default_rng(1)
+    hist = [
+        HistoricalDataPoint(date=(dt.date(2026, 9, 1) + dt.timedelta(days=d)).isoformat(), quantity=float(rng.poisson(level)))
+        for d in range(60)
+    ]
+    fc = ForecastService().generate_forecast(
+        DemandForecastRequest(product_id=1, warehouse_id=1, horizon_days=14, start_date="2026-10-31", historical_data=hist)
+    )
+    assert 0.6 * level <= fc.daily_average <= 1.6 * level
+
+
+def test_old_raw_unit_model_artifacts_are_rejected(tmp_path):
+    import joblib
+
+    pipe = DemandForecastPipeline()
+    pipe.train(generate_synthetic_demand(days=100, random_seed=1))
+    path = tmp_path / "old_model.joblib"
+    pipe.version = "1.0.0"
+    pipe.save(path)
+    with pytest.raises(ValueError, match="retrain"):
+        DemandForecastPipeline.load(path)

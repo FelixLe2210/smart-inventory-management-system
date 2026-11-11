@@ -1,4 +1,4 @@
-"""Sprint9-07 - Shortage Risk Logic (M2). Pure functions, no I/O.
+"""Shortage risk logic. Pure functions, no I/O.
 
 Question answered: *"If I do nothing new today, will I run out of stock before the next
 delivery could arrive?"*  A new order placed today only helps after one lead time, so the

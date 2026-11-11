@@ -4,7 +4,6 @@ import TransactionTypeBadge from '../../components/inventory/TransactionTypeBadg
 
 /**
  * RecentTransactions - Bảng giao dịch kho phát sinh gần đây
- * Sprint 6 - Milestone M3 (Sprint6-12: Recent Transactions UI)
  */
 export default function RecentTransactions({ transactions = [], isLoading = false }) {
   const formatDate = (isoStr) => {

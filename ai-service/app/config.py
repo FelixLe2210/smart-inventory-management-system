@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -24,7 +24,6 @@ class Settings(BaseSettings):
         "http://127.0.0.1:5173",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:8080",
-        "*",
     ]
 
     # Directories
@@ -33,6 +32,9 @@ class Settings(BaseSettings):
 
     # Default model configuration
     DEFAULT_MODEL_NAME: str = "demand_forecast_model.joblib"
+    # Khóa quản trị cho các endpoint đổi trạng thái mô hình (huấn luyện, nạp model). Gửi qua header X-Admin-Key.
+    # Để trống: cho phép khi APP_ENV=development, từ chối hoàn toàn ở môi trường khác.
+    ADMIN_API_KEY: Optional[str] = None
     ALLOW_RULE_BASED_FALLBACK: bool = True
     DEFAULT_CONFIDENCE_LEVEL: float = 0.95
 

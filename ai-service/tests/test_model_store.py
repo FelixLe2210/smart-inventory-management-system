@@ -1,4 +1,4 @@
-"""Sprint8-08 – lưu / nạp model."""
+"""lưu / nạp model."""
 import pytest
 from app.ml.data_generator import generate_synthetic_demand
 from app.ml.model_registry import ModelRegistry

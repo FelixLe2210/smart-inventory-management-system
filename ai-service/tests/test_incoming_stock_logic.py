@@ -1,4 +1,4 @@
-"""Sprint9-06 - Incoming Stock Logic."""
+"""Incoming Stock Logic."""
 from datetime import date
 
 import pytest

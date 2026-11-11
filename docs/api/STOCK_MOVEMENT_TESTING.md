@@ -1,6 +1,6 @@
 # Nhập kho / Xuất kho / Chuyển kho: API, xử lý lỗi và kiểm thử
 
-Sprint 5, phần M4 (Sprint5-13 đến Sprint5-16). Tài liệu này mô tả luồng chuyển kho trên giao diện,
+Tài liệu này mô tả luồng chuyển kho trên giao diện,
 cách giao diện xử lý lỗi giao dịch, và cách chạy các bộ kiểm thử.
 
 ## 1. API sử dụng

@@ -13,7 +13,6 @@ export const DEFAULT_INV_FILTERS = { warehouseId: 'all', categoryId: 'all', stat
 /**
  * Hook useReports
  * Dữ liệu & bộ lọc cho trang Báo cáo (/reports): báo cáo giao dịch + báo cáo tồn kho.
- * Sprint 6 - M4 (Sprint6-14: Report UI, Sprint6-15: API Integration)
  *
  * Với mỗi báo cáo: thử gọi Report API của backend theo bộ lọc; nếu chưa có (hoặc sai contract)
  * thì dựng báo cáo từ dữ liệu tồn kho/giao dịch đã nạp.

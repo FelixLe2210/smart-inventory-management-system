@@ -1,4 +1,4 @@
-"""Sprint9-07 - Shortage Risk Logic."""
+"""Shortage Risk Logic."""
 import pytest
 
 from app.services.shortage_risk_logic import (

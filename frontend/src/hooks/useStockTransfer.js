@@ -23,7 +23,6 @@ const EMPTY_FORM = {
 
 /**
  * useStockTransfer - logic & state cho trang Chuyển kho (/transfer)
- * Sprint 5 - M4 (Sprint5-13 UI/Flow, Sprint5-14 Integration, Sprint5-15 Error handling)
  *
  * Luồng: chọn sản phẩm -> kho nguồn (dòng tồn còn khả dụng) -> kho đích (ACTIVE, khác nguồn) -> số lượng
  *   -> POST /inventories/{sourceInventoryId}/transfer -> đọc lại tồn thật từ server và đối chiếu.

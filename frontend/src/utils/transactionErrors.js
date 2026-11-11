@@ -1,6 +1,5 @@
 /**
  * Chuẩn hoá lỗi giao dịch kho (nhập / xuất / chuyển kho).
- * Sprint 5 - M4 (Sprint5-15 Transaction Error Handling)
  *
  * Nhận ApiClientError (hoặc object có code / status / message / details) và trả về
  * thông tin đủ để giao diện hiển thị đúng chỗ, đúng nội dung, đúng hành động tiếp theo.

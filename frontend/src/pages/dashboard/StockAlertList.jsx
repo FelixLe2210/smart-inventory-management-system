@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import OperateOnly from '../../components/common/OperateOnly';
 
 /**
  * StockAlertList - Danh sách các sản phẩm hết hàng hoặc chạm ngưỡng an toàn
@@ -58,13 +59,15 @@ export default function StockAlertList({ alerts = [], totalCount }) {
               </div>
             </div>
 
-            <Link
-              to="/inbound"
-              className="shrink-0 px-2.5 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary text-[11px] font-medium rounded-md transition-colors flex items-center gap-1"
-            >
-              <span className="material-symbols-outlined text-[14px]">add_shopping_cart</span>
-              <span>Nhập hàng</span>
-            </Link>
+            <OperateOnly>
+              <Link
+                to="/inbound"
+                className="shrink-0 px-2.5 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary text-[11px] font-medium rounded-md transition-colors flex items-center gap-1"
+              >
+                <span className="material-symbols-outlined text-[14px]">add_shopping_cart</span>
+                <span>Nhập hàng</span>
+              </Link>
+            </OperateOnly>
           </div>
         ))}
       </div>

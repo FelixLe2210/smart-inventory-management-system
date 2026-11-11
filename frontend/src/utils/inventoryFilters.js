@@ -1,5 +1,5 @@
 /**
- * Logic thuần (không phụ thuộc React) cho trang Tồn kho – Sprint4-13/14.
+ * Logic thuần (không phụ thuộc React) cho trang Tồn kho
  * Có test: utils/inventoryFilters.test.mjs (chạy: node --test src/utils).
  */
 

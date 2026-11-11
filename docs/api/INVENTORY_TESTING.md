@@ -1,6 +1,6 @@
-# Inventory – Hướng dẫn kiểm thử (Sprint 4 · M4)
+# Inventory – Hướng dẫn kiểm thử
 
-Phạm vi: **Sprint4-13** Stock Status UI · **Sprint4-14** Inventory Filtering · **Sprint4-15** Inventory Integration · **Sprint4-16** End-to-End Testing.
+Phạm vi: giao diện trạng thái tồn, bộ lọc tồn kho, tích hợp với Master Data và kiểm thử đầu cuối.
 
 ## 1. Quy tắc trạng thái tồn
 
@@ -43,7 +43,7 @@ Lọc theo **trạng thái** và **từ khóa**, cùng các thẻ KPI, được 
 - Nhập, xuất, điều chỉnh vật lý, tồn ban đầu (nếu > 0) và chuyển kho ghi lịch sử cùng database transaction với số tồn. Chuyển kho ghi cặp `TRANSFER_OUT`/`TRANSFER_IN`; lỗi ở một bước rollback toàn bộ.
 - Giao dịch yêu cầu JWT hợp lệ; `created_by` lấy từ người dùng đã xác thực. Quyền theo kho/vai trò chi tiết chưa được mô hình hóa trong backend hiện tại.
 
-## 3. Tích hợp Master Data ↔ Inventory (Sprint4-15)
+## 3. Tích hợp Master Data ↔ Inventory
 
 - Form khai báo tồn chỉ cho chọn **sản phẩm ACTIVE** và **kho ACTIVE**; backend từ chối kho không hoạt động (`WAREHOUSE_NOT_ACTIVE`).
 - Mỗi cặp Product–Warehouse chỉ có một dòng tồn (`INVENTORY_EXISTS`).

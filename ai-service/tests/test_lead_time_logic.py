@@ -1,4 +1,4 @@
-"""Sprint9-05 - Lead Time Logic."""
+"""Lead Time Logic."""
 from datetime import date
 
 import pytest

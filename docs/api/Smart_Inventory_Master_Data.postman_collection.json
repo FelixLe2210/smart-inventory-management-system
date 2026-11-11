@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "smart-inventory-master-data-collection",
 		"name": "Smart Inventory - Master Data API",
-		"description": "Comprehensive integration test collection for Master Data (Sprint3-14, 15, 16): Warehouse, Category, Supplier, Product.",
+		"description": "Comprehensive integration test collection for Master Data: Warehouse, Category, Supplier, Product.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [

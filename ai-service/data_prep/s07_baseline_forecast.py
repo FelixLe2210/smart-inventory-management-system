@@ -1,10 +1,10 @@
-"""Sprint7-07 – Baseline dự báo tuần và trung bình, chỉ dùng dữ liệu train."""
+"""Baseline dự báo tuần và trung bình, chỉ dùng dữ liệu train."""
 import json
 
 import numpy as np
 import pandas as pd
 
-from .common import KEY, PROCESSED_DIR, TARGET, TEST_FILE, TRAIN_FILE, ensure_dirs
+from .common import KEY, PROCESSED_DIR, TARGET, TEST_FILE, TRAIN_FILE, data_note, ensure_dirs
 
 
 def _metrics(actual: pd.Series, predicted: pd.Series) -> dict:
@@ -67,7 +67,7 @@ def evaluate_baselines(train: pd.DataFrame, test: pd.DataFrame) -> tuple[pd.Data
         },
         "notes": [
             "Predictions are created from train only; test is used only for scoring.",
-            "Synthetic data results validate the pipeline and are not evidence of real-world accuracy.",
+            data_note(),
             "MAPE is omitted because intermittent demand can contain zero actuals; use MAE/WAPE.",
         ],
     }
@@ -76,8 +76,8 @@ def evaluate_baselines(train: pd.DataFrame, test: pd.DataFrame) -> tuple[pd.Data
 
 def main():
     ensure_dirs()
-    train = pd.read_csv(TRAIN_FILE)
-    test = pd.read_csv(TEST_FILE)
+    train = pd.read_csv(TRAIN_FILE, dtype={"sku": str, "warehouse_code": str})
+    test = pd.read_csv(TEST_FILE, dtype={"sku": str, "warehouse_code": str})
     predictions, metrics = evaluate_baselines(train, test)
     predictions_file = PROCESSED_DIR / "baseline_predictions.csv"
     metrics_file = PROCESSED_DIR / "baseline_metrics.json"

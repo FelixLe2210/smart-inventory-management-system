@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Sprint5-16 – Receiving / Issuing / Transfer End-to-End test
+ * Receiving / Issuing / Transfer End-to-End test
  *
  * Chạy với backend THẬT (SQL Server) đang bật:
  *

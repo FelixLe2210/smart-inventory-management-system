@@ -1,4 +1,4 @@
-"""Sprint 8 M1 – compare forecast baselines and candidate models on a time holdout."""
+"""Compare forecast baselines and candidate models on a time holdout."""
 import argparse
 import importlib.util
 import json
@@ -11,7 +11,7 @@ from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import OneHotEncoder
 
-from .common import KEY, PROCESSED_DIR, TARGET, TEST_FILE, TRAIN_FILE, ensure_dirs
+from .common import KEY, PROCESSED_DIR, TARGET, TEST_FILE, TRAIN_FILE, data_note, ensure_dirs
 from .s05_calendar_features import add_calendar_features
 
 CALENDAR_FEATURES = [
@@ -185,7 +185,7 @@ def evaluate_models(train: pd.DataFrame, test: pd.DataFrame) -> tuple[pd.DataFra
         "weekday_mean": np.array(
             [
                 weekday_means.get(
-                    (row.sku, row.warehouse_code, pd.Timestamp(row.date).dayofweek),
+                    (row.sku, row.warehouse_code, pd.Timestamp(row.date).day_of_week),
                     series_means.get((row.sku, row.warehouse_code)),
                 )
                 for row in test_features.itertuples()
@@ -308,7 +308,7 @@ def evaluate_models(train: pd.DataFrame, test: pd.DataFrame) -> tuple[pd.DataFra
             "Lag and rolling features use only earlier observations; test actuals become available for the next one-day-ahead forecast.",
             "MAPE excludes zero-actual rows; MAE and WAPE are included for intermittent demand.",
             "Metrics include imputed test rows; scored_imputed_rows records their count.",
-            "Current project data is synthetic; results validate the evaluation pipeline, not real-world accuracy.",
+            data_note(),
             "XGBoost and Prophet are optional and are reported as unavailable when not installed.",
         ],
     }
@@ -323,12 +323,24 @@ def main(argv=None) -> None:
     parser.add_argument("--train", type=Path, default=TRAIN_FILE)
     parser.add_argument("--test", type=Path, default=TEST_FILE)
     parser.add_argument("--output-dir", type=Path, default=PROCESSED_DIR)
+    parser.add_argument(
+        "--train-last-days", type=int, default=None,
+        help="chỉ huấn luyện trên N ngày gần nhất của tập train (nhanh hơn nhiều với dataset lớn)",
+    )
     args = parser.parse_args(argv)
 
     ensure_dirs()
-    train = pd.read_csv(args.train, parse_dates=["date"])
-    test = pd.read_csv(args.test, parse_dates=["date"])
+    train = pd.read_csv(args.train, parse_dates=["date"], dtype={"sku": str, "warehouse_code": str})
+    test = pd.read_csv(args.test, parse_dates=["date"], dtype={"sku": str, "warehouse_code": str})
+    if args.train_last_days:
+        cutoff = train["date"].max() - pd.Timedelta(days=args.train_last_days)
+        train = train[train["date"] > cutoff].reset_index(drop=True)
     prediction_frame, report = evaluate_models(train, test)
+    if args.train_last_days:
+        report["train_window_days"] = args.train_last_days
+        report["notes"].append(
+            f"Mô hình chỉ huấn luyện trên {args.train_last_days} ngày gần nhất của tập train để rút ngắn thời gian chạy."
+        )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     metrics_path = args.output_dir / "model_comparison_metrics.json"
     predictions_path = args.output_dir / "model_comparison_predictions.csv"

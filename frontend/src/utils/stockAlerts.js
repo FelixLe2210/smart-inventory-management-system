@@ -1,6 +1,5 @@
 /**
  * Logic cảnh báo tồn kho dùng chung cho Dashboard (KPI + danh sách) và trang Cảnh báo.
- * Sprint 6 - Milestone M4 (Sprint6-13, Sprint6-15, Sprint6-16)
  *
  * Quy ước (khớp backend `InventoryResponse`):
  *  - Số lượng tồn nằm ở `currentStock` (bản cũ/mock dùng `quantity` → vẫn được hỗ trợ).
@@ -156,7 +155,7 @@ export function filterAlerts(alerts = [], { type = 'all', search = '' } = {}) {
 }
 
 /**
- * Chuẩn hóa cảnh báo do Alert API (Sprint6-03) trả về về cùng shape với `buildStockAlerts`.
+ * Chuẩn hóa cảnh báo do Alert API trả về về cùng shape với `buildStockAlerts`.
  * Chấp nhận dạng phẳng (productId/productSku/productName/alertType/...) hoặc dạng lồng (product: {...}).
  * Trả về null nếu bản ghi không hợp lệ.
  */

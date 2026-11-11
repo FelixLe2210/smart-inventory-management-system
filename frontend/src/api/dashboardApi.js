@@ -7,7 +7,6 @@ import { cleanParams, isEndpointMissing } from '../utils/apiFallback';
 
 /**
  * Lớp tích hợp Dashboard / Cảnh báo / Báo cáo.
- * Sprint 6 - Milestone M4 (Sprint6-15: Dashboard API Integration)
  *
  * Chiến lược "backend-first, client-fallback":
  *  1. Gọi endpoint tổng hợp của backend (M1/M2: Alert API, Dashboard KPI API, Report APIs).
@@ -37,22 +36,21 @@ async function getOrNull(path, params) {
 }
 
 export const dashboardApi = {
-  /** Sprint6-05 — KPI dashboard. */
   getKpis() {
     return getOrNull(DASHBOARD_ENDPOINTS.kpis);
   },
 
-  /** Sprint6-03 — cảnh báo tồn kho. @param {{type?: 'LOW_STOCK'|'OUT_OF_STOCK'}} params */
+  /** cảnh báo tồn kho. @param {{type?: 'LOW_STOCK'|'OUT_OF_STOCK'}} params */
   getStockAlerts(params = {}) {
     return getOrNull(DASHBOARD_ENDPOINTS.stockAlerts, params);
   },
 
-  /** Sprint6-06 — báo cáo giao dịch. @param {{from?:string,to?:string,type?:string,warehouseId?:number,productId?:number}} params */
+  /** báo cáo giao dịch. @param {{from?:string,to?:string,type?:string,warehouseId?:number,productId?:number}} params */
   getTransactionReport(params = {}) {
     return getOrNull(DASHBOARD_ENDPOINTS.transactionReport, params);
   },
 
-  /** Sprint6-07 — báo cáo tồn kho. @param {{warehouseId?:number,categoryId?:number,status?:string}} params */
+  /** báo cáo tồn kho. @param {{warehouseId?:number,categoryId?:number,status?:string}} params */
   getInventoryReport(params = {}) {
     return getOrNull(DASHBOARD_ENDPOINTS.inventoryReport, params);
   },

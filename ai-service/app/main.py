@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 
 from app.api.forecast import router as forecast_router
 from app.api.health import router as health_router
+from app.api.reorder import router as reorder_router
 from app.config import settings
 from app.ml.model_registry import registry
 from app.schemas.envelope import ApiResponse
@@ -85,6 +86,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 # Include API Routers
 app.include_router(health_router)
 app.include_router(forecast_router)
+app.include_router(reorder_router)
 
 
 @app.get("/", tags=["Root"])
@@ -96,5 +98,6 @@ def root():
             "docs_url": "/docs",
             "health_url": "/api/health",
             "forecast_endpoint": "/api/forecast/demand",
+            "reorder_endpoint": "/api/reorder/recommend",
         }
     )

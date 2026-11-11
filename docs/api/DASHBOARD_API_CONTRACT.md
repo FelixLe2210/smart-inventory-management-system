@@ -1,4 +1,4 @@
-# Dashboard / Alert / Report – Contract API (Sprint 6)
+# Dashboard / Alert / Report – Contract API
 
 Tài liệu này là **hợp đồng giữa Frontend (M4) và Backend (M1/M2)**. Frontend đã được viết sẵn theo contract này
 (`frontend/src/api/dashboardApi.js`) và có **cơ chế fallback**: nếu một endpoint chưa tồn tại, UI tự tính số liệu từ
@@ -15,7 +15,7 @@ Khi backend triển khai đúng contract bên dưới, UI tự chuyển sang dù
 
 Mọi response bọc trong `ApiResponse` như các API khác: `{ success, data, error, timestamp }`. Cần JWT hợp lệ.
 
-## 1. Alert API — Sprint6-01/02/03
+## 1. Alert API
 
 `GET /api/alerts/stock?type=LOW_STOCK|OUT_OF_STOCK` (không truyền `type` = cả hai)
 
@@ -44,7 +44,7 @@ Tính **theo sản phẩm, cộng dồn các kho**, trên **tồn khả dụng**
 > Ví dụ Min = 10, kho A còn 6, kho B còn 5 → trang **Tồn kho** hiện cả hai dòng "Sắp hết", nhưng **Cảnh báo/Dashboard không cảnh báo** vì tổng 11 > 10.
 > Nếu nhóm muốn cảnh báo theo từng kho, cần đổi đồng thời cả backend và `utils/stockAlerts.js`.
 
-## 2. Dashboard KPI API — Sprint6-05
+## 2. Dashboard KPI API
 
 `GET /api/dashboard/kpis` → `data` là **object**. Bắt buộc có 4 trường số: `totalProducts`, `totalStockQuantity`, `lowStockCount`, `outOfStockCount`. Các trường còn lại tùy chọn (thiếu thì UI tự tính):
 
@@ -64,7 +64,7 @@ Tính **theo sản phẩm, cộng dồn các kho**, trên **tồn khả dụng**
 
 `lowStockCount` / `outOfStockCount` **phải bằng** số phần tử cùng loại của Alert API (cùng định nghĩa ở mục 1). `totalInventoryValue = Σ currentStock × purchasePrice`.
 
-## 3. Transaction Report API — Sprint6-06
+## 3. Transaction Report API
 
 `GET /api/reports/transactions?from=YYYY-MM-DD&to=YYYY-MM-DD&type=&warehouseId=&productId=`
 
@@ -89,7 +89,7 @@ Tính **theo sản phẩm, cộng dồn các kho**, trên **tồn khả dụng**
 - `netChange`: Σ biến động có dấu (`RECEIVING` +, `ISSUING` −, `ADJUSTMENT` = `balanceAfter − balanceBefore`). **Chuyển kho không tính** khi xem toàn hệ thống; khi lọc theo một kho thì tính.
 - Bắt buộc có `summary` (object) và `rows` (mảng).
 
-## 4. Inventory Report API — Sprint6-07
+## 4. Inventory Report API
 
 `GET /api/reports/inventory?warehouseId=&categoryId=&status=IN_STOCK|LOW_STOCK|OUT_OF_STOCK|OVER_STOCK`
 
@@ -113,4 +113,4 @@ Mỗi dòng = một cặp (sản phẩm, kho). `status` dùng đúng quy tắc `
 
 ## Test đối chiếu
 
-`frontend/src/utils/stockAlerts.test.mjs` và `reports.test.mjs` chứa các ca số liệu mẫu (biên Min, nhiều kho, giữ chỗ, chuyển kho không đếm đôi…) — backend nên dùng cùng bộ ca khi viết **Sprint6-04 Alert Logic Testing** và **Sprint6-08 Report Testing**.
+`frontend/src/utils/stockAlerts.test.mjs` và `reports.test.mjs` chứa các ca số liệu mẫu (biên Min, nhiều kho, giữ chỗ, chuyển kho không đếm đôi…) — backend nên dùng cùng bộ ca khi viết kiểm thử logic cảnh báo và kiểm thử báo cáo.

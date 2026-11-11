@@ -1,4 +1,4 @@
-"""Sprint9-08 - Reorder (recommendation) service tests: M1 + M2 logic working together."""
+"""Reorder (recommendation) service tests: decision and supply logic working together."""
 from datetime import date
 
 import pytest

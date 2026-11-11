@@ -4,7 +4,7 @@ const SELECT_CLASS =
   'h-9 px-3 bg-surface-container-low rounded-lg outline-none font-body-sm text-body-sm text-on-surface cursor-pointer border border-transparent focus:border-primary/30 max-w-[240px]';
 
 /**
- * Thanh lọc tồn kho: kho / sản phẩm / trạng thái + tìm kiếm (Sprint4-14).
+ * Thanh lọc tồn kho: kho / sản phẩm / trạng thái + tìm kiếm.
  */
 export default function InventoryFilterBar({
   search, onSearch,

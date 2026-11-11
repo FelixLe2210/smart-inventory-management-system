@@ -24,3 +24,8 @@ def test_api_health_endpoint(client):
     data = response.json()
     assert data["success"] is True
     assert data["data"]["status"] == "UP"
+
+
+def test_health_reports_model_version(client):
+    d = client.get("/health").json()["data"]
+    assert d["model_version"] and d["model_trained_at"]

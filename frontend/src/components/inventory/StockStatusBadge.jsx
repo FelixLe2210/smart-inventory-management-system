@@ -1,5 +1,5 @@
 /**
- * Cấu hình hiển thị 3 trạng thái tồn kho (Sprint4-13).
+ * Cấu hình hiển thị 3 trạng thái tồn kho.
  * Giá trị khóa trùng với Inventory.getStockStatus() ở backend
  * (In Stock / Low Stock / Out of Stock theo yêu cầu, thêm Over Stock khi tồn > Max).
  */

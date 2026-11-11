@@ -56,14 +56,14 @@ export default function ForecastErrorBanner({ errorInfo, onRetry }) {
       className={`forecast-fade-in flex flex-col sm:flex-row items-start justify-between gap-4 rounded-2xl border ${style.border} ${style.bg} p-5 ${style.text} shadow-sm`}
     >
       <div className="flex items-start gap-3.5">
-        <div className="mt-0.5 rounded-xl bg-white/80 p-2 shadow-xs">
+        <div className="mt-0.5 rounded-xl bg-surface-container-lowest/80 p-2 shadow-xs">
           <span className={`material-symbols-outlined text-2xl ${style.iconColor}`}>{style.icon}</span>
         </div>
         <div>
           <h3 className="font-semibold text-base leading-snug">{title}</h3>
           <p className="mt-1 text-sm opacity-90 leading-relaxed">{message}</p>
           {hint && (
-            <p className="mt-2 text-xs opacity-75 bg-white/60 rounded-lg px-2.5 py-1.5 inline-block font-mono">
+            <p className="mt-2 text-xs opacity-75 bg-surface-container-lowest/60 rounded-lg px-2.5 py-1.5 inline-block font-mono">
               💡 {hint}
             </p>
           )}
@@ -74,7 +74,7 @@ export default function ForecastErrorBanner({ errorInfo, onRetry }) {
         <button
           type="button"
           onClick={onRetry}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-white px-3.5 py-2 text-xs font-semibold shadow-xs border border-slate-200 transition-all hover:bg-slate-50 hover:border-slate-300 active:scale-95"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-surface-container-lowest px-3.5 py-2 text-xs font-semibold shadow-xs border border-slate-200 transition-all hover:bg-slate-50 hover:border-slate-300 active:scale-95"
         >
           <span className="material-symbols-outlined text-sm">refresh</span>
           Thử lại

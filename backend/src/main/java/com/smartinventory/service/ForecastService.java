@@ -7,6 +7,9 @@ import com.smartinventory.dto.ForecastPredictionResponse;
 import com.smartinventory.dto.ForecastRequest;
 import com.smartinventory.dto.ForecastResponse;
 import com.smartinventory.exception.AiServiceException;
+import com.smartinventory.model.InventoryTransaction;
+import com.smartinventory.repository.InventoryTransactionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,7 +28,12 @@ import java.util.Objects;
 @Service
 public class ForecastService {
 
+    static final int HISTORY_DAYS = 120;
+
     private final RestClient aiServiceClient;
+    // Field injection (optional) keeps the single-argument constructor used by unit tests.
+    @Autowired(required = false)
+    private InventoryTransactionRepository transactionRepository;
 
     public ForecastService(RestClient aiServiceRestClient) {
         this.aiServiceClient = aiServiceRestClient;
@@ -37,7 +45,8 @@ public class ForecastService {
                 request.warehouseId(),
                 request.horizonDays(),
                 request.startDate() == null ? null : request.startDate().toString(),
-                request.includeConfidenceIntervals() == null || request.includeConfidenceIntervals()
+                request.includeConfidenceIntervals() == null || request.includeConfidenceIntervals(),
+                loadHistory(request)
         );
 
         AiEnvelope<AiForecastResponse> envelope = execute(() -> aiServiceClient.post()
@@ -50,6 +59,22 @@ public class ForecastService {
             throw invalidResponse();
         }
         return mapForecast(envelope.data(), request);
+    }
+
+    /**
+     * Real daily ISSUING history so the AI forecasts from actual sales instead of a placeholder.
+     * Returns null when there is no sales history (the AI then flags its output as placeholder-based).
+     */
+    private List<Map<String, Object>> loadHistory(ForecastRequest request) {
+        if (transactionRepository == null) {
+            return null;
+        }
+        LocalDate today = LocalDate.now();
+        java.time.LocalDateTime since = today.minusDays(HISTORY_DAYS).atStartOfDay();
+        List<InventoryTransaction> issues = request.warehouseId() == null
+                ? transactionRepository.findIssuesByProductSince(request.productId(), since)
+                : transactionRepository.findIssuesSince(request.productId(), request.warehouseId(), since);
+        return DemandHistoryBuilder.dailySeries(issues, today, HISTORY_DAYS);
     }
 
     public ForecastModelInfoResponse getModelInfo() {
@@ -140,7 +165,8 @@ public class ForecastService {
                 dailyAverage,
                 response.modelName(),
                 response.modelVersion(),
-                response.fallbackApplied()
+                response.fallbackApplied(),
+                response.historySource()
         );
     }
 
@@ -197,7 +223,9 @@ public class ForecastService {
             @JsonProperty("warehouse_id") Long warehouseId,
             @JsonProperty("horizon_days") Integer horizonDays,
             @JsonProperty("start_date") String startDate,
-            @JsonProperty("include_confidence_intervals") boolean includeConfidenceIntervals
+            @JsonProperty("include_confidence_intervals") boolean includeConfidenceIntervals,
+            @JsonProperty("historical_data") @com.fasterxml.jackson.annotation.JsonInclude(
+                    com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL) List<Map<String, Object>> historicalData
     ) {
     }
 
@@ -225,7 +253,8 @@ public class ForecastService {
             @JsonProperty("daily_average") Double dailyAverage,
             @JsonProperty("model_name") String modelName,
             @JsonProperty("model_version") String modelVersion,
-            @JsonProperty("fallback_applied") Boolean fallbackApplied
+            @JsonProperty("fallback_applied") Boolean fallbackApplied,
+            @JsonProperty("history_source") String historySource
     ) {
     }
 

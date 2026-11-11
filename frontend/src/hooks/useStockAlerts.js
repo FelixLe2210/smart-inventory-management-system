@@ -10,7 +10,6 @@ import {
 /**
  * Hook useStockAlerts
  * Dữ liệu & bộ lọc cho trang Cảnh báo tồn kho (/alerts)
- * Sprint 6 - M4 (Sprint6-13: Alert UI, Sprint6-15: API Integration)
  */
 export function useStockAlerts() {
   const [snapshot, setSnapshot] = useState({ products: [], warehouses: [], inventories: [] });

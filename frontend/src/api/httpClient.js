@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { ApiClientError } from './ApiClientError';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 const ACCESS_TOKEN_STORAGE_KEY = 'smart_inventory_access_token';
 
 export const httpClient = axios.create({
@@ -21,6 +21,18 @@ httpClient.interceptors.request.use((config) => {
   return config;
 });
 
+function isSessionExpired(url) {
+  return !(url || '').startsWith('/auth/') && !!localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+}
+
+function handleSessionExpired() {
+  localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+  localStorage.removeItem('smart_inventory_current_user');
+  if (window.location.pathname !== '/login') {
+    window.location.assign('/login');
+  }
+}
+
 // Every backend response is wrapped as { success, data, error, timestamp }.
 // On success we unwrap straight to that envelope; on failure we normalize
 // into ApiClientError so calling code has one shape to handle.
@@ -28,6 +40,13 @@ httpClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
     if (error.response) {
+      // Phiên hết hạn hoặc token không còn hợp lệ: xóa phiên và đưa về trang đăng nhập.
+      // Các lời gọi /auth/* (đăng nhập sai mật khẩu, OTP sai...) cũng trả 401 nhưng là lỗi
+      // của biểu mẫu, không phải phiên hết hạn, nên bỏ qua.
+      if (error.response.status === 401 && isSessionExpired(error.config?.url)) {
+        handleSessionExpired();
+      }
+
       // Server responded with a non-2xx status. Backend follows the
       // ApiResponse envelope, so error details live in response.data.error.
       const body = error.response.data;

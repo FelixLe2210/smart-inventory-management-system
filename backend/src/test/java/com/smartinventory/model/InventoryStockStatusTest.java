@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/** Sprint4-13/16: quy tắc trạng thái tồn kho In Stock / Low / Out (và Over Stock) theo Min/Max của Product. */
+/** Quy tắc trạng thái tồn kho In Stock / Low / Out (và Over Stock) theo Min/Max của Product. */
 class InventoryStockStatusTest {
 
     private Inventory inv(int current, int min, int max) {

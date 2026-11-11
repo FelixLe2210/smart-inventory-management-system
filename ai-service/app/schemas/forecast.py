@@ -2,7 +2,7 @@ from datetime import date
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field, field_validator
 
-SUPPORTED_HORIZONS = (7, 14, 30)  # Sprint8-05/06/07: khớp FORECAST_HORIZONS ở frontend
+SUPPORTED_HORIZONS = (7, 14, 30)  # khớp FORECAST_HORIZONS ở frontend
 
 
 class HistoricalDataPoint(BaseModel):

@@ -18,7 +18,7 @@ function daysAgo(n) {
   return isoDate(d);
 }
 
-/** Báo cáo giao dịch — Sprint6-14 (Report UI) */
+/** Báo cáo giao dịch */
 export default function TransactionReportPanel({ reports }) {
   const { txFilters: f, updateTxFilter, resetTxFilters, txReport: report, txSource, warehouses, products, isLoading } = reports;
   const { summary, byType, rows } = report;

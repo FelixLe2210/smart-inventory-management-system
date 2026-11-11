@@ -1,7 +1,8 @@
 from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.ml.model_registry import registry
+from app.security import require_admin_key
 from app.schemas.envelope import ApiResponse
 from app.schemas.forecast import (
     SUPPORTED_HORIZONS,
@@ -34,7 +35,7 @@ def create_demand_forecast(request: DemandForecastRequest) -> ApiResponse[Demand
         )
 
 
-@router.get("/horizons", response_model=ApiResponse[dict], summary="Các khoảng dự báo chuẩn (Sprint8-05/06/07)")
+@router.get("/horizons", response_model=ApiResponse[dict], summary="Các khoảng dự báo chuẩn")
 def list_horizons() -> ApiResponse[dict]:
     return ApiResponse.ok({"horizons": list(SUPPORTED_HORIZONS)})
 
@@ -77,7 +78,7 @@ def get_product_forecast(
     return ApiResponse.ok(forecast_service.generate_forecast(request))
 
 
-@router.post("/train", response_model=ApiResponse[TrainingResponse], summary="Trigger model training pipeline")
+@router.post("/train", dependencies=[Depends(require_admin_key)], response_model=ApiResponse[TrainingResponse], summary="Trigger model training pipeline")
 def train_forecast_model(request: TrainingRequest) -> ApiResponse[TrainingResponse]:
     try:
         result = registry.train_and_register(
@@ -104,7 +105,7 @@ def list_saved_models() -> ApiResponse[List[Dict[str, Any]]]:
     return ApiResponse.ok(registry.list_models())
 
 
-@router.post("/models/load", response_model=ApiResponse[ModelInfoResponse], summary="Nạp model đã lưu làm model đang dùng")
+@router.post("/models/load", dependencies=[Depends(require_admin_key)], response_model=ApiResponse[ModelInfoResponse], summary="Nạp model đã lưu làm model đang dùng")
 def load_saved_model(request: ModelLoadRequest) -> ApiResponse[ModelInfoResponse]:
     try:
         registry.load_model(request.model_name)

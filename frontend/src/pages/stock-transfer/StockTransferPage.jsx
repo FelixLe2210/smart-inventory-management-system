@@ -8,7 +8,6 @@ import ToastNotification from '../../components/common/ToastNotification';
 
 /**
  * StockTransferPage - Trang Chuyển kho giữa các chi nhánh (/transfer)
- * Sprint 5 - M4 (Sprint5-13 Stock Transfer UI/Flow)
  * Có thể mở sẵn từ trang Tồn kho: /transfer?productId=..&sourceWarehouseId=..
  */
 export default function StockTransferPage() {

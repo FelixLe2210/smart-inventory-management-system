@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useDashboard } from '../../hooks/useDashboard';
 import KpiGrid from './KpiGrid';
+import StockHealthStrip from './StockHealthStrip';
+import { useRealtime } from '../../realtime/RealtimeProvider';
 import InventoryCharts from './InventoryCharts';
 import RecentTransactions from './RecentTransactions';
 import StockAlertList from './StockAlertList';
@@ -9,14 +11,12 @@ import DataSourceBadge from '../../components/common/DataSourceBadge';
 
 /**
  * DashboardPage - Bàn làm việc & Tổng quan quản trị kho
- * Sprint 6 - Milestone M3 (Frontend Dashboard & Visualizations)
- *   - Sprint6-09: Dashboard Layout
- *   - Sprint6-10: KPI Cards (Products, stock, low stock, out of stock)
- *   - Sprint6-11: Inventory Charts (Tồn kho theo chi nhánh, phân bổ danh mục, biến động)
- *   - Sprint6-12: Recent Transactions UI (Hiển thị giao dịch kho mới nhất)
- * Sprint 6 - Milestone M4:
- *   - Sprint6-13: danh sách cảnh báo liên kết sang trang /alerts
- *   - Sprint6-15: Dashboard API Integration (KPI API + Alert API, fallback tính tại client)
+ *   - Dashboard Layout
+ *   - KPI Cards (Products, stock, low stock, out of stock)
+ *   - Inventory Charts (Tồn kho theo chi nhánh, phân bổ danh mục, biến động)
+ *   - Recent Transactions UI (Hiển thị giao dịch kho mới nhất)
+ *   - danh sách cảnh báo liên kết sang trang /alerts
+ *   - Dashboard API Integration (KPI API + Alert API, fallback tính tại client)
  */
 export default function DashboardPage() {
   const {
@@ -35,66 +35,50 @@ export default function DashboardPage() {
     refetch,
   } = useDashboard();
 
+  // Tồn kho đổi ở nơi khác: nạp lại số liệu (gộp các thay đổi liên tiếp trong 1,5 giây).
+  const { subscribe } = useRealtime();
+  const refetchRef = useRef(refetch);
+  refetchRef.current = refetch;
+  useEffect(() => {
+    let timer = null;
+    const unsubscribe = subscribe((msg) => {
+      if (msg.type !== 'INVENTORY_UPDATED') return;
+      clearTimeout(timer);
+      timer = setTimeout(() => refetchRef.current(), 1500);
+    });
+    return () => {
+      clearTimeout(timer);
+      unsubscribe();
+    };
+  }, [subscribe]);
+
   return (
     <div className="flex flex-col w-full min-h-full">
-      {/* ── Top Header & Quick Actions Bar ── */}
-      <div className="w-full px-margin py-space-md flex flex-col md:flex-row md:items-center md:justify-between gap-space-md bg-surface-container-lowest shadow-sm border-b border-outline-variant/20">
-        <div>
-          <div className="flex items-center gap-space-xs text-secondary text-xs">
-            <span className="material-symbols-outlined text-[16px]">dashboard</span>
-            <span>Điều hành chung</span>
-            <span className="text-outline-variant">/</span>
-            <span className="text-on-surface font-medium">Bàn làm việc (Dashboard)</span>
-          </div>
-          <div className="flex items-center gap-3 mt-1">
-            <h1 className="text-xl md:text-2xl font-bold text-on-surface tracking-tight">
-              Tổng quan Vận hành Kho vận
-            </h1>
-            <DataSourceBadge source={dataSource.kpis} label="KPI" />
-          </div>
-          {lastRefreshedAt && (
-            <p className="text-[11px] text-secondary mt-0.5">
-              Cập nhật lúc {lastRefreshedAt.toLocaleTimeString('vi-VN')}
-            </p>
-          )}
-        </div>
+      {/* ── Thanh thao tác nhanh (tiêu đề trang nằm ở header) ── */}
+      <div className="w-full px-margin py-3 flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/50 bg-surface-container-lowest">
+        <p className="text-[13px] text-secondary flex items-center gap-2">
+          {lastRefreshedAt ? `Cập nhật lúc ${lastRefreshedAt.toLocaleTimeString('vi-VN')}` : 'Đang tải số liệu...'}
+          <DataSourceBadge source={dataSource.kpis} label="KPI" />
+        </p>
 
-        {/* Quick actions buttons */}
         <div className="flex items-center gap-2 flex-wrap">
           <button
             type="button"
             onClick={refetch}
             disabled={isLoading}
-            className="flex items-center gap-1.5 px-3 py-2 bg-surface-container text-on-surface text-xs font-semibold rounded-lg hover:bg-surface-container-high transition-colors"
+            className="flex items-center gap-1.5 h-9 px-3 rounded-lg border border-outline-variant text-on-surface text-[13px] font-medium hover:bg-surface-container-low transition-colors"
           >
-            <span className={`material-symbols-outlined text-[18px] ${isLoading ? 'animate-spin' : ''}`}>
-              refresh
-            </span>
-            <span>{isLoading ? 'Đang cập nhật...' : 'Làm mới'}</span>
+            <span className={`material-symbols-outlined text-[18px] ${isLoading ? 'animate-spin' : ''}`}>refresh</span>
+            {isLoading ? 'Đang cập nhật...' : 'Làm mới'}
           </button>
-
-          <Link
-            to="/inbound"
-            className="flex items-center gap-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors"
-          >
-            <span className="material-symbols-outlined text-[18px]">move_to_inbox</span>
-            <span>Nhập kho</span>
+          <Link to="/inbound" className="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary text-on-primary text-[13px] font-semibold hover:brightness-110 transition">
+            <span className="material-symbols-outlined text-[18px]">move_to_inbox</span>Nhập kho
           </Link>
-
-          <Link
-            to="/outbound"
-            className="flex items-center gap-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors"
-          >
-            <span className="material-symbols-outlined text-[18px]">unarchive</span>
-            <span>Xuất kho</span>
+          <Link to="/outbound" className="flex items-center gap-1.5 h-9 px-3 rounded-lg border border-outline-variant text-on-surface text-[13px] font-medium hover:bg-surface-container-low transition-colors">
+            <span className="material-symbols-outlined text-[18px]">outbox</span>Xuất kho
           </Link>
-
-          <Link
-            to="/transfer"
-            className="flex items-center gap-1 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors"
-          >
-            <span className="material-symbols-outlined text-[18px]">sync_alt</span>
-            <span>Chuyển kho</span>
+          <Link to="/transfer" className="flex items-center gap-1.5 h-9 px-3 rounded-lg border border-outline-variant text-on-surface text-[13px] font-medium hover:bg-surface-container-low transition-colors">
+            <span className="material-symbols-outlined text-[18px]">swap_horiz</span>Chuyển kho
           </Link>
         </div>
       </div>
@@ -121,17 +105,19 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Sprint6-10: KPI Cards Grid */}
+        <StockHealthStrip kpis={kpis} isLoading={isLoading} />
+
+        {/* KPI Cards Grid */}
         <KpiGrid kpis={kpis} />
 
-        {/* Sprint6-11: Inventory Distribution & Charts */}
+        {/* Inventory Distribution & Charts */}
         <InventoryCharts
           warehouseStocks={warehouseStocks}
           categoryDistribution={categoryDistribution}
           transactionBreakdown={transactionBreakdown}
         />
 
-        {/* Sprint6-12 & Alerts: Recent Transactions + Stock Warnings */}
+        {/* Recent Transactions + Stock Warnings */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <RecentTransactions transactions={recentTransactions} isLoading={isLoading} />

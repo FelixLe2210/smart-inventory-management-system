@@ -21,6 +21,9 @@ import com.smartinventory.repository.InventoryTransactionRepository;
 import com.smartinventory.repository.ProductRepository;
 import com.smartinventory.repository.UserRepository;
 import com.smartinventory.repository.WarehouseRepository;
+import com.smartinventory.realtime.InventoryChangedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -42,6 +45,10 @@ public class InventoryService {
     private final ProductRepository productRepository;
     private final WarehouseRepository warehouseRepository;
     private final UserRepository userRepository;
+
+    /** Có thể null khi service được dựng thủ công trong test; khi đó không phát sự kiện thời gian thực. */
+    @Autowired(required = false)
+    private ApplicationEventPublisher eventPublisher;
 
     public InventoryService(InventoryRepository inventoryRepository,
                             InventoryTransactionRepository transactionRepository,
@@ -136,6 +143,7 @@ public class InventoryService {
             recordTransaction("ADJUSTMENT", product, warehouse, null, initialStock,
                     0, initialStock, null, "Initial stock", actor);
         }
+        publishChange(saved, 0, "CREATED");
         return InventoryResponse.from(saved);
     }
 
@@ -248,6 +256,7 @@ public class InventoryService {
                     "RECEIVING".equals(transactionType) ? inventory.getWarehouse() : null,
                     qty, current, balanceAfter, request.referenceDoc(), request.reason(), actor));
         }
+        publishChange(inventory, current, "ADJUST_" + type);
         return InventoryResponse.from(inventory);
     }
 
@@ -318,7 +327,48 @@ public class InventoryService {
 
         inventoryRepository.save(source);
         inventoryRepository.save(destination);
+        publishChange(source, sourceStock, "TRANSFER_OUT");
+        publishChange(destination, destinationStock, "TRANSFER_IN");
         return InventoryResponse.from(destination);
+    }
+
+    /**
+     * Nhận hàng vào kho (RECEIVING) cho một sản phẩm; tạo bản ghi tồn kho nếu chưa có.
+     * Dùng cho luồng Purchase Order -> nhận hàng. Chạy trong transaction của người gọi,
+     * nên nếu bước sau lỗi thì tồn kho và lịch sử giao dịch cùng được hoàn tác.
+     */
+    @Transactional
+    public InventoryResponse receiveStock(Long productId, Long warehouseId, int quantity,
+                                          String referenceDoc, String reason) {
+        if (quantity <= 0) {
+            throw new BadRequestException("INVALID_QUANTITY", "Số lượng nhập kho phải lớn hơn 0.");
+        }
+        Warehouse warehouse = lockWarehouse(warehouseId);
+        validateWarehouseActive(warehouse);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("PRODUCT_NOT_FOUND", "Không tìm thấy sản phẩm với ID: " + productId));
+        validateProductActive(product);
+        User actor = currentUser();
+
+        Inventory inventory = inventoryRepository.findByProductIdAndWarehouseIdForUpdate(productId, warehouseId)
+                .orElseGet(() -> inventoryRepository.save(new Inventory(product, warehouse, 0, 0, null)));
+        int current = inventory.getCurrentStock() != null ? inventory.getCurrentStock() : 0;
+        int reserved = inventory.getReservedStock() != null ? inventory.getReservedStock() : 0;
+        validateStockConsistency(current, reserved);
+        int balanceAfter = addStock(current, quantity);
+        inventory.setCurrentStock(balanceAfter);
+
+        transactionRepository.save(newTransaction("RECEIVING", product, null, warehouse,
+                quantity, current, balanceAfter, referenceDoc, reason, actor));
+        publishChange(inventory, current, "RECEIVING");
+        return InventoryResponse.from(inventory);
+    }
+
+    /** Phát sự kiện tồn kho đổi; WebSocket chỉ gửi sau khi transaction commit thành công. */
+    private void publishChange(Inventory inventory, int previousStock, String changeType) {
+        if (eventPublisher != null) {
+            eventPublisher.publishEvent(InventoryChangedEvent.of(inventory, previousStock, changeType));
+        }
     }
 
     public List<InventoryTransactionResponse> getTransactions(Long inventoryId) {

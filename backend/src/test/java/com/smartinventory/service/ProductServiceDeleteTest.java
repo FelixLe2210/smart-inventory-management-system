@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-/** Sprint4-15: ràng buộc xóa sản phẩm khi còn tồn kho. */
+/** Ràng buộc xóa sản phẩm khi còn tồn kho. */
 @ExtendWith(MockitoExtension.class)
 class ProductServiceDeleteTest {
 

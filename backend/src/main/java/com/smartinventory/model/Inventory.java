@@ -71,7 +71,11 @@ public class Inventory {
      * Xác định trạng thái tồn kho dựa theo định mức Min/Max của sản phẩm.
      */
     public String getStockStatus() {
-        int current = currentStock != null ? currentStock : 0;
+        return statusFor(product, currentStock != null ? currentStock : 0);
+    }
+
+    /** Trạng thái tồn kho của một sản phẩm tại mức tồn {@code current} (dùng cả để so sánh trạng thái trước/sau). */
+    public static String statusFor(Product product, int current) {
         if (current <= 0) {
             return "OUT_OF_STOCK";
         }

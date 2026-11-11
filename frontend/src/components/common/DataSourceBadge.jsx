@@ -2,7 +2,7 @@ import React from 'react';
 
 /**
  * DataSourceBadge - Cho biết số liệu đang lấy từ Backend API hay tính tại client.
- * Hữu ích khi nghiệm thu (Sprint6-16) và khi API tổng hợp của backend chưa sẵn sàng.
+ * Hữu ích khi nghiệm thu và khi API tổng hợp của backend chưa sẵn sàng.
  */
 export default function DataSourceBadge({ source, label = 'Nguồn số liệu' }) {
   const isBackend = source === 'backend';

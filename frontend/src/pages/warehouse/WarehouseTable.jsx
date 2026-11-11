@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useCanManage } from '../../utils/permissions';
 
 /**
  * StatusBadge – hiển thị trạng thái của kho với màu sắc tương ứng.
@@ -77,6 +78,7 @@ function CapacityBar({ used, capacity, area }) {
  * WarehouseTableRow – một dòng trong bảng danh sách kho.
  */
 function WarehouseTableRow({ warehouse, isSelected, onSelect, onToggleStatus, onEdit, onPreview, onCopyCode }) {
+  const canManage = useCanManage();
   const { code, name, description, region: _region, type, typeLabel, typeIcon, address, area, capacity, used, manager, status } =
     warehouse;
   const isActive = status === "active";
@@ -155,6 +157,7 @@ function WarehouseTableRow({ warehouse, isSelected, onSelect, onToggleStatus, on
               className="sr-only peer"
               type="checkbox"
               checked={isActive}
+              disabled={!canManage}
               onChange={(e) => onToggleStatus(code, e.target.checked)}
               aria-label={`Toggle trạng thái kho ${code}`}
             />
@@ -167,6 +170,7 @@ function WarehouseTableRow({ warehouse, isSelected, onSelect, onToggleStatus, on
       {/* Thao tác */}
       <td className="py-3 px-4 text-right">
         <div className="inline-flex items-center gap-1 justify-end">
+          {canManage && (
           <button
             className="p-1 rounded text-secondary hover:text-primary hover:bg-surface-container-high transition-colors"
             onClick={() => onEdit(code)}
@@ -174,6 +178,7 @@ function WarehouseTableRow({ warehouse, isSelected, onSelect, onToggleStatus, on
           >
             <span className="material-symbols-outlined text-[18px]">edit_square</span>
           </button>
+          )}
           {warehouse.id != null && (
             <Link
               to={`/inventory?warehouseId=${warehouse.id}`}

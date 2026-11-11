@@ -26,7 +26,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 /**
- * Sprint4-16: kiểm thử end-to-end luồng Product -> Warehouse -> Inventory.
+ * Kiểm thử end-to-end luồng Product -> Warehouse -> Inventory.
  *
  * Dùng 3 service thật (Product, Warehouse, Inventory) nối với repository giả lập lưu trong bộ nhớ,
  * nên kiểm được ràng buộc xuyên module mà không cần SQL Server.

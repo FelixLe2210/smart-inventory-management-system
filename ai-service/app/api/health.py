@@ -17,12 +17,15 @@ def health_check() -> ApiResponse[dict]:
     model_info = registry.get_info()
 
     payload = {
-        "status": "UP",
+        # UP = sẵn sàng dự báo bằng mô hình; DEGRADED = chạy được nhưng chưa nạp mô hình (đề xuất dùng trung bình đơn giản).
+        "status": "UP" if model_info.is_loaded else "DEGRADED",
         "service": settings.APP_NAME,
         "environment": settings.APP_ENV,
         "uptime_seconds": uptime_seconds,
         "model_loaded": model_info.is_loaded,
         "active_model": model_info.model_name,
         "algorithm": model_info.algorithm,
+        "model_version": model_info.version,
+        "model_trained_at": model_info.trained_at,
     }
     return ApiResponse.ok(payload)

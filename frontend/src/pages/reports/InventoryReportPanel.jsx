@@ -7,7 +7,7 @@ import { ReportStat, FilterPanel, Field, ExportButton, controlClass, fmtNumber, 
 
 const MAX_ROWS_SHOWN = 200;
 
-/** Báo cáo tồn kho — Sprint6-14 (Report UI) */
+/** Báo cáo tồn kho */
 export default function InventoryReportPanel({ reports }) {
   const { invFilters: f, updateInvFilter, resetInvFilters, invReport: report, invSource, warehouses, categories, isLoading } = reports;
   const { summary, rows } = report;
